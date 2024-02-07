@@ -28,6 +28,28 @@ python3 -m eval.mmlu.run_eval \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
 
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on mmlu ..."
+
+# zero-shot
+python3 -m eval.mmlu.run_eval \
+    --ntrain 0 \
+    --data_dir data/eval/mmlu \
+    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.mmlu.run_eval \
+    --ntrain 5 \
+    --data_dir data/eval/mmlu \
+    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v1-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
 
 model_name_or_path="ai4bharat/airavata"
 

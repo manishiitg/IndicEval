@@ -27,6 +27,26 @@ python3 -m eval.hellaswag.run_eval \
     --eval_batch_size 1
 
 
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on hellaswag ..."
+
+# zero-shot
+python3 -m eval.hellaswag.run_eval \
+    --ntrain 0 \
+    --save_dir "/sky-notebook/eval-results/hellaswag/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.hellaswag.run_eval \
+    --ntrain 5 \
+    --save_dir "/sky-notebook/eval-results/hellaswag/aditi-v1-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
 model_name_or_path="ai4bharat/airavata"
 
 echo "evaluating airavata on hellaswag ..."
@@ -75,6 +95,28 @@ python3 -m eval.hellaswag.run_eval \
     --ntrain 5 \
     --dataset "Thanmay/hellaswag-translated" \
     --save_dir "/sky-notebook/eval-results/hellaswag-hi/aditi-v2-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on hellaswag-hi ..."
+
+# zero-shot
+python3 -m eval.hellaswag.run_eval \
+    --ntrain 0 \
+    --dataset "Thanmay/hellaswag-translated" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.hellaswag.run_eval \
+    --ntrain 5 \
+    --dataset "Thanmay/hellaswag-translated" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/aditi-v1-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1

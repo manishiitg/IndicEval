@@ -26,6 +26,30 @@ python3 -m eval.in22.run_eval \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
 
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on in22-gen ..."
+
+# zero-shot
+python3 -m eval.in22.run_eval \
+    --ntrain 0 \
+    --dataset "ai4bharat/IN22-Gen" \
+    --src_lang eng_Latn --tgt_lang hin_Deva \
+    --save_dir "/sky-notebook/eval-results/in22-gen/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 8
+
+# 5-shot
+python3 -m eval.in22.run_eval \
+    --ntrain 5 \
+    --dataset "ai4bharat/IN22-Gen" \
+    --src_lang eng_Latn --tgt_lang hin_Deva \
+    --save_dir "/sky-notebook/eval-results/in22-gen/aditi-v1-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
 
 model_name_or_path="ai4bharat/airavata"
 

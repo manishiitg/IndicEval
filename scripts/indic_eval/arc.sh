@@ -29,6 +29,29 @@ python3 -m eval.arc.run_eval \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
 
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on arc easy ..."
+
+# zero-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 0 \
+    --dataset "ai2_arc" \
+    --subset "easy" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 5 \
+    --dataset "ai2_arc" \
+    --subset "easy" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/aditi-v1-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
 
 model_name_or_path="ai4bharat/airavata"
 
@@ -82,6 +105,30 @@ python3 -m eval.arc.run_eval \
     --dataset "ai2_arc" \
     --subset "challenge" \
     --save_dir "/sky-notebook/eval-results/arc-challenge/aditi-v2-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on arc challenge ..."
+
+# zero-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 0 \
+    --dataset "ai2_arc" \
+    --subset "challenge" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 5 \
+    --dataset "ai2_arc" \
+    --subset "challenge" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/aditi-v1-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -144,6 +191,31 @@ python3 -m eval.arc.run_eval \
     --eval_batch_size 1
 
 
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on indic arc easy ..."
+
+# zero-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 0 \
+    --dataset "ai4bharat/ai2_arc-hi" \
+    --subset "easy" \
+    --save_dir "/sky-notebook/eval-results/arc-easy-hi/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 5 \
+    --dataset "ai4bharat/ai2_arc-hi" \
+    --subset "easy" \
+    --save_dir "/sky-notebook/eval-results/arc-easy-hi/aditi-v1-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
+
 model_name_or_path="ai4bharat/airavata"
 
 echo "evaluating airavata on arc ..."
@@ -196,6 +268,30 @@ python3 -m eval.arc.run_eval \
     --dataset "ai4bharat/ai2_arc-hi" \
     --subset "challenge" \
     --save_dir "/sky-notebook/eval-results/arc-challenge-hi/aditi-v2-5shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1
+
+model_name_or_path="manishiitg/open-aditi-hi-v1"
+
+echo "evaluating open-aditi-v1 base on indic arc challenge ..."
+
+# zero-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 0 \
+    --dataset "ai4bharat/ai2_arc-hi" \
+    --subset "challenge" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge-hi/aditi-v1-0shot" \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 4
+
+# 5-shot
+python3 -m eval.arc.run_eval \
+    --ntrain 5 \
+    --dataset "ai4bharat/ai2_arc-hi" \
+    --subset "challenge" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge-hi/aditi-v1-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
