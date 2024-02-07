@@ -7,7 +7,7 @@ python -m eval.codex_humaneval.run_eval \
     --eval_pass_at_ks 1 5 10 20 \
     --unbiased_sampling_size_n 20 \
     --temperature 0.1 \
-    --save_dir results/codex_humaneval/llama_7B_temp_0_1 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/llama_7B_temp_0_1 \
     --model ../hf_llama_models/7B/ \
     --tokenizer ../hf_llama_models/7B/ \
     --eval_batch_size 32 \
@@ -20,7 +20,7 @@ python -m eval.codex_humaneval.run_eval \
     --eval_pass_at_ks 10 \
     --unbiased_sampling_size_n 20 \
     --temperature 0.8 \
-    --save_dir results/codex_humaneval/llama_7B_temp_0_8 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/llama_7B_temp_0_8 \
     --model ../hf_llama_models/7B/ \
     --tokenizer ../hf_llama_models/7B/ \
     --eval_batch_size 32 \
@@ -35,7 +35,7 @@ python -m eval.codex_humaneval.run_eval \
     --eval_pass_at_ks 1 5 10 20 \
     --unbiased_sampling_size_n 20 \
     --temperature 0.1 \
-    --save_dir results/codex_humaneval/tulu_7B_temp_0_1 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/tulu_7B_temp_0_1 \
     --model ../checkpoints/tulu_7B/ \
     --tokenizer ../checkpoints/tulu_7B/ \
     --eval_batch_size 32 \
@@ -50,7 +50,7 @@ python -m eval.codex_humaneval.run_eval \
     --eval_pass_at_ks 10 \
     --unbiased_sampling_size_n 20 \
     --temperature 0.8 \
-    --save_dir results/codex_humaneval/tulu_7B_temp_0_8 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/tulu_7B_temp_0_8 \
     --model ../checkpoints/tulu_7B/ \
     --tokenizer ../checkpoints/tulu_7B/ \
     --eval_batch_size 32 \
@@ -64,7 +64,7 @@ python -m eval.codex_humaneval.run_eval \
     --unbiased_sampling_size_n 20 \
     --temperature 0.1 \
     --openai_engine "gpt-3.5-turbo-0301" \
-    --save_dir results/codex_humaneval/chatgpt_temp_0.1/ \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/chatgpt_temp_0.1/ \
     --eval_batch_size 10
 
 
@@ -75,7 +75,7 @@ python -m eval.codex_humaneval.run_eval \
     --unbiased_sampling_size_n 20 \
     --temperature 0.8 \
     --openai_engine "gpt-3.5-turbo-0301" \
-    --save_dir results/codex_humaneval/chatgpt_temp_0.8/ \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/chatgpt_temp_0.8/ \
     --eval_batch_size 10
 
 
@@ -86,7 +86,7 @@ python -m eval.codex_humaneval.run_eval \
     --unbiased_sampling_size_n 20 \
     --temperature 0.1 \
     --openai_engine "gpt-4-0314" \
-    --save_dir results/codex_humaneval/gpt4_temp_0.1 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/gpt4_temp_0.1 \
     --eval_batch_size 1
 
 
@@ -97,5 +97,5 @@ python -m eval.codex_humaneval.run_eval \
     --unbiased_sampling_size_n 20 \
     --temperature 0.8 \
     --openai_engine "gpt-4-0314" \
-    --save_dir results/codex_humaneval/gpt4_temp_0.8 \
+    --save_dir /sky-notebook/eval-results/codex_humaneval/gpt4_temp_0.8 \
     --eval_batch_size 1

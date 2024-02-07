@@ -1,15 +1,15 @@
 export CUDA_VISIBLE_DEVICES=0
 
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on xlsum ..."
+echo "evaluating open-aditi-v2 base on xlsum ..."
 
 # 1-shot
 python3 -m eval.xlsum.run_eval \
     --ntrain 1 \
     --max_context_length 512 \
-    --save_dir "results/xlsum-hin/openhathi-base-1shot" \
+    --save_dir "/sky-notebook/eval-results/xlsum-hin/aditi-v2-1shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -23,7 +23,7 @@ echo "evaluating airavata on xlsum ..."
 python3 -m eval.xlsum.run_eval \
     --ntrain 1 \
     --max_context_length 512 \
-    --save_dir "results/xlsum-hin/airavata-1shot" \
+    --save_dir "/sky-notebook/eval-results/xlsum-hin/airavata-1shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \

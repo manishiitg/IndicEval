@@ -170,7 +170,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir", 
         type=str, 
-        default="results/toxigen"
+        default="/sky-notebook/eval-results/toxigen"
     )
     parser.add_argument(
         "--model_name_or_path",

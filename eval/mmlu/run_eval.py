@@ -259,7 +259,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="results/mmlu/llama-7B/"
+        default="/sky-notebook/eval-results/mmlu/llama-7B/"
     )
     parser.add_argument(
         "--model_name_or_path",

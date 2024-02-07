@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=0
 python -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/llama-7B-0shot \
+    --save_dir /sky-notebook/eval-results/mmlu/llama-7B-0shot \
     --model_name_or_path ../hf_llama_models/7B \
     --tokenizer_name_or_path ../hf_llama_models/7B \
     --eval_batch_size 4 \
@@ -17,7 +17,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/llama-7B-5shot \
+    --save_dir /sky-notebook/eval-results/mmlu/llama-7B-5shot \
     --model_name_or_path ../hf_llama_models/7B \
     --tokenizer_name_or_path ../hf_llama_models/7B \
     --eval_batch_size 4 \
@@ -28,7 +28,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/tulu-7B-0shot \
+    --save_dir /sky-notebook/eval-results/mmlu/tulu-7B-0shot \
     --model_name_or_path ../checkpoints/tulu_7B \
     --tokenizer_name_or_path ../checkpoints/tulu_7B \
     --eval_batch_size 4 \
@@ -41,7 +41,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/tulu-7B-5shot \
+    --save_dir /sky-notebook/eval-results/mmlu/tulu-7B-5shot \
     --model_name_or_path ../checkpoints/tulu_7B \
     --tokenizer_name_or_path ../checkpoints/tulu_7B \
     --eval_batch_size 4 \
@@ -54,7 +54,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/llama2-chat-7B-5shot \
+    --save_dir /sky-notebook/eval-results/mmlu/llama2-chat-7B-5shot \
     --model_name_or_path ../hf_llama2_models/7B-chat \
     --tokenizer_name_or_path ../hf_llama2_models/7B-chat \
     --eval_batch_size 4 \
@@ -67,7 +67,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/llama2-chat-7B-5shot \
+    --save_dir /sky-notebook/eval-results/mmlu/llama2-chat-7B-5shot \
     --model_name_or_path ../hf_llama2_models/7B-chat \
     --tokenizer_name_or_path ../hf_llama2_models/7B-chat \
     --eval_batch_size 4 \
@@ -80,7 +80,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/chatgpt-0shot/ \
+    --save_dir /sky-notebook/eval-results/mmlu/chatgpt-0shot/ \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20
 
@@ -89,7 +89,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/chatgpt-5shot/ \
+    --save_dir /sky-notebook/eval-results/mmlu/chatgpt-5shot/ \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20
 
@@ -98,7 +98,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/gpt4-0shot/ \
+    --save_dir /sky-notebook/eval-results/mmlu/gpt4-0shot/ \
     --openai_engine "gpt-4-0314" \
     --n_instances 100 \
     --eval_batch_size 20
@@ -108,7 +108,7 @@ python -m eval.mmlu.run_eval \
 python -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir results/mmlu/gpt4-5shot/ \
+    --save_dir /sky-notebook/eval-results/mmlu/gpt4-5shot/ \
     --openai_engine "gpt-4-0314" \
     --n_instances 100 \
     --eval_batch_size 20

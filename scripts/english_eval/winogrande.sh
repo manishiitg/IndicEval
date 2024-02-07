@@ -8,7 +8,7 @@ echo "evaluating llama-2 7b chat on winogrande ..."
 # zero-shot
 python3 -m eval.winogrande.run_english_eval \
     --ntrain 0 \
-    --save_dir "results/winogrande/llama2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/winogrande/llama2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8 \
@@ -23,7 +23,7 @@ echo "evaluating llama-2 7b base on winogrande ..."
 # zero-shot
 python3 -m eval.winogrande.run_english_eval \
     --ntrain 0 \
-    --save_dir "results/winogrande/llama2-7b-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/winogrande/llama2-7b-base-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8 \

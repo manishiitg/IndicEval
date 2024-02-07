@@ -7,7 +7,7 @@ echo "evaluating llama 2 7b base on indicsentiment ..."
 # zero-shot
 python3 -m eval.indicsentiment.run_translate_test_eval \
     --ntrain 0 \
-    --save_dir "results/translate_test/llama-2/indicsentiment/llama-2-7b-0shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicsentiment/llama-2-7b-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 16
@@ -15,7 +15,7 @@ python3 -m eval.indicsentiment.run_translate_test_eval \
 # 5-shot
 python3 -m eval.indicsentiment.run_translate_test_eval \
     --ntrain 5 \
-    --save_dir "results/translate_test/llama-2/indicsentiment/llama-2-7b-5shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicsentiment/llama-2-7b-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -29,7 +29,7 @@ echo "evaluating llama-2-7b-chat on indicsentiment ..."
 # zero-shot
 python3 -m eval.indicsentiment.run_translate_test_eval \
     --ntrain 0 \
-    --save_dir "results/translate_test/llama-2/indicsentiment/llama-2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicsentiment/llama-2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 16 \
@@ -39,7 +39,7 @@ python3 -m eval.indicsentiment.run_translate_test_eval \
 # 5-shot
 python3 -m eval.indicsentiment.run_translate_test_eval \
     --ntrain 5 \
-    --save_dir "results/translate_test/llama-2/indicsentiment/llama-2-7b-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicsentiment/llama-2-7b-chat-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \

@@ -447,7 +447,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--save_dir", 
         type=str, 
-        default="results/truthfulqa/", 
+        default="/sky-notebook/eval-results/truthfulqa/", 
         help="The directory to save the results."
     )
     parser.add_argument(

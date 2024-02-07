@@ -10,7 +10,7 @@ python3 -m eval.indicqa.run_translate_test_eval \
     --ntrain 1 \
     --max_context_length 768 \
     --no_context \
-    --save_dir "results/translate_test/llama-2/indicqa/llama-2-7b-0shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicqa/llama-2-7b-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -19,7 +19,7 @@ python3 -m eval.indicqa.run_translate_test_eval \
 python3 -m eval.indicqa.run_translate_test_eval \
     --ntrain 1 \
     --max_context_length 768 \
-    --save_dir "results/translate_test/llama-2/indicqa/llama-2-7b-5shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicqa/llama-2-7b-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 2
@@ -35,7 +35,7 @@ python3 -m eval.indicqa.run_translate_test_eval \
     --ntrain 1 \
     --max_context_length 768 \
     --no_context \
-    --save_dir "results/translate_test/llama-2/indicqa/llama-2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicqa/llama-2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 16 \
@@ -46,7 +46,7 @@ python3 -m eval.indicqa.run_translate_test_eval \
 python3 -m eval.indicqa.run_translate_test_eval \
     --ntrain 1 \
     --max_context_length 768 \
-    --save_dir "results/translate_test/llama-2/indicqa/llama-2-7b-chat-1shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/llama-2/indicqa/llama-2-7b-chat-1shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 2 \

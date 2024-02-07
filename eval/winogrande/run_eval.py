@@ -82,7 +82,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name_or_path", type=str, required=True, help="Path to the model checkpoint.")
-    parser.add_argument("--save_dir", type=str, default="results/winogrande/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/winogrande/llama-7B/")
     parser.add_argument("--tokenizer_name_or_path", type=str, default=None, help="Path to the tokenizer.")
     parser.add_argument("--eval_batch_size", type=int, default=1, help="Batch size for evaluation.")
     parser.add_argument("--load_in_8bit", action="store_true", help="Load model in 8bit mode.")

@@ -14,7 +14,7 @@ echo "evaluating llama-2 7b chat on mmlu ..."
 python3 -m eval.mmlu.run_english_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/llama2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/llama2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -26,7 +26,7 @@ python3 -m eval.mmlu.run_english_eval \
 python3 -m eval.mmlu.run_english_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/llama2-7b-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/llama2-7b-chat-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -45,7 +45,7 @@ echo "evaluating llama-2 7b base on mmlu ..."
 python3 -m eval.mmlu.run_english_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/llama2-7b-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/llama2-7b-base-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -55,7 +55,7 @@ python3 -m eval.mmlu.run_english_eval \
 python3 -m eval.mmlu.run_english_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/llama2-7b-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/llama2-7b-chat-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \

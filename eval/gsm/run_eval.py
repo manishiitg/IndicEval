@@ -175,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir", 
         type=str, 
-        default="results/gsm"
+        default="/sky-notebook/eval-results/gsm"
     )
     parser.add_argument(
         "--model_name_or_path", 

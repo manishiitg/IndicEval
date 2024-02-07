@@ -157,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "gu", "kn", "hi", "ml", "mr", "or", "pa", "ta", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="results/indicheadline/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicheadline/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,

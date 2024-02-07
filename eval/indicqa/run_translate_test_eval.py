@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "gu", "hi", "kn", "ml", "mr", "or", "pa", "ta", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="results/mmlu/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/mmlu/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,

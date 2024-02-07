@@ -1,14 +1,14 @@
 export CUDA_VISIBLE_DEVICES=0
 
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on winogrande ..."
+echo "evaluating open-aditi-v2 base on winogrande ..."
 
 # zero-shot
 python3 -m eval.winogrande.run_eval \
     --ntrain 0 \
-    --save_dir "results/winogrande/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/winogrande/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8
@@ -21,7 +21,7 @@ echo "evaluating airavata on winogrande ..."
 # zero-shot
 python3 -m eval.winogrande.run_eval \
     --ntrain 0 \
-    --save_dir "results/winogrande/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/winogrande/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8 \

@@ -112,7 +112,7 @@ The evaluation scripts for the benchmarks listed can be found at `scripts/indic_
 # Evaluation on IndicSentiment (Hindi) on a 5-shot setting
 python3 -m eval.indicsentiment.run_eval \
     --ntrain 5 \
-    --save_dir "results/indicsentiment/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/indicsentiment/airavata-5shot" \
     --model_name_or_path ai4bharat/airavata \
     --tokenizer_name_or_path ai4bharat/airavata \
     --eval_batch_size 4
@@ -120,7 +120,7 @@ python3 -m eval.indicsentiment.run_eval \
 # Evaluation on IndicSentiment (Translate-test) on a 5-shot setting
 python3 -m eval.indicsentiment.run_translate_test_eval \
     --ntrain 5 \
-    --save_dir "results/translate_test/indicsentiment/llama2-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/translate_test/indicsentiment/llama2-chat-5shot" \
     --model_name_or_path meta-llama/Llama-2-7b-chat-hf \
     --tokenizer_name_or_path meta-llama/Llama-2-7b-chat-hf \
     --eval_batch_size 4

@@ -1,14 +1,14 @@
 export CUDA_VISIBLE_DEVICES=0
 
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on indicxnli ..."
+echo "evaluating open-aditi-v2 base on indicxnli ..."
 
 # zero-shot
 python3 -m eval.indicxnli.run_eval \
     --ntrain 0 \
-    --save_dir "results/indicxnli/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/indicxnli/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8
@@ -16,7 +16,7 @@ python3 -m eval.indicxnli.run_eval \
 # 5-shot
 python3 -m eval.indicxnli.run_eval \
     --ntrain 5 \
-    --save_dir "results/indicxnli/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/indicxnli/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -29,7 +29,7 @@ echo "evaluating airavata on indicxnli ..."
 # zero-shot
 python3 -m eval.indicxnli.run_eval \
     --ntrain 0 \
-    --save_dir "results/indicxnli/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/indicxnli/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8 \
@@ -40,7 +40,7 @@ python3 -m eval.indicxnli.run_eval \
 # 5-shot
 python3 -m eval.indicxnli.run_eval \
     --ntrain 5 \
-    --save_dir "results/indicxnli/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/indicxnli/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \

@@ -2,16 +2,16 @@
 export CUDA_VISIBLE_DEVICES=0
 
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on in22-gen ..."
+echo "evaluating open-aditi-v2 base on in22-gen ..."
 
 # zero-shot
 python3 -m eval.in22.run_eval \
     --ntrain 0 \
     --dataset "ai4bharat/IN22-Gen" \
     --src_lang eng_Latn --tgt_lang hin_Deva \
-    --save_dir "results/in22-gen/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/in22-gen/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8
@@ -21,7 +21,7 @@ python3 -m eval.in22.run_eval \
     --ntrain 5 \
     --dataset "ai4bharat/IN22-Gen" \
     --src_lang eng_Latn --tgt_lang hin_Deva \
-    --save_dir "results/in22-gen/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/in22-gen/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -36,7 +36,7 @@ python3 -m eval.in22.run_eval \
     --ntrain 0 \
     --dataset "ai4bharat/IN22-Gen" \
     --src_lang eng_Latn --tgt_lang hin_Deva \
-    --save_dir "results/in22-gen/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/in22-gen/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 8 \
@@ -48,7 +48,7 @@ python3 -m eval.in22.run_eval \
     --ntrain 5 \
     --dataset "ai4bharat/IN22-Gen" \
     --src_lang eng_Latn --tgt_lang hin_Deva \
-    --save_dir "results/in22-gen/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/in22-gen/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \

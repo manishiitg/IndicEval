@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=0)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--save_dir", type=str, default="results/implicit_hate/llama-7B")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/implicit_hate/llama-7B")
     parser.add_argument(
         "--model_name_or_path",
         type=str,

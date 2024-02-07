@@ -6,14 +6,14 @@ export CUDA_VISIBLE_DEVICES=0
 #                       Hellaswag
 # -------------------------------------------------------------
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on hellaswag ..."
+echo "evaluating open-aditi-v2 base on hellaswag ..."
 
 # zero-shot
 python3 -m eval.hellaswag.run_eval \
     --ntrain 0 \
-    --save_dir "results/hellaswag/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -21,7 +21,7 @@ python3 -m eval.hellaswag.run_eval \
 # 5-shot
 python3 -m eval.hellaswag.run_eval \
     --ntrain 5 \
-    --save_dir "results/hellaswag/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -34,7 +34,7 @@ echo "evaluating airavata on hellaswag ..."
 # zero-shot
 python3 -m eval.hellaswag.run_eval \
     --ntrain 0 \
-    --save_dir "results/hellaswag/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -45,7 +45,7 @@ python3 -m eval.hellaswag.run_eval \
 # 5-shot
 python3 -m eval.hellaswag.run_eval \
     --ntrain 5 \
-    --save_dir "results/hellaswag/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -57,15 +57,15 @@ python3 -m eval.hellaswag.run_eval \
 #                       Indic Hellaswag
 # -------------------------------------------------------------
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on hellaswag-hi ..."
+echo "evaluating open-aditi-v2 base on hellaswag-hi ..."
 
 # zero-shot
 python3 -m eval.hellaswag.run_eval \
     --ntrain 0 \
     --dataset "Thanmay/hellaswag-translated" \
-    --save_dir "results/hellaswag-hi/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -74,7 +74,7 @@ python3 -m eval.hellaswag.run_eval \
 python3 -m eval.hellaswag.run_eval \
     --ntrain 5 \
     --dataset "Thanmay/hellaswag-translated" \
-    --save_dir "results/hellaswag-hi/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -88,7 +88,7 @@ echo "evaluating airavata on hellaswag ..."
 python3 -m eval.hellaswag.run_eval \
     --ntrain 0 \
     --dataset "Thanmay/hellaswag-translated" \
-    --save_dir "results/hellaswag-hi/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -100,7 +100,7 @@ python3 -m eval.hellaswag.run_eval \
 python3 -m eval.hellaswag.run_eval \
     --ntrain 5 \
     --dataset "Thanmay/hellaswag-translated" \
-    --save_dir "results/hellaswag-hi/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/hellaswag-hi/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \

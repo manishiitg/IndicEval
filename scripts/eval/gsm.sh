@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=0
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/llama-7B-cot-8shot \
+    --save_dir /sky-notebook/eval-results/gsm/llama-7B-cot-8shot \
     --model ../hf_llama_models/7B \
     --tokenizer ../hf_llama_models/7B \
     --eval_batch_size 20 \
@@ -18,7 +18,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/llama-7B-no-cot-8shot \
+    --save_dir /sky-notebook/eval-results/gsm/llama-7B-no-cot-8shot \
     --model ../hf_llama_models/7B \
     --tokenizer ../hf_llama_models/7B \
     --eval_batch_size 20 \
@@ -31,7 +31,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/tulu-7B-cot-8shot \
+    --save_dir /sky-notebook/eval-results/gsm/tulu-7B-cot-8shot \
     --model ../checkpoints/tulu_7B \
     --tokenizer ../checkpoints/tulu_7B \
     --eval_batch_size 20 \
@@ -45,7 +45,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/llama2-chat-7B-cot-8shot \
+    --save_dir /sky-notebook/eval-results/gsm/llama2-chat-7B-cot-8shot \
     --model ../hf_llama2_models/7B-chat \
     --tokenizer ../hf_llama2_models/7B-chat \
     --eval_batch_size 20 \
@@ -59,7 +59,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/chatgpt-cot \
+    --save_dir /sky-notebook/eval-results/gsm/chatgpt-cot \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20 \
     --n_shot 8 
@@ -69,7 +69,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/chatgpt-no-cot \
+    --save_dir /sky-notebook/eval-results/gsm/chatgpt-no-cot \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20 \
     --n_shot 8 \
@@ -80,7 +80,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/gpt4-cot \
+    --save_dir /sky-notebook/eval-results/gsm/gpt4-cot \
     --openai_engine "gpt-4-0314" \
     --eval_batch_size 20 \
     --n_shot 8 
@@ -90,7 +90,7 @@ python -m eval.gsm.run_eval \
 python -m eval.gsm.run_eval \
     --data_dir data/eval/gsm/ \
     --max_num_examples 200 \
-    --save_dir results/gsm/gpt4-no-cot \
+    --save_dir /sky-notebook/eval-results/gsm/gpt4-no-cot \
     --openai_engine "gpt-4-0314" \
     --eval_batch_size 20 \
     --n_shot 8 \

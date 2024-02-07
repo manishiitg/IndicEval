@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir", 
         type=str, 
-        default="results/bbh"
+        default="/sky-notebook/eval-results/bbh"
     )
     parser.add_argument(
         "--model_name_or_path", 

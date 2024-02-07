@@ -14,7 +14,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 0 \
     --dataset "ai2_arc" \
     --subset "easy" \
-    --save_dir "results/arc-easy/llama2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/llama2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -26,7 +26,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 5 \
     --dataset "ai2_arc" \
     --subset "easy" \
-    --save_dir "results/arc-easy/llama2-7b-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/llama2-7b-chat-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -43,7 +43,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 0 \
     --dataset "ai2_arc" \
     --subset "easy" \
-    --save_dir "results/arc-easy/llama2-7b-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/llama2-7b-base-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -53,7 +53,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 5 \
     --dataset "ai2_arc" \
     --subset "easy" \
-    --save_dir "results/arc-easy/llama2-7b-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/arc-easy/llama2-7b-base-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -71,7 +71,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 0 \
     --dataset "ai2_arc" \
     --subset "challenge" \
-    --save_dir "results/arc-challenge/llama2-7b-chat-0shot" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/llama2-7b-chat-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -83,7 +83,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 5 \
     --dataset "ai2_arc" \
     --subset "challenge" \
-    --save_dir "results/arc-challenge/llama2-7b-chat-5shot" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/llama2-7b-chat-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -100,7 +100,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 0 \
     --dataset "ai2_arc" \
     --subset "challenge" \
-    --save_dir "results/arc-challenge/llama2-7b-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/llama2-7b-base-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -110,7 +110,7 @@ python3 -m eval.arc.run_english_eval \
     --ntrain 5 \
     --dataset "ai2_arc" \
     --subset "challenge" \
-    --save_dir "results/arc-challenge/llama2-7b-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/arc-challenge/llama2-7b-base-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \

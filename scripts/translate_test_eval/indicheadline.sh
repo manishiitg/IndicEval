@@ -6,7 +6,7 @@ model_name_or_path="meta-llama/Llama-2-7b-hf"
 # Evaluating Llama-2 7B base model using 0 shot
 python -m eval.indicheadline.run_translate_test_eval \
     --ntrain 0 \
-    --save_dir results/translate_test/llama-2/indicheadline/llama-2-7b-chat-0shot \
+    --save_dir /sky-notebook/eval-results/translate_test/llama-2/indicheadline/llama-2-7b-chat-0shot \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path  $model_name_or_path \
     --eval_batch_size 2 \
@@ -19,7 +19,7 @@ model_name_or_path="meta-llama/Llama-2-7b-chat-hf"
 # Evaluating Llama-2 7B chat model using 0 shot
 python -m eval.indicheadline.run_translate_test_eval \
     --ntrain 0 \
-    --save_dir results/translate_test/llama-2/indicheadline/llama-2-7b-0shot \
+    --save_dir /sky-notebook/eval-results/translate_test/llama-2/indicheadline/llama-2-7b-0shot \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 2

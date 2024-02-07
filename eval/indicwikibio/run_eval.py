@@ -155,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "kn", "hi", "ml", "or", "pa", "ta", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="results/indicwikibio/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicwikibio/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,

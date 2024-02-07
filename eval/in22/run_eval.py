@@ -198,7 +198,7 @@ if __name__ == "__main__":
         default="hin_Deva",
         choices=list(lang_map.keys()),
     )
-    parser.add_argument("--save_dir", type=str, default="results/in22-gen/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/in22-gen/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,

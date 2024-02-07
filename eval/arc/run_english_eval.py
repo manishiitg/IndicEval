@@ -140,7 +140,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--dataset", type=str, default="easy", choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
     parser.add_argument("--subset", type=str, default="easy", choices=["easy", "challenge"])
-    parser.add_argument("--save_dir", type=str, default="results/mmlu/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/mmlu/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,

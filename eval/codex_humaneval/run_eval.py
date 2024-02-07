@@ -179,7 +179,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir", 
         type=str, 
-        default="results/codex_eval", 
+        default="/sky-notebook/eval-results/codex_eval", 
         help="Directory to save the results."
     )
     parser.add_argument(

@@ -9,7 +9,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/llama-7B-goldp \
+    --save_dir /sky-notebook/eval-results/tydiqa/llama-7B-goldp \
     --model ../hf_llama_model/7B \
     --tokenizer ../hf_llama_model/7B \
     --eval_batch_size 20 \
@@ -23,7 +23,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/llama-7B-no-context \
+    --save_dir /sky-notebook/eval-results/tydiqa/llama-7B-no-context \
     --model ../hf_llama_model/7B \
     --tokenizer ../hf_llama_model/7B \
     --eval_batch_size 40 \
@@ -37,7 +37,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/tulu-7B-goldp \
+    --save_dir /sky-notebook/eval-results/tydiqa/tulu-7B-goldp \
     --model ../checkpoints/tulu_7B \
     --tokenizer ../checkpoints/tulu_7B \
     --eval_batch_size 20 \
@@ -53,7 +53,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/tulu-7B-no-context \
+    --save_dir /sky-notebook/eval-results/tydiqa/tulu-7B-no-context \
     --model ../checkpoints/tulu_7B \
     --tokenizer ../checkpoints/tulu_7B \
     --eval_batch_size 20 \
@@ -70,7 +70,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/llama2-chat-7B-goldp \
+    --save_dir /sky-notebook/eval-results/tydiqa/llama2-chat-7B-goldp \
     --model ../hf_llama2_models/7B-chat \
     --tokenizer ../hf_llama2_models/7B-chat \
     --eval_batch_size 20 \
@@ -86,7 +86,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/llama2-chat-7B-no-context \
+    --save_dir /sky-notebook/eval-results/tydiqa/llama2-chat-7B-no-context \
     --model ../hf_llama2_models/7B-chat \
     --tokenizer ../hf_llama2_models/7B-chat \
     --eval_batch_size 20 \
@@ -102,7 +102,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/chatgpt-goldp-1shot \
+    --save_dir /sky-notebook/eval-results/tydiqa/chatgpt-goldp-1shot \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20
 
@@ -113,7 +113,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/chatgpt-no-context-1shot \
+    --save_dir /sky-notebook/eval-results/tydiqa/chatgpt-no-context-1shot \
     --openai_engine "gpt-3.5-turbo-0301" \
     --eval_batch_size 20 \
     --no_context 
@@ -125,7 +125,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/gpt4-goldp-1shot \
+    --save_dir /sky-notebook/eval-results/tydiqa/gpt4-goldp-1shot \
     --openai_engine "gpt-4-0314" \
     --eval_batch_size 20
 
@@ -136,7 +136,7 @@ python -m eval.tydiqa.run_eval \
     --n_shot 1 \
     --max_num_examples_per_lang 100 \
     --max_context_length 512 \
-    --save_dir results/tydiqa/gpt4-no-context-1shot \
+    --save_dir /sky-notebook/eval-results/tydiqa/gpt4-no-context-1shot \
     --openai_engine "gpt-4-0314" \
     --eval_batch_size 20 \
     --no_context 

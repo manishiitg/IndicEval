@@ -6,15 +6,15 @@ export CUDA_VISIBLE_DEVICES=0
 #                       MMLU
 # -------------------------------------------------------------
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on mmlu ..."
+echo "evaluating open-aditi-v2 base on mmlu ..."
 
 # zero-shot
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -23,7 +23,7 @@ python3 -m eval.mmlu.run_eval \
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -37,7 +37,7 @@ echo "evaluating airavata on mmlu ..."
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -49,7 +49,7 @@ python3 -m eval.mmlu.run_eval \
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir "results/mmlu/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
@@ -61,15 +61,15 @@ python3 -m eval.mmlu.run_eval \
 #                       Indic MMLU
 # -------------------------------------------------------------
 
-model_name_or_path="sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+model_name_or_path="manishiitg/open-aditi-hi-v2"
 
-echo "evaluating openhathi base on indic mmlu ..."
+echo "evaluating open-aditi-v2 base on indic mmlu ..."
 
 # zero-shot
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "results/mmlu-hi/openhathi-base-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu-hi/aditi-v2-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -78,7 +78,7 @@ python3 -m eval.mmlu.run_eval \
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "results/mmlu-hi/openhathi-base-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu-hi/aditi-v2-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
@@ -92,7 +92,7 @@ echo "evaluating airavata on indic mmlu ..."
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "results/mmlu-hi/airavata-0shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu-hi/airavata-0shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
@@ -104,7 +104,7 @@ python3 -m eval.mmlu.run_eval \
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "results/mmlu-hi/airavata-5shot" \
+    --save_dir "/sky-notebook/eval-results/mmlu-hi/airavata-5shot" \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \

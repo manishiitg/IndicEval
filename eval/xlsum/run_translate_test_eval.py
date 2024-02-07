@@ -154,7 +154,7 @@ if __name__ == "__main__":
         default="hindi",
         choices=["bengali", "english", "gujarati", "hindi", "marathi", "nepali", "punjabi", "tamil", "telugu", "urdu"],
     )
-    parser.add_argument("--save_dir", type=str, default="results/xlsum/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/xlsum/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
