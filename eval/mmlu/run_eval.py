@@ -11,7 +11,7 @@ from eval.mmlu.categories import subcategories, categories
 from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function
 from datasets import load_dataset
 
-choices = ["A", "B", "C", "D"]
+choices = ["1", "2", "3", "4"]
 
 
 def format_subject(subject):
@@ -24,12 +24,12 @@ def format_subject(subject):
 
 def format_example(df, idx, include_answer=True):
     prompt = df.iloc[idx, 0]
-    k = df.shape[1] - 2
-    for j in range(k):
-        prompt += "\n{}. {}".format(choices[j], df.iloc[idx, j + 1])
+    ch = df.iloc[idx, 2]
+    answer = df.iloc[idx, -1]
+    prompt += "\n{}".format(ch)
     prompt += "\nAnswer:"
     if include_answer:
-        prompt += " {}\n\n".format(df.iloc[idx, k + 1])
+        prompt += " {}\n\n".format(answer)
     return prompt
 
 
