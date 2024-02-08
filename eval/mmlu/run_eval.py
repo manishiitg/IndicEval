@@ -40,7 +40,7 @@ def gen_prompt(train_df, subject, k=-1):
     if k == -1:
         k = train_df.shape[0]
     for i in range(k):
-        prompt += format_example(train_df, i) + "\n\n"
+        prompt += format_example(train_df, i) + "\n"
     return prompt
 
 
@@ -87,7 +87,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                     
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
-            print("prompt", prompt)
             prompts.append(prompt)
 
     # get the answer for all examples

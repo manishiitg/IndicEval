@@ -162,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
-        default="/data/jaygala/bleurt/BLEURT-20",
+        default="./BLEURT-20",
         help="bleurt model to load for evaluation.",
     )
     parser.add_argument(
