@@ -9,7 +9,7 @@ from tqdm import tqdm
 import time
 from eval.mmlu.categories import subcategories, categories
 from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function
-
+from datasets import load_dataset
 
 choices = ["A", "B", "C", "D"]
 
@@ -87,6 +87,9 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     pred_indices, all_probs = get_next_word_predictions(
         model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
     )
+
+    print("pred_indices", pred_indices)
+    os.exit(1)
 
     # get the metrics
     cors = []
@@ -180,11 +183,13 @@ def main(args):
 
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
         
-        try:
-            dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-        except:
-            continue
+        # try:
+            # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
+            # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
+        dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
+        test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+        # except:
+        #     continue
         
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
