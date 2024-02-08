@@ -160,7 +160,7 @@ def get_next_word_predictions(
         batch_logits = model(input_ids=batch_input_ids, attention_mask=attention_mask).logits[
             :, -1, :
         ]
-        print("batch_logits", batch_logits)
+        
         batch_probs = torch.softmax(batch_logits, dim=-1)
         if candidate_token_ids is not None:
             batch_probs = batch_probs[:, candidate_token_ids]
@@ -179,8 +179,6 @@ def get_next_word_predictions(
         if not disable_tqdm:
             progress.update(len(batch_prompts))
 
-    print("predictionspredictions", predictions)
-    os.exit(1)
     assert len(predictions) == len(
         prompts
     ), "number of predictions should be equal to number of prompts"
