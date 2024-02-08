@@ -25,6 +25,8 @@ for model_name_or_path in "${model_names[@]}"; do
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${FOLDER_SUFFIX}"
     FILE=$FOLDER/metrics.json
 
+    echo "FILE $FILE"
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.arc.run_eval \
