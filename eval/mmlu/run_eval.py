@@ -96,11 +96,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     for i in range(len(pred_indices)):
         prediction = choices[pred_indices[i]]
         ground_truth = groud_truths[i]
-        print("prediction", prediction)
-        print("ground_truth", ground_truth)
         cors.append(prediction == ground_truth)
     
-    os.exit(1)
     acc = np.mean(cors)
     cors = np.array(cors)
 

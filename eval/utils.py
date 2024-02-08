@@ -178,6 +178,8 @@ def get_next_word_predictions(
         if not disable_tqdm:
             progress.update(len(batch_prompts))
 
+    print("predictionspredictions", predictions)
+    os.exit(1)
     assert len(predictions) == len(
         prompts
     ), "number of predictions should be equal to number of prompts"
