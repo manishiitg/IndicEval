@@ -71,7 +71,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             if k < 0:
                 include_prompt = False
                 break
-            k -= 1
             if k < 0:
                 include_prompt = False
                 break

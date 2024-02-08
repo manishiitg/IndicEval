@@ -123,7 +123,6 @@ def main(args):
             if k < 0:
                 include_prompt = False
                 break
-            k -= 1
             train_prompt = gen_prompt(dev_data, k)
             prompt = train_prompt + prompt_end
 
