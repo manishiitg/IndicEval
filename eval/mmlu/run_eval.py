@@ -40,7 +40,7 @@ def gen_prompt(train_df, subject, k=-1):
     if k == -1:
         k = train_df.shape[0]
     for i in range(k):
-        prompt += format_example(train_df, i)
+        prompt += format_example(train_df, i) + "\n\n"
     return prompt
 
 
@@ -52,15 +52,17 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         k = args.ntrain
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
+        print("train_prompt", train_prompt)
+        os.exit(1)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += "The answer is:"
-            else:
-                prompt += " The answer is:"
+            # if prompt[-1] in ["\n", " "]:
+            #     prompt += "The answer is:"
+            # else:
+            #     prompt += " The answer is:"
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -72,10 +74,10 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += "The answer is:"
-                else:
-                    prompt += " The answer is:"
+                # if prompt[-1] in ["\n", " "]:
+                #     prompt += "The answer is:"
+                # else:
+                #     prompt += " The answer is:"
                     
             print("prompt", prompt)
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
