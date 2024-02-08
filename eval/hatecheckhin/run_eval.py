@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, dynamic_import_function
 
 
-choices = ["hateful", "nonhateful"]
+choices = ["hateful", "non-hateful"]
 choices_to_id = {choice: i for i, choice in enumerate(choices)}
 
 
@@ -75,7 +75,7 @@ def main(args):
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 2048:
+        while len(tokenized_prompt) > 4096:
             k -= 1
             train_prompt = gen_prompt(dev_data, k)
             prompt = train_prompt + prompt_end
