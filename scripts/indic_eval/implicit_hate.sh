@@ -1,68 +1,46 @@
 export CUDA_VISIBLE_DEVICES=0
 
 
-model_name_or_path="manishiitg/open-aditi-hi-v2"
-
-echo "evaluating open-aditi-v2 base on implicit hate ..."
-
-# zero-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 0 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/aditi-v2-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 8
-
-# 5-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 5 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/aditi-v2-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4
-
-model_name_or_path="manishiitg/open-aditi-hi-v1"
-
-echo "evaluating open-aditi-v1 base on implicit hate ..."
-
-# zero-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 0 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/aditi-v1-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 8
-
-# 5-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 5 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/aditi-v1-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4
+model_names=(
+    "manishiitg/open-aditi-hi-v2"
+    "manishiitg/open-aditi-hi-v1"
+)
+FOLDER_BASE=/sky-notebook/eval-results
 
 
-model_name_or_path="ai4bharat/airavata"
+for model_name_or_path in "${model_names[@]}"; do
+    model_name=${model_name_or_path##*/}
+    TASK_NAME=implicit_hate
+    NUM_SHOTS=0short
+    
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
 
-echo "evaluating airavata on implicit hate ..."
+    if [ ! -f "$FILE" ]; then
+    # zero-shot
+        python3 -m eval.implicit_hate.run_eval \
+            --ntrain 0 \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 8 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
 
-# zero-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 0 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/airavata-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 8 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
+    NUM_SHOTS=5short
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
 
-
-# 5-shot
-python3 -m eval.implicit_hate.run_eval \
-    --ntrain 5 \
-    --save_dir "/sky-notebook/eval-results/implicit_hate/airavata-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
+    if [ ! -f "$FILE" ]; then
+        # 5-shot
+        python3 -m eval.implicit_hate.run_eval \
+            --ntrain 5 \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 4 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
+done

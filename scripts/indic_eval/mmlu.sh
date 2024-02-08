@@ -14,7 +14,7 @@ echo "evaluating open-aditi-v2 base on mmlu ..."
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v2-0shot" \
+    --save_dir $FOLDER \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4
@@ -23,61 +23,10 @@ python3 -m eval.mmlu.run_eval \
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v2-5shot" \
+    --save_dir $FOLDER \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1
-
-model_name_or_path="manishiitg/open-aditi-hi-v1"
-
-echo "evaluating open-aditi-v1 base on mmlu ..."
-
-# zero-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 0 \
-    --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v1-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4
-
-# 5-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 5 \
-    --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/aditi-v1-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 1
-
-
-model_name_or_path="ai4bharat/airavata"
-
-echo "evaluating airavata on mmlu ..."
-
-# zero-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 0 \
-    --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/airavata-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
-
-
-# 5-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 5 \
-    --data_dir data/eval/mmlu \
-    --save_dir "/sky-notebook/eval-results/mmlu/airavata-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 1 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
-
 
 # -------------------------------------------------------------
 #                       Indic MMLU
@@ -91,44 +40,20 @@ echo "evaluating open-aditi-v2 base on indic mmlu ..."
 python3 -m eval.mmlu.run_eval \
     --ntrain 0 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "/sky-notebook/eval-results/mmlu-hi/aditi-v2-0shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 4
-
-# 5-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 5 \
-    --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "/sky-notebook/eval-results/mmlu-hi/aditi-v2-5shot" \
-    --model_name_or_path $model_name_or_path \
-    --tokenizer_name_or_path $model_name_or_path \
-    --eval_batch_size 1
-
-
-model_name_or_path="ai4bharat/airavata"
-
-echo "evaluating airavata on indic mmlu ..."
-
-# zero-shot
-python3 -m eval.mmlu.run_eval \
-    --ntrain 0 \
-    --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "/sky-notebook/eval-results/mmlu-hi/airavata-0shot" \
+    --save_dir $FOLDER \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 4 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
-
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
 
 # 5-shot
 python3 -m eval.mmlu.run_eval \
     --ntrain 5 \
     --data_dir data/eval/mmlu_hi_translated \
-    --save_dir "/sky-notebook/eval-results/mmlu-hi/airavata-5shot" \
+    --save_dir $FOLDER \
     --model_name_or_path $model_name_or_path \
     --tokenizer_name_or_path $model_name_or_path \
     --eval_batch_size 1 \
-    --use_chat_format \
-    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
