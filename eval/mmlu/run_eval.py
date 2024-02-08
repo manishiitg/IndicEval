@@ -52,8 +52,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         k = args.ntrain
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
-        print("train_prompt", train_prompt)
-        os.exit(1)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
@@ -79,8 +77,9 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                 # else:
                 #     prompt += " The answer is:"
                     
-            print("prompt", prompt)
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+        
+        print("prompt", prompt)
         prompts.append(prompt)
 
     # get the answer for all examples
