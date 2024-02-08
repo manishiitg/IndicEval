@@ -1,7 +1,4 @@
-from transformers import AutoTokenizer
 import unicodedata
-tokenizer = AutoTokenizer.from_pretrained("teknium/OpenHermes-2.5-Mistral-7B")
-
 def is_hindi(char):
     try:
         return unicodedata.name(char).startswith('DEVANAGARI')
