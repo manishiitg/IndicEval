@@ -13,94 +13,94 @@ FOLDER_BASE=/sky-notebook/eval-results
 # #                       ARC-Easy
 # # -------------------------------------------------------------
 
-# for model_name_or_path in "${model_names[@]}"; do
-#     model_name=${model_name_or_path##*/}
-#     TASK_NAME=arc-easy-hi
-#     NUM_SHOTS=0short
-#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+for model_name_or_path in "${model_names[@]}"; do
+    model_name=${model_name_or_path##*/}
+    TASK_NAME=arc-easy-hi
+    NUM_SHOTS=0short
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
     
-#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-#     FILE=$FOLDER/metrics.json
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
 
-#     if [ ! -f "$FILE" ]; then
-#         # zero-shot
-#         python3 -m eval.arc.run_eval \
-#             --ntrain 0 \
-#             --dataset "ai2_arc" \
-#             --subset "easy" \
-#             --save_dir $FOLDER \
-#             --model_name_or_path $model_name_or_path \
-#             --tokenizer_name_or_path $model_name_or_path \
-#             --eval_batch_size 4 \
-#             --use_chat_format \
-#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-#     fi
+    if [ ! -f "$FILE" ]; then
+        # zero-shot
+        python3 -m eval.arc.run_eval \
+            --ntrain 0 \
+            --dataset "ai2_arc" \
+            --subset "easy" \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 4 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
 
-#     NUM_SHOTS=5short
-#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
-#     FILE=$FOLDER/metrics.json
-#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    NUM_SHOTS=5short
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-#     if [ ! -f "$FILE" ]; then
-#         # 5-shot
-#         python3 -m eval.arc.run_eval \
-#             --ntrain 5 \
-#             --dataset "ai2_arc" \
-#             --subset "easy" \
-#             --save_dir "/sky-notebook/eval-results/arc-easy/aditi-v2-5shot" \
-#             --model_name_or_path $model_name_or_path \
-#             --tokenizer_name_or_path $model_name_or_path \
-#             --eval_batch_size 1 \
-#             --use_chat_format \
-#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-#     fi
-# done
+    if [ ! -f "$FILE" ]; then
+        # 5-shot
+        python3 -m eval.arc.run_eval \
+            --ntrain 5 \
+            --dataset "ai2_arc" \
+            --subset "easy" \
+            --save_dir "/sky-notebook/eval-results/arc-easy/aditi-v2-5shot" \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 1 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
+done
 
-# # -------------------------------------------------------------
-# #                       ARC-Challenge
-# # -------------------------------------------------------------
-# for model_name_or_path in "${model_names[@]}"; do
-#     model_name=${model_name_or_path##*/}
-#     TASK_NAME=arc-challenge-hi
+# -------------------------------------------------------------
+#                       ARC-Challenge
+# -------------------------------------------------------------
+for model_name_or_path in "${model_names[@]}"; do
+    model_name=${model_name_or_path##*/}
+    TASK_NAME=arc-challenge-hi
 
-#     NUM_SHOTS=0short
-#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-#     FILE=$FOLDER/metrics.json
+    NUM_SHOTS=0short
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
 
-#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-#     if [ ! -f "$FILE" ]; then
-#         # zero-shot
-#         python3 -m eval.arc.run_eval \
-#             --ntrain 0 \
-#             --dataset "ai2_arc" \
-#             --subset "challenge" \
-#             --save_dir $FOLDER \
-#             --model_name_or_path $model_name_or_path \
-#             --tokenizer_name_or_path $model_name_or_path \
-#             --eval_batch_size 4 \
-#             --use_chat_format \
-#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-#     fi
-#     NUM_SHOTS=5short
-#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
-#     FILE=$FOLDER/metrics.json
-#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    if [ ! -f "$FILE" ]; then
+        # zero-shot
+        python3 -m eval.arc.run_eval \
+            --ntrain 0 \
+            --dataset "ai2_arc" \
+            --subset "challenge" \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 4 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
+    NUM_SHOTS=5short
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
+    FILE=$FOLDER/metrics.json
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-#     if [ ! -f "$FILE" ]; then
-#         # 5-shot
-#         python3 -m eval.arc.run_eval \
-#             --ntrain 5 \
-#             --dataset "ai2_arc" \
-#             --subset "challenge" \
-#             --save_dir $FOLDER \
-#             --model_name_or_path $model_name_or_path \
-#             --tokenizer_name_or_path $model_name_or_path \
-#             --eval_batch_size 1 \
-#             --use_chat_format \
-#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-#     fi
-# done
+    if [ ! -f "$FILE" ]; then
+        # 5-shot
+        python3 -m eval.arc.run_eval \
+            --ntrain 5 \
+            --dataset "ai2_arc" \
+            --subset "challenge" \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 1 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    fi
+done
 
 
 # -------------------------------------------------------------
@@ -187,7 +187,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --ntrain 5 \
             --dataset "ai4bharat/ai2_arc-hi" \
             --subset "challenge" \
-            --save_dir "/sky-notebook/eval-results/arc-challenge-hi/aditi-v2-5shot" \
+            --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
             --eval_batch_size 1 \
