@@ -167,13 +167,18 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
     else:
-        subjects = sorted(
-            [
-                f.split("_test.csv")[0]
-                for f in os.listdir(os.path.join(args.data_dir, "test"))
-                if "_test.csv" in f
-            ]
-        )
+        # subjects = sorted(
+        #     [
+        #         f.split("_test.csv")[0]
+        #         for f in os.listdir(os.path.join(args.data_dir, "test"))
+        #         if "_test.csv" in f
+        #     ]
+        # )
+        ds = load_dataset("cais/mmlu", split="test")
+        subjects = []
+        for row in ds:
+            subjects.append(row["subject"])
+        subjects = list(set(subjects))
 
     if args.subjects:
         assert all(subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -195,8 +200,10 @@ def main(args):
             dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
         else:
-            dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
+            # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
+            # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
+            dev_df = pd.DataFrame(load_dataset("cais/mmlu", split="dev"))[: args.ntrain]
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", split="test"))
         # except:
         #     continue
         
