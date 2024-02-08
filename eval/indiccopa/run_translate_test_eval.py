@@ -102,7 +102,7 @@ def main(args):
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 4096:
+        while len(tokenized_prompt) > 2048:
             k -= 1
 
             train_prompt = gen_prompt(dev_data, k)
