@@ -160,6 +160,7 @@ def get_next_word_predictions(
         batch_logits = model(input_ids=batch_input_ids, attention_mask=attention_mask).logits[
             :, -1, :
         ]
+        print("batch_logits", batch_logits)
         batch_probs = torch.softmax(batch_logits, dim=-1)
         if candidate_token_ids is not None:
             batch_probs = batch_probs[:, candidate_token_ids]
