@@ -87,7 +87,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     pred_indices, all_probs = get_next_word_predictions(
         model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
     )
-
     print("pred_indices", pred_indices)
     os.exit(1)
 
