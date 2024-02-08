@@ -48,7 +48,7 @@ def gen_prompt(train_df, subject, k=-1):
 def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1):
     prompts = []
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
-    for i in range(0, test_df.shape[0]):
+    for i in tqdm(range(0, test_df.shape[0])):
         k = args.ntrain
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
@@ -79,6 +79,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                     
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         prompts.append(prompt)
+        break
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
