@@ -101,8 +101,8 @@ def main(args):
                 prompt += "The summary is: "
             else:
                 prompt += " The summary is: "
-        if include_prompt:
-            prompts.append(prompt)
+    
+        prompts.append(prompt)
 
     outputs = generate_completions(
         model=model,
