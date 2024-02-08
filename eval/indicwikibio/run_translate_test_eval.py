@@ -113,7 +113,8 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
         
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     outputs = generate_completions(
         model=model,

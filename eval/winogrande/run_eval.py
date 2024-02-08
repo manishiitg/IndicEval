@@ -48,7 +48,8 @@ def main(args):
                 # else:
                 #     prompt += " The answer is: "
 
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     # Get the answer for all examples
     answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in ['true', 'false']]

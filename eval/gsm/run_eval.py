@@ -74,7 +74,8 @@ def main(args):
                 prompt += " Answer:"
         else:
             prompt += "\nAnswer:"
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     if args.model_name_or_path:
         print("Loading model and tokenizer...")

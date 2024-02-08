@@ -103,7 +103,8 @@ def main(args):
                 prompt += "The headline is: "
             else:
                 prompt += " The headline is: "
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     outputs = generate_completions(
         model=model,

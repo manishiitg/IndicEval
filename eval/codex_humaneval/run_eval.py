@@ -35,6 +35,7 @@ def main(args):
                 prompt += "Here is the completed function:\n\n\n" + example["prompt"]
             else:
                 prompt += " Here is the completed function:\n\n\n" + example["prompt"]
+            if include_prompt:
             prompts.append(prompt)
     else:
         prompts = [example["prompt"] for example in test_data]

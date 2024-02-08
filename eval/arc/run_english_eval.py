@@ -79,7 +79,12 @@ def main(args):
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
+        include_prompt = True
         while len(tokenized_prompt) > 4096:
+            k -= 1
+            if k < 0:
+                include_prompt = False
+                break
             k -= 1
             train_prompt = gen_prompt(dev_data, k)
             prompt = train_prompt + prompt_end
@@ -90,7 +95,8 @@ def main(args):
                 prompt = "\n\n".join([x["content"] for x in prompt])
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt

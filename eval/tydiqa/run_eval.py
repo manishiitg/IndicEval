@@ -177,7 +177,8 @@ def main(args):
                 prompt += " " + a_template
         else:
             prompt += a_template
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     if args.model_name_or_path:
         if args.use_vllm:
