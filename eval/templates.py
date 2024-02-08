@@ -31,8 +31,8 @@ def create_prompt_with_chatml_format(messages, bos="<s>", eos="</s>", add_bos=Tr
                 break
 
     if not has_system:
-        default_system_en = "You are a helpful assistant. Please give a long and detailed answer."
-        default_system_hi = "आप एक सहायक सहायक हैं. कृपया लंबा और विस्तृत उत्तर दें."
+        default_system_en = "You are a helpful assistant."
+        default_system_hi = "आप एक सहायक सहायक हैं."
         if has_hindi:
             messages.insert(0, {"role":"system", "content": default_system_hi})
         else:
