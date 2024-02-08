@@ -79,7 +79,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                     
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         prompts.append(prompt)
-        break
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
