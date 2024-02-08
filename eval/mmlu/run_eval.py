@@ -65,12 +65,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
         include_prompt = True
-        include_prompt = True
         while len(tokenized_prompt) > 4096:
             k -= 1
-            if k < 0:
-                include_prompt = False
-                break
             if k < 0:
                 include_prompt = False
                 break
@@ -126,8 +122,7 @@ def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
         prompt = train_prompt + prompt_end        
-        if include_prompt:
-            prompts.append(prompt)
+        prompts.append(prompt)
 
     instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
     results = query_openai_chat_model(
@@ -182,7 +177,7 @@ def main(args):
         #         if "_test.csv" in f
         #     ]
         # )
-        ds = load_dataset("cais/mmlu", split="test")
+        ds = load_dataset("cais/mmlu", split="test", config="all")
         subjects = []
         for row in ds:
             subjects.append(row["subject"])
