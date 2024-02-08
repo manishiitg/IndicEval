@@ -66,6 +66,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         # make sure every prompt is less than 2048 tokens
         while len(tokenized_prompt) > 4096:
             k -= 1
+            if k < 0:
+                break
             train_prompt = gen_prompt(dev_df, subject, k)
             prompt = train_prompt + prompt_end
 

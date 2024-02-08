@@ -43,10 +43,10 @@ def main(args):
             messages = [{"role": "user", "content": prompt}]
             chat_formatting_function = dynamic_import_function(args.chat_formatting_function)
             prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += "The answer is: "
-            else:
-                prompt += " The answer is: "
+            # if prompt[-1] in ["\n", " "]:
+                #     prompt += "The answer is: "
+                # else:
+                #     prompt += " The answer is: "
 
         prompts.append(prompt)
 
