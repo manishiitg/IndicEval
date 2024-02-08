@@ -69,6 +69,7 @@ def main(args):
             else:
                 # we will use the original text from toxigen as the prompt.
                 prompt = example["text"]
+            if include_prompt:
             prompts.append(prompt)
 
         if args.use_vllm:

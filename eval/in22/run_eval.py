@@ -116,8 +116,12 @@ def main(args):
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 2048:
+        include_prompt = True
+        while len(tokenized_prompt) > 4096:
             k -= 1
+            if k < 0:
+                include_prompt = False
+                break
             train_prompt = gen_prompt(dev_data, k)
             prompt = train_prompt + prompt_end
 
@@ -130,7 +134,8 @@ def main(args):
                     prompt += f" The {lang_map[args.tgt_lang]} translation is: "
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     outputs = generate_completions(
         model=model,
@@ -202,7 +207,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
-        default="/data/jaygala/bleurt/BLEURT-20",
+        default="./BLEURT-20",
         help="bleurt model to load for evaluation.",
     )
     parser.add_argument(

@@ -43,12 +43,13 @@ def main(args):
             messages = [{"role": "user", "content": prompt}]
             chat_formatting_function = dynamic_import_function(args.chat_formatting_function)
             prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += "The answer is: "
-            else:
-                prompt += " The answer is: "
+            # if prompt[-1] in ["\n", " "]:
+                #     prompt += "The answer is: "
+                # else:
+                #     prompt += " The answer is: "
 
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     # Get the answer for all examples
     answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in ['true', 'false']]

@@ -149,6 +149,7 @@ if __name__ == "__main__":
                     prompt = instance["prompt"]
             else:
                 raise ValueError("Either `messages` or `prompt` should be in the instance.")
+            if include_prompt:
             prompts.append(prompt)
         if args.use_vllm:
             model = vllm.LLM(

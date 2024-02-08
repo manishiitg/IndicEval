@@ -11,7 +11,7 @@ from eval.mmlu.categories import subcategories, categories
 from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function
 from datasets import load_dataset
 
-choices = ["A", "B", "C", "D"]
+choices = ["1", "2", "3", "4"]
 
 
 def format_subject(subject):
@@ -24,12 +24,12 @@ def format_subject(subject):
 
 def format_example(df, idx, include_answer=True):
     prompt = df.iloc[idx, 0]
-    k = df.shape[1] - 2
-    for j in range(k):
-        prompt += "\n{}. {}".format(choices[j], df.iloc[idx, j + 1])
+    ch = df.iloc[idx, 2]
+    answer = df.iloc[idx, -1]
+    prompt += "\n{}".format(ch)
     prompt += "\nAnswer:"
     if include_answer:
-        prompt += " {}\n\n".format(df.iloc[idx, k + 1])
+        prompt += " {}\n\n".format(answer)
     return prompt
 
 
@@ -40,7 +40,7 @@ def gen_prompt(train_df, subject, k=-1):
     if k == -1:
         k = train_df.shape[0]
     for i in range(k):
-        prompt += format_example(train_df, i)
+        prompt += format_example(train_df, i) + "\n"
     return prompt
 
 
@@ -48,7 +48,7 @@ def gen_prompt(train_df, subject, k=-1):
 def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1):
     prompts = []
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
-    for i in range(0, test_df.shape[0]):
+    for i in tqdm(range(0, test_df.shape[0])):
         k = args.ntrain
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
@@ -57,28 +57,37 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += "The answer is:"
-            else:
-                prompt += " The answer is:"
+            # if prompt[-1] in ["\n", " "]:
+            #     prompt += "The answer is:"
+            # else:
+            #     prompt += " The answer is:"
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 2048:
+        include_prompt = True
+        include_prompt = True
+        while len(tokenized_prompt) > 4096:
             k -= 1
+            if k < 0:
+                include_prompt = False
+                break
+            if k < 0:
+                include_prompt = False
+                break
             train_prompt = gen_prompt(dev_df, subject, k)
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += "The answer is:"
-                else:
-                    prompt += " The answer is:"
+                # if prompt[-1] in ["\n", " "]:
+                #     prompt += "The answer is:"
+                # else:
+                #     prompt += " The answer is:"
                     
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
@@ -87,9 +96,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     pred_indices, all_probs = get_next_word_predictions(
         model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
     )
-
-    print("pred_indices", pred_indices)
-    os.exit(1)
+    
 
     # get the metrics
     cors = []
@@ -98,7 +105,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         prediction = choices[pred_indices[i]]
         ground_truth = groud_truths[i]
         cors.append(prediction == ground_truth)
-        
+    
     acc = np.mean(cors)
     cors = np.array(cors)
 
@@ -119,7 +126,8 @@ def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1
         prompt_end = format_example(test_df, i, include_answer=False)
         train_prompt = gen_prompt(dev_df, subject, k)
         prompt = train_prompt + prompt_end        
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
     results = query_openai_chat_model(
@@ -160,13 +168,25 @@ def main(args):
             use_fast_tokenizer=not args.use_slow_tokenizer,
         )
     
-    subjects = sorted(
-        [
-            f.split("_test.csv")[0]
-            for f in os.listdir(os.path.join(args.data_dir, "test"))
-            if "_test.csv" in f
-        ]
-    )
+    if args.data_dir == "data/eval/mmlu_hi_translated":
+        ds = load_dataset("manishiitg/cais-mmlu", split="test")
+        subjects = []
+        for row in ds:
+            subjects.append(row["subject"])
+        subjects = list(set(subjects))
+    else:
+        # subjects = sorted(
+        #     [
+        #         f.split("_test.csv")[0]
+        #         for f in os.listdir(os.path.join(args.data_dir, "test"))
+        #         if "_test.csv" in f
+        #     ]
+        # )
+        ds = load_dataset("cais/mmlu", split="test")
+        subjects = []
+        for row in ds:
+            subjects.append(row["subject"])
+        subjects = list(set(subjects))
 
     if args.subjects:
         assert all(subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -184,10 +204,14 @@ def main(args):
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
         
         # try:
+        if args.data_dir == "data/eval/mmlu_hi_translated":
+            dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
+            test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+        else:
             # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
             # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-        dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
-        test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+            dev_df = pd.DataFrame(load_dataset("cais/mmlu", split="dev"))[: args.ntrain]
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", split="test"))
         # except:
         #     continue
         

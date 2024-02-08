@@ -23,6 +23,7 @@ def main(args):
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
+        
         prompts.append(prompt)
 
     if args.model_name_or_path is not None:

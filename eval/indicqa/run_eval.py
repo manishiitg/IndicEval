@@ -117,7 +117,8 @@ def main(args):
             prompt += a_template if prompt[-1] in ["\n", " "] else " " + a_template
         else:
             prompt += a_template
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     outputs = generate_completions(
         model=model,

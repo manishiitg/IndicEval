@@ -97,8 +97,8 @@ def main(args):
                     else:
                         prompt += " A:"
                 else:
-                    prompt += "\nA:"
-                prompts.append(prompt)
+                    prompt += "\nA:"                
+            prompts.append(prompt)
             # generate with vllm
             if args.use_vllm:
                 sampling_params = vllm.SamplingParams(

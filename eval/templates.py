@@ -1,7 +1,4 @@
-from transformers import AutoTokenizer
 import unicodedata
-tokenizer = AutoTokenizer.from_pretrained("teknium/OpenHermes-2.5-Mistral-7B")
-
 def is_hindi(char):
     try:
         return unicodedata.name(char).startswith('DEVANAGARI')
@@ -39,22 +36,22 @@ def create_prompt_with_chatml_format(messages, bos="<s>", eos="</s>", add_bos=Tr
             messages.insert(0, {"role":"system", "content": default_system_en})
 
 
-    # for message in messages:
-    #     if message["role"] == "system":
-    #         formatted_text += "<|im_start|>system\n" + message["content"] + "<|im_end|>\n"
-    #     elif message["role"] == "user":
-    #         formatted_text += "<|im_start|>user\n" + message["content"] + "<|im_end|>\n"
-    #     elif message["role"] == "assistant":
-    #         formatted_text += "<|assistant|>\n" + message["content"].strip() + eos + "\n"
-    #     else:
-    #         raise ValueError(
-    #             "Tulu chat template only supports 'system', 'user' and 'assistant' roles. Invalid role: {}.".format(
-    #                 message["role"]
-    #             )
-    #         )
+    for message in messages:
+        if message["role"] == "system":
+            formatted_text += "<|im_start|>system\n" + message["content"] + "<|im_end|>\n"
+        elif message["role"] == "user":
+            formatted_text += "<|im_start|>user\n" + message["content"] + "<|im_end|>\n"
+        elif message["role"] == "assistant":
+            formatted_text += "<|im_start|>assistant\n" + message["content"].strip() + "\n"
+        else:
+            raise ValueError(
+                "Tulu chat template only supports 'system', 'user' and 'assistant' roles. Invalid role: {}.".format(
+                    message["role"]
+                )
+            )
     # formatted_text += "<|assistant|>\n"
     # formatted_text = bos + formatted_text if add_bos else formatted_text
-    formatted_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    # formatted_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     if not debug_print:
         print("formatted_text", formatted_text)
         debug_print = True

@@ -68,15 +68,19 @@ def main(args):
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += "The answer is: "
-            else:
-                prompt += " The answer is: "
+            # if prompt[-1] in ["\n", " "]:
+                #     prompt += "The answer is: "
+                # else:
+                #     prompt += " The answer is: "
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 2048:
+        include_prompt = True
+        while len(tokenized_prompt) > 4096:
             k -= 1
+            if k < 0:
+                include_prompt = False
+                break
             train_prompt = gen_prompt(dev_data, k)
             prompt = train_prompt + prompt_end
 
@@ -89,7 +93,8 @@ def main(args):
                     prompt += " The answer is: "
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        prompts.append(prompt)
+        if include_prompt:
+            prompts.append(prompt)
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
