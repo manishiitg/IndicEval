@@ -159,13 +159,20 @@ def main(args):
             use_fast_tokenizer=not args.use_slow_tokenizer,
         )
     
-    subjects = sorted(
-        [
-            f.split("_test.csv")[0]
-            for f in os.listdir(os.path.join(args.data_dir, "test"))
-            if "_test.csv" in f
-        ]
-    )
+    if args.data_dir == "data/eval/mmlu_hi_translated":
+        ds = load_dataset("manishiitg/cais-mmlu", split="test")
+        subjects = []
+        for row in ds:
+            subjects.append(row["subject"])
+        subjects = list(set(subjects))
+    else:
+        subjects = sorted(
+            [
+                f.split("_test.csv")[0]
+                for f in os.listdir(os.path.join(args.data_dir, "test"))
+                if "_test.csv" in f
+            ]
+        )
 
     if args.subjects:
         assert all(subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -183,12 +190,12 @@ def main(args):
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
         
         # try:
-        if args.data_dir != "data/eval/mmlu_hi_translated":
-            dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-        else:
+        if args.data_dir == "data/eval/mmlu_hi_translated":
             dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+        else:
+            dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
+            test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
         # except:
         #     continue
         
