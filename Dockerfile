@@ -1,6 +1,7 @@
 FROM vllm/vllm-openai:latest
 
 WORKDIR /stage/
+ENV PIP_ROOT_USER_ACTION=ignore
 
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
