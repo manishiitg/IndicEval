@@ -63,9 +63,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         answerStr = ""
         answer = row["answer"]
         if answer == "true":
-            answerStr = "A. हाँ"
+            answerStr = "A"
         else:
-            answerStr = "B. नहीं"
+            answerStr = "B"
         row["answer_text"] = answerStr
         return row
 
@@ -82,6 +82,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     predictions = []
     idx = 0
     for row in test_data:
+        outputs[idx] = outputs[idx].split('.')[0]
         row = {
             "question": row["question"],
             "model_output": outputs[idx],
