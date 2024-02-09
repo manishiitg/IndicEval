@@ -76,11 +76,11 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         
         prompts.append(prompt)
-        
+
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
-        stop=["\n"],
+        stop=["\n", "<|im_end|>"],
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
@@ -195,10 +195,11 @@ def main(args):
     }
     cat_cors = {cat: [] for cat in categories}
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-    print("Loading model and tokenizer...")
+    
 
     if args.use_vllm:
         if args.awq:
+            print("Loading model and tokenizer vllm awq...")
             model = vllm.LLM(
                 model=args.model_name_or_path + "-awq",
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
@@ -208,6 +209,7 @@ def main(args):
                 quantization="AWQ",
             )
         else:
+            print("Loading model and tokenizer vllm...")
             model = vllm.LLM(
                 model=args.model_name_or_path,
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
@@ -216,7 +218,8 @@ def main(args):
                 max_num_batched_tokens=4096,
             )
     else:
-        model, tokenizer2 = load_hf_lm_and_tokenizer(
+        print("Loading model and tokenizer vllm hf...")
+        model, tokenizer = load_hf_lm_and_tokenizer(
             model_name_or_path=args.model_name_or_path, 
             tokenizer_name_or_path=args.tokenizer_name_or_path, 
             load_in_8bit=args.load_in_8bit, 
@@ -234,8 +237,8 @@ def main(args):
         else:
             # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
             # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-            dev_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="dev", trust_remote_code=True))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))
+            dev_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="dev", trust_remote_code=True))[: args.ntrain]
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="test", trust_remote_code=True))
         # except:
         #     continue
 
