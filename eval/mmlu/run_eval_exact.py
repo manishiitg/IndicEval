@@ -84,13 +84,18 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
-    print("generations", generations)
     prompt_to_output = {
         g.prompt: g.outputs[0].text for g in generations
     }
-    print("prompt_to_output", prompt_to_output)
+    for p in prompts:
+        print(p)
+        print("----")
+
+    for p in prompt_to_output:
+        print(p)
+        print("----")
     outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
-        
+    os.exit(1)
     
 
     def extract_answer(row):
