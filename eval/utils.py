@@ -161,7 +161,7 @@ def get_next_word_predictions(
         batch_logits = model(input_ids=batch_input_ids, attention_mask=attention_mask).logits[
             :, -1, :
         ]
-        
+        batch_probs = torch.softmax(batch_logits, dim=-1)
         if candidate_token_ids is not None:
             batch_probs = batch_probs[:, candidate_token_ids]
         batch_prediction_indices = torch.argmax(batch_probs, dim=-1)
@@ -249,7 +249,9 @@ def load_hf_lm_and_tokenizer(
     if awq_model:
         from awq import AutoAWQForCausalLM
 
-        model = AutoAWQForCausalLM.from_quantized(model_name_or_path + "-awq", fuse_layers=True)
+        model_wrapper = AutoAWQForCausalLM.from_quantized(model_name_or_path + "-awq", fuse_layers=True)
+        model = model_wrapper.model
+        
     elif gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
