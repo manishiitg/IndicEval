@@ -206,7 +206,7 @@ def main(args):
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
                 tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
                 tensor_parallel_size=torch.cuda.device_count(),
-                max_num_batched_tokens=4096,
+                # max_num_batched_tokens=4096,
                 quantization="AWQ",
             )
         else:
@@ -216,7 +216,7 @@ def main(args):
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
                 tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
                 tensor_parallel_size=torch.cuda.device_count(),
-                max_num_batched_tokens=4096,
+                # max_num_batched_tokens=4096,
             )
     else:
         print("Loading model and tokenizer hf...")
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--awq",
-        action="store_false", 
+        action="store_true", 
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
