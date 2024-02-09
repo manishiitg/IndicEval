@@ -118,8 +118,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     for index, row in test_df.iterrows():
         print("question", row["question"])
         print("answer", row["answer_text"])
-        print("outputs", outputs[index])
-        print("pred", targets[index])
+        print("outputs", outputs[idx])
+        print("pred", targets[idx])
         predictions.append({
             "question": row["question"],
             "answer": row["answer_text"],
