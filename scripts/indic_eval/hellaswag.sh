@@ -34,7 +34,7 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
 
     if [ ! -f "$FILE" ]; then
@@ -76,7 +76,7 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
 
     if [ ! -f "$FILE" ]; then

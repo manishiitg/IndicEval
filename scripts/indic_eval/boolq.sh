@@ -32,22 +32,22 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format
     fi
     
-    NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    # NUM_SHOTS=5short
+    # FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    # FILE=$FOLDER/metrics.json
+    # echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-    if [ ! -f "$FILE" ]; then
-        # 5-shot
-        python3 -m eval.boolq.run_eval \
-            --ntrain 5 \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-    fi
+    # if [ ! -f "$FILE" ]; then
+    #     # 5-shot
+    #     python3 -m eval.boolq.run_eval \
+    #         --ntrain 5 \
+    #         --save_dir $FOLDER \
+    #         --model_name_or_path $model_name_or_path \
+    #         --tokenizer_name_or_path $model_name_or_path \
+    #         --eval_batch_size 1 \
+    #         --use_chat_format \
+    #         --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    # fi
 done
 
 # -------------------------------------------------------------
@@ -76,20 +76,20 @@ for model_name_or_path in "${model_names[@]}"; do
 
     fi
     
-    NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name_or_path}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    # NUM_SHOTS=5short
+    # FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    # FILE=$FOLDER/metrics.json
+    # echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-    if [ ! -f "$FILE" ]; then
-        # 5-shot
-        python3 -m eval.boolq.run_translated_eval \
-            --ntrain 5 \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-    fi
+    # if [ ! -f "$FILE" ]; then
+    #     # 5-shot
+    #     python3 -m eval.boolq.run_translated_eval \
+    #         --ntrain 5 \
+    #         --save_dir $FOLDER \
+    #         --model_name_or_path $model_name_or_path \
+    #         --tokenizer_name_or_path $model_name_or_path \
+    #         --eval_batch_size 1 \
+    #         --use_chat_format \
+    #         --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+    # fi
 done
