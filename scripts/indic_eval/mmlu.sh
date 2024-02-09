@@ -22,7 +22,7 @@ for model_name_or_path in "${model_names[@]}"; do
         # zero-shot
         python3 -m eval.mmlu.run_eval_exact \
             --ntrain 0 \
-            --data_dir data/eval/mmlu_hi_translated_exact \
+            --data_dir data/eval/mmlu_hi_translated \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
@@ -84,53 +84,6 @@ for model_name_or_path in "${model_names[@]}"; do
     #     python3 -m eval.mmlu.run_eval \
     #         --ntrain 5 \
     #         --data_dir data/eval/mmlu_hi_translated \
-    #         --save_dir $FOLDER \
-    #         --model_name_or_path $model_name_or_path \
-    #         --tokenizer_name_or_path $model_name_or_path \
-    #         --eval_batch_size 1 \
-    #         --use_chat_format \
-    #         --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-    # fi
-done
-
-# -------------------------------------------------------------
-#                       MMLU
-# -------------------------------------------------------------
-
-
-
-
-for model_name_or_path in "${model_names[@]}"; do
-    model_name=${model_name_or_path##*/}
-    TASK_NAME=mmlu
-    NUM_SHOTS=0short
-    
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-
-    if [ ! -f "$FILE" ]; then
-        # zero-shot
-        python3 -m eval.mmlu.run_eval \
-            --ntrain 0 \
-            --data_dir data/eval/mmlu \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 4 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-
-    fi
-
-    # NUM_SHOTS=5short
-    # FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    # FILE=$FOLDER/metrics.json
-
-    # if [ ! -f "$FILE" ]; then
-    #     # 5-shot
-    #     python3 -m eval.mmlu.run_eval \
-    #         --ntrain 5 \
-    #         --data_dir data/eval/mmlu \
     #         --save_dir $FOLDER \
     #         --model_name_or_path $model_name_or_path \
     #         --tokenizer_name_or_path $model_name_or_path \
