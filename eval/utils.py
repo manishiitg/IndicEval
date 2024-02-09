@@ -144,6 +144,7 @@ def get_next_word_predictions(
 
     for i in range(0, len(prompts), batch_size):
         batch_prompts = prompts[i : i + batch_size]
+        print("batch_prompts", batch_prompts)
         tokenized_prompts = tokenizer(
             batch_prompts,
             padding="longest",
