@@ -29,8 +29,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq \
-            --use_vllm
+            --awq "true" \
+            --use_vllm "true"
     fi
 
     # NUM_SHOTS=5short
