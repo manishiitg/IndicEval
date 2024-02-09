@@ -8,11 +8,13 @@ import json
 from tqdm import tqdm
 import time
 from eval.mmlu.categories import subcategories, categories
-from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function
+from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function, generate_completions
 from datasets import load_dataset
-
+import vllm
+import evaluate
 choices = ["1", "2", "3", "4"]
-
+exact_match = evaluate.load("exact_match")
+from transformers import AutoTokenizer
 
 def format_subject(subject):
     l = subject.split("_")
@@ -45,8 +47,12 @@ def gen_prompt(train_df, subject, k=-1):
 
 
 @torch.no_grad()
-def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1):
+def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
     prompts = []
+    tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            "slow" if args.use_slow_tokenizer else "auto",
+        )
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
     for i in tqdm(range(0, test_df.shape[0])):
         k = args.ntrain
@@ -75,29 +81,90 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         
         prompts.append(prompt)
 
-    # get the answer for all examples
-    # adding a prefix space here, as that's expected from the prompt
-    # TODO: should raise a warning if this returns more than one token
-    answer_choice_ids = [tokenizer.encode(" " + answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
-    pred_indices, all_probs = get_next_word_predictions(
-        model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
-    )
+    if args.model_name_or_path:
+        print("Loading model and tokenizer...")
+        if args.use_vllm:
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                max_num_batched_tokens=4096,
+            )
+            sampling_params = vllm.SamplingParams(
+                temperature=0,
+                max_tokens=512,
+                stop=["\n"],
+            )
+            # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+            generations = model.generate(prompts, sampling_params)
+            prompt_to_output = {
+                g.prompt: g.outputs[0].text for g in generations
+            }
+            outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
+        else:
+            model, tokenizer = load_hf_lm_and_tokenizer(
+                model_name_or_path=args.model_name_or_path, 
+                tokenizer_name_or_path=args.tokenizer_name_or_path, 
+                load_in_8bit=args.load_in_8bit, 
+                device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+                gptq_model=args.gptq,
+                use_fast_tokenizer=not args.use_slow_tokenizer,
+            )
+            new_line_token = tokenizer.encode("\n", add_special_tokens=False)[-1] # get the last token because the tokenizer may add space tokens at the start.
+            outputs = generate_completions(
+                model=model,
+                tokenizer=tokenizer,
+                prompts=prompts,
+                max_new_tokens=512,
+                batch_size=args.eval_batch_size,
+                stop_id_sequences=[[new_line_token]],
+                do_sample=False,
+            )
+    else:
+        instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
+        results = query_openai_chat_model(
+            engine=args.openai_engine,
+            instances=instances,
+            batch_size=args.eval_batch_size if args.eval_batch_size else 10,
+            output_path=os.path.join(args.save_dir, f"openai_results.jsonl"),
+        )
+        outputs = [result["output"] for result in results]
     
 
-    # get the metrics
-    cors = []
-    groud_truths = test_df.iloc[:, -1].values
-    for i in range(len(pred_indices)):
-        prediction = choices[pred_indices[i]]
-        ground_truth = groud_truths[i]
-        cors.append(prediction == ground_truth)
-    
-    acc = np.mean(cors)
-    cors = np.array(cors)
+    def extract_answer(row):
+        choices = row['choices'].split('\n')
+        answer_index = int(row['answer'])  # Adjust for zero-based indexing
+        if answer_index < len(choices):
+            return choices[answer_index].strip()  # Remove the number and the bracket
+        else:
+            return None  # Or handle the case where the answer index is out of range
 
-    all_probs = np.array(all_probs)
-    print("Average accuracy {:.3f} - {}".format(acc, subject))
-    return cors, acc, all_probs
+    # Apply the function to each row of the DataFrame
+    test_df['answer_text'] = test_df.apply(extract_answer, axis=1)
+
+    targets = test_df['answer_text'].tolist()
+
+    em_score = exact_match.compute(predictions=outputs, references=targets, ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match : {em_score}")
+
+    predictions = [{
+        "question": example["question"],
+        "answer": example["answer_text"],
+        "model_output": output,
+        "prediction": pred
+    } for example, output, pred in zip(test_df, outputs, predictions)]
+
+    with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
+        for prediction in predictions:
+            fout.write(json.dumps(prediction) + "\n") 
+    
+    with open(os.path.join(args.save_dir, f"metrics-{subject}.json"), "w") as fout:
+        json.dump({
+            "exact_match": em_score
+        }, fout, indent=4)
+
+    return em_score
 
 
 def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1):
@@ -141,17 +208,6 @@ def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1
     return cors, acc, all_probs
 
 def main(args):
-
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path, 
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit, 
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-            use_fast_tokenizer=not args.use_slow_tokenizer,
-        )
     
     if args.data_dir == "data/eval/mmlu_hi_translated":
         ds = load_dataset("manishiitg/cais-mmlu", split="test")
@@ -165,6 +221,8 @@ def main(args):
         for row in ds:
             subjects.append(row["subject"])
         subjects = list(set(subjects))
+
+    ds = ds.select(range(100))
 
     if args.subjects:
         assert all(subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -197,23 +255,23 @@ def main(args):
             test_df = test_df.sample(args.n_instances, random_state=42)
 
         if args.model_name_or_path:
-            cors, acc, probs = eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, args.eval_batch_size)
+            em_score = eval_hf_model(args, subject, dev_df, test_df, args.eval_batch_size)
         else:
-            cors, acc, probs = eval_openai_chat_engine(args, subject, args.openai_engine, dev_df, test_df, args.eval_batch_size)
-            
+            raise Exception("unsupported flow")    
+        
         subcats = subcategories[subject]
         for subcat in subcats:
-            subcat_cors[subcat].append(cors)
+            subcat_cors[subcat].append(em_score)
             for key in categories.keys():
                 if subcat in categories[key]:
-                    cat_cors[key].append(cors)
-        all_cors.append(cors)
+                    cat_cors[key].append(em_score)
+        all_cors.append(em_score)
 
-        test_df["correct"] = cors
-        for j in range(probs.shape[1]):
-            choice = choices[j]
-            test_df["choice{}_probs".format(choice)] = probs[:, j]
-        test_df.to_csv(os.path.join(args.save_dir, "{}.csv".format(subject)), index=None)
+        # test_df["correct"] = cors
+        # for j in range(probs.shape[1]):
+        #     choice = choices[j]
+        #     test_df["choice{}_probs".format(choice)] = probs[:, j]
+        # test_df.to_csv(os.path.join(args.save_dir, "{}.csv".format(subject)), index=None)
 
     # In IndicMMLU, we exclude math specific subjects where the translation outputs are not good.
     idxs = []
@@ -327,6 +385,11 @@ if __name__ == "__main__":
         type=str, 
         default="eval.templates.create_prompt_with_tulu_chat_format", 
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`."
+    )
+    parser.add_argument(
+        "--use_vllm",
+        action="store_true", 
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
 
