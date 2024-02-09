@@ -164,6 +164,7 @@ def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
+            print("prediction", prediction)
             fout.write(json.dumps(prediction) + "\n") 
     
     with open(os.path.join(args.save_dir, f"metrics-{subject}.json"), "w") as fout:
@@ -229,8 +230,6 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
-    ds = ds.select(range(100))
-
     if args.subjects:
         assert all(subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
         subjects = args.subjects
@@ -254,7 +253,7 @@ def main(args):
             # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
             # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
             dev_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="dev", trust_remote_code=True))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))[:10]
         # except:
         #     continue
         
