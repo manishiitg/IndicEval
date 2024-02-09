@@ -51,6 +51,7 @@ def main(args):
             load_in_8bit=args.load_in_8bit,
             device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
             gptq_model=args.gptq,
+            awq_model=args.awq,
         )
 
     if not os.path.exists(args.save_dir):
@@ -72,10 +73,6 @@ def main(args):
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            # if prompt[-1] in ["\n", " "]:
-            #     prompt += "The answer is: "
-            # else:
-            #     prompt += " The answer is: "
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -91,10 +88,6 @@ def main(args):
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                # if prompt[-1] in ["\n", " "]:
-                #     prompt += "The answer is: "
-                # else:
-                #     prompt += " The answer is: "
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
@@ -108,7 +101,7 @@ def main(args):
         model,
         tokenizer,
         prompts,
-        candidate_token_ids=answer_choice_ids,
+        candidate_token_ids=None,
         return_token_predictions=False,
         batch_size=args.eval_batch_size,
     )
@@ -168,6 +161,11 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     main(args)

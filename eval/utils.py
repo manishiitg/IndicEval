@@ -60,9 +60,9 @@ def generate_completions(
         batch_input_ids = tokenized_prompts.input_ids
         attention_mask = tokenized_prompts.attention_mask
 
-        if model.device.type == "cuda":
-            batch_input_ids = batch_input_ids.cuda()
-            attention_mask = attention_mask.cuda()
+        # if model.device.type == "cuda":
+        batch_input_ids = batch_input_ids.cuda()
+        attention_mask = attention_mask.cuda()
 
         try:
             batch_outputs = model.generate(
@@ -144,6 +144,7 @@ def get_next_word_predictions(
 
     for i in range(0, len(prompts), batch_size):
         batch_prompts = prompts[i : i + batch_size]
+        print("batch_prompts", batch_prompts)
         tokenized_prompts = tokenizer(
             batch_prompts,
             padding="longest",
@@ -153,14 +154,13 @@ def get_next_word_predictions(
         batch_input_ids = tokenized_prompts.input_ids
         attention_mask = tokenized_prompts.attention_mask
 
-        if model.device.type == "cuda":
-            batch_input_ids = batch_input_ids.cuda()
-            attention_mask = attention_mask.cuda()
+        # if model.device.type == "cuda":
+        batch_input_ids = batch_input_ids.cuda()
+        attention_mask = attention_mask.cuda()
 
         batch_logits = model(input_ids=batch_input_ids, attention_mask=attention_mask).logits[
             :, -1, :
         ]
-        
         batch_probs = torch.softmax(batch_logits, dim=-1)
         if candidate_token_ids is not None:
             batch_probs = batch_probs[:, candidate_token_ids]
@@ -242,10 +242,17 @@ def load_hf_lm_and_tokenizer(
     gptq_model=False,
     use_fast_tokenizer=True,
     padding_side="left",
+    awq_model=False,
 ):
     from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM
 
-    if gptq_model:
+    if awq_model:
+        from awq import AutoAWQForCausalLM
+
+        model = AutoAWQForCausalLM.from_quantized(model_name_or_path, fuse_layers=True)
+        # model = model_wrapper.model
+        
+    elif gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
         model_wrapper = AutoGPTQForCausalLM.from_quantized(

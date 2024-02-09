@@ -102,7 +102,7 @@ def main(args):
         model,
         tokenizer,
         prompts,
-        candidate_token_ids=answer_choice_ids,
+        candidate_token_ids=None,
         return_token_predictions=False,
         batch_size=args.eval_batch_size,
     )

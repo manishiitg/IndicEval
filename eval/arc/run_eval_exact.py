@@ -15,6 +15,10 @@ from eval.utils import (
     load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 choices = ["A", "B", "C", "D", "E"]
 num_to_letter = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
@@ -41,20 +45,105 @@ def gen_prompt(dev_data, k=-1):
             )
     return prompt
 
+@torch.no_grad()
+def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
+    def extract_answer(row):
+        choices = row['choices']
+        answerKey = row['answerKey']
+        answerStr = ""
+        for idx, l in enumerate(choices["label"]):
+            if l == answerKey:
+                answerStr = l + ". " + choices["text"][idx]
+
+        row["answer_text"] = answerStr
+        return row
+
+    # Apply the function to each row of the DataFrame
+    test_data = test_data.map(extract_answer)
+
+    targets = test_data['answer_text']
+
+    em_score = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    
+    print(f"Exact match : {em_score}")
+
+    predictions = []
+    idx = 0
+    for row in test_data:
+        row = {
+            "question": row["question"],
+            "id": row["id"],
+            "model_output": outputs[idx],
+            "prediction": targets[idx]
+        }
+        predictions.append(row)
+        idx += 1
+
+    with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
+        for prediction in predictions:
+            fout.write(json.dumps(prediction) + "\n")
+
+    with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
+        json.dump({
+            "exact_match": em_score
+        }, fout, indent=4)
+
+    return em_score
 
 def main(args):
     random.seed(args.seed)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-            awq_model=True,
-        )
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.use_vllm:
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+    else:
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path,
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
+        #     load_in_8bit=args.load_in_8bit,
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -93,48 +182,9 @@ def main(args):
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
-
-    # get the answer for all examples
-    # adding a prefix space here, as that's expected from the prompt
-    # TODO: should raise a warning if this returns more than one token
-    # Label space is different for different examples so need to individually
-    # run the likelihood for each example
-    # answer_choice_ids = [
-    #     tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in answer_choices
-    # ]
-    pred_indices = []
-    for prompt, example in tqdm(zip(prompts, test_data)):
-        answer_choices = choices
-        if len(example["choices"]["label"]) == 4:
-            answer_choices = answer_choices[:4]
-
         
-        pred_index, all_prob = get_next_word_predictions(
-            model,
-            tokenizer,
-            [prompt],
-            candidate_token_ids=None,
-            return_token_predictions=False,
-            disable_tqdm=True,
-        )
-        pred_indices.append(pred_index[0])
-
-    # get the metrics
-    ground_truths = [num_to_letter.get(example["answerKey"], example["answerKey"]) for example in test_data]
-    ground_truths = [choices.index(ground_truth) for ground_truth in ground_truths]
-    predictions = [pred_index for pred_index in pred_indices]
-    metrics = {
-        "accuracy": accuracy_score(ground_truths, predictions),
-        "precision": precision_score(ground_truths, predictions, average="macro"),
-        "recall": recall_score(ground_truths, predictions, average="macro"),
-        "f1": f1_score(ground_truths, predictions, average="macro"),
-    }
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
-
-    # save results
-    with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-        json.dump(metrics, fout, indent=4)
+    em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
+    print("Em Score", em_score)
 
 
 if __name__ == "__main__":
@@ -182,6 +232,11 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--use_vllm",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     parser.add_argument(
         "--awq",

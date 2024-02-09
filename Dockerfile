@@ -1,16 +1,11 @@
-# This dockerfile is forked from ai2/cuda11.8-cudnn8-dev-ubuntu20.04
-FROM gcr.io/ai2-beaker-core/public/cjvktq5s0r0fr8pb7470:latest
-
-RUN apt update && apt install -y openjdk-8-jre-headless
-
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
-RUN apt-get -y install git-lfs
+FROM vllm/vllm-openai:latest
 
 WORKDIR /stage/
-
+ENV PIP_ROOT_USER_ACTION=ignore
+RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 RUN pip install packaging
 RUN pip install flash-attn --no-build-isolation
 RUN pip install -r requirements.txt

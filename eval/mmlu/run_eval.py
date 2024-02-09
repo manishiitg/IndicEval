@@ -11,7 +11,7 @@ from eval.mmlu.categories import subcategories, categories
 from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function
 from datasets import load_dataset
 
-choices = ["1", "2", "3", "4"]
+choices = ["0", "1", "2", "3"]
 
 
 def format_subject(subject):
@@ -57,10 +57,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            # if prompt[-1] in ["\n", " "]:
-            #     prompt += "The answer is:"
-            # else:
-            #     prompt += " The answer is:"
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -74,10 +70,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                # if prompt[-1] in ["\n", " "]:
-                #     prompt += "The answer is:"
-                # else:
-                #     prompt += " The answer is:"
                     
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         
@@ -86,9 +78,12 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
     # TODO: should raise a warning if this returns more than one token
-    answer_choice_ids = [tokenizer.encode(" " + answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
+    # answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
+    import random
+    random.shuffle(prompts)
+    groud_truths = test_df.iloc[:, -1].values
     pred_indices, all_probs = get_next_word_predictions(
-        model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
+        model, tokenizer, prompts, candidate_token_ids=None, return_token_predictions=False, batch_size=batch_size, add_special_tokens=False,
     )
     
 
@@ -107,46 +102,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     print("Average accuracy {:.3f} - {}".format(acc, subject))
     return cors, acc, all_probs
 
-
-def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1):
-    
-    import tiktoken
-    gpt_tokenizer = tiktoken.get_encoding("cl100k_base")
-    answer_choice_ids = [gpt_tokenizer.encode(" " + x)[0] for x in choices]  # be careful, the tokenizer will tokenize " A" and "A" differently.
-
-    prompts = []
-    for i in range(0, test_df.shape[0]):
-        k = args.ntrain
-        prompt_end = format_example(test_df, i, include_answer=False)
-        train_prompt = gen_prompt(dev_df, subject, k)
-        prompt = train_prompt + prompt_end        
-        prompts.append(prompt)
-
-    instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
-    results = query_openai_chat_model(
-        engine=args.openai_engine,
-        instances=instances,
-        batch_size=args.eval_batch_size if args.eval_batch_size else 10,
-        output_path=os.path.join(args.save_dir, f"{subject}_openai_results.jsonl"),
-        logit_bias={token_id: 100 for token_id in answer_choice_ids},
-        max_tokens=1,
-    )
-    
-    # get the metrics
-    cors = []
-    groud_truths = test_df.iloc[:, -1].values
-    for i in range(len(test_df)):
-        prediction = results[i]["output"].strip()
-        ground_truth = groud_truths[i]
-        cors.append(prediction == ground_truth)
-        
-    acc = np.mean(cors)
-    cors = np.array(cors)
-
-    all_probs = np.array([[0.25, 0.25, 0.25, 0.25] for _ in range(len(test_df))]) # dummy probs, just don't want to dig into the openai probs
-
-    print("Average accuracy {:.3f} - {}".format(acc, subject))
-    return cors, acc, all_probs
 
 def main(args):
 
@@ -168,14 +123,7 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
     else:
-        # subjects = sorted(
-        #     [
-        #         f.split("_test.csv")[0]
-        #         for f in os.listdir(os.path.join(args.data_dir, "test"))
-        #         if "_test.csv" in f
-        #     ]
-        # )
-        ds = load_dataset("cais/mmlu", split="test", config="all")
+        ds = load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True)
         subjects = []
         for row in ds:
             subjects.append(row["subject"])
@@ -199,12 +147,11 @@ def main(args):
         # try:
         if args.data_dir == "data/eval/mmlu_hi_translated":
             dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+            test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test").filter(lambda x: x["subject"] == subject))
         else:
-            # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-            dev_df = pd.DataFrame(load_dataset("cais/mmlu", split="dev"))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", split="test"))
+            # dev_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="dev"))[: args.ntrain]
+            # test_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="test"))
+            raise Exception("unsupported")
         # except:
         #     continue
         
@@ -214,7 +161,7 @@ def main(args):
         if args.model_name_or_path:
             cors, acc, probs = eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, args.eval_batch_size)
         else:
-            cors, acc, probs = eval_openai_chat_engine(args, subject, args.openai_engine, dev_df, test_df, args.eval_batch_size)
+            raise Exception("unsupported")
             
         subcats = subcategories[subject]
         for subcat in subcats:
