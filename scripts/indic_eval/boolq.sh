@@ -14,7 +14,7 @@ FOLDER_BASE=/sky-notebook/eval-results
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=boolq-hi
+    TASK_NAME=boolq-hi-exact
     NUM_SHOTS=0short
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
