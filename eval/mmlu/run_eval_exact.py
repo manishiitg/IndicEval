@@ -222,7 +222,7 @@ def main(args):
         # except:
         #     continue
 
-        # args.n_instances = 10
+        args.n_instances = 200
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
