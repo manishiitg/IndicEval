@@ -219,7 +219,7 @@ def main(args):
                 tensor_parallel_size=torch.cuda.device_count(),
                 # max_num_batched_tokens=4096,
                 quantization="AWQ",
-                max_seq_len=4096,
+                max_model_len=4096,
             )
         else:
             print("Loading model and tokenizer vllm...")
@@ -229,7 +229,7 @@ def main(args):
                 tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
                 tensor_parallel_size=torch.cuda.device_count(),
                 # max_num_batched_tokens=4096,
-                max_seq_len=4096,
+                max_model_len=4096,
             )
     else:
         # print("Loading model and tokenizer hf...")
