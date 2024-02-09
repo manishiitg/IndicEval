@@ -100,46 +100,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     return cors, acc, all_probs
 
 
-def eval_openai_chat_engine(args, subject, engine, dev_df, test_df, batch_size=1):
-    
-    import tiktoken
-    gpt_tokenizer = tiktoken.get_encoding("cl100k_base")
-    answer_choice_ids = [gpt_tokenizer.encode(" " + x)[0] for x in choices]  # be careful, the tokenizer will tokenize " A" and "A" differently.
-
-    prompts = []
-    for i in range(0, test_df.shape[0]):
-        k = args.ntrain
-        prompt_end = format_example(test_df, i, include_answer=False)
-        train_prompt = gen_prompt(dev_df, subject, k)
-        prompt = train_prompt + prompt_end        
-        prompts.append(prompt)
-
-    instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
-    results = query_openai_chat_model(
-        engine=args.openai_engine,
-        instances=instances,
-        batch_size=args.eval_batch_size if args.eval_batch_size else 10,
-        output_path=os.path.join(args.save_dir, f"{subject}_openai_results.jsonl"),
-        logit_bias={token_id: 100 for token_id in answer_choice_ids},
-        max_tokens=1,
-    )
-    
-    # get the metrics
-    cors = []
-    groud_truths = test_df.iloc[:, -1].values
-    for i in range(len(test_df)):
-        prediction = results[i]["output"].strip()
-        ground_truth = groud_truths[i]
-        cors.append(prediction == ground_truth)
-        
-    acc = np.mean(cors)
-    cors = np.array(cors)
-
-    all_probs = np.array([[0.25, 0.25, 0.25, 0.25] for _ in range(len(test_df))]) # dummy probs, just don't want to dig into the openai probs
-
-    print("Average accuracy {:.3f} - {}".format(acc, subject))
-    return cors, acc, all_probs
-
 def main(args):
 
     if args.model_name_or_path:

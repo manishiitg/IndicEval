@@ -126,7 +126,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
-            print("prediction", prediction)
             fout.write(json.dumps(prediction) + "\n")
 
     with open(os.path.join(args.save_dir, f"metrics-{subject}.json"), "w") as fout:
@@ -152,7 +151,7 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
-        subject = subject[:2] ##test
+    subject = subject[:2] ##test
 
     if args.subjects:
         assert all(
@@ -206,22 +205,17 @@ def main(args):
 
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
 
-        # try:
         if args.data_dir == "data/eval/mmlu_hi_translated":
             dev_df = pd.DataFrame(load_dataset(
                 "manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset(
                 "manishiitg/cais-mmlu", split="test"))
         else:
-            # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
             dev_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="dev", trust_remote_code=True))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="test", trust_remote_code=True))
-        # except:
-        #     continue
-
+        
         args.n_instances = 200
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
