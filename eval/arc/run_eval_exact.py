@@ -62,12 +62,12 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     def extract_answer(row):
-        choices = row['choices']["text"]
+        choices = row['choices']
         answerKey = row['answerKey']
         answerStr = ""
         for idx, l in enumerate(choices["label"]):
             if l == answerKey:
-                answerStr = l + ". " + choices[idx]
+                answerStr = l + ". " + choices["text"][idx]
 
         row["answer_text"] = answerStr
         return row
