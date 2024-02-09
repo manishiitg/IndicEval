@@ -53,6 +53,7 @@ def main(args):
             load_in_8bit=args.load_in_8bit,
             device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
             gptq_model=args.gptq,
+            awq_model=True,
         )
 
     if not os.path.exists(args.save_dir):
@@ -74,11 +75,7 @@ def main(args):
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            # if prompt[-1] in ["\n", " "]:
-            #     prompt += "The answer is: "
-            # else:
-            #     prompt += " The answer is: "
-
+            
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
         include_prompt = True
@@ -93,10 +90,6 @@ def main(args):
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                # if prompt[-1] in ["\n", " "]:
-                #     prompt += "The answer is: "
-                # else:
-                #     prompt += " The answer is: "
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
@@ -106,15 +99,16 @@ def main(args):
     # TODO: should raise a warning if this returns more than one token
     # Label space is different for different examples so need to individually
     # run the likelihood for each example
+    # answer_choice_ids = [
+    #     tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in answer_choices
+    # ]
     pred_indices = []
     for prompt, example in tqdm(zip(prompts, test_data)):
         answer_choices = choices
         if len(example["choices"]["label"]) == 4:
             answer_choices = answer_choices[:4]
 
-        answer_choice_ids = [
-            tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in answer_choices
-        ]
+        
         pred_index, all_prob = get_next_word_predictions(
             model,
             tokenizer,
