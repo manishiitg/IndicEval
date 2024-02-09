@@ -176,7 +176,7 @@ def get_next_word_predictions(
         print("batch_prediction_indices", batch_prediction_indices)
         xx = tokenizer.convert_ids_to_tokens(batch_prediction_indices)
         print("xx", xx)
-        os.exit(1)
+        # os.exit(1)
         if return_token_predictions:
             if candidate_token_ids is not None:
                 candidate_tokens = tokenizer.convert_ids_to_tokens(candidate_token_ids)
