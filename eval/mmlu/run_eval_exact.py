@@ -151,6 +151,7 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
+    subjects = subjects[:2]
 
     if args.subjects:
         assert all(
@@ -240,7 +241,7 @@ def main(args):
     for subcat in subcat_cors:
         if len(subcat_cors[subcat]) > 0:
             try:
-                subcat_acc = np.mean(np.concatenate(subcat_cors[subcat]))
+                subcat_acc = np.mean(subcat_cors[subcat])
                 print("Average accuracy {:.3f} - {}".format(subcat_acc, subcat))
             except:
                 idxs.append(subcat)
@@ -250,9 +251,9 @@ def main(args):
 
     for cat in cat_cors:
         if len(cat_cors[cat]) > 0:
-            cat_acc = np.mean(np.concatenate(cat_cors[cat]))
+            cat_acc = np.mean(cat_cors[cat])
             print("Average accuracy {:.3f} - {}".format(cat_acc, cat))
-    weighted_acc = np.mean(np.concatenate(all_cors))
+    weighted_acc = np.mean(all_cors)
     print("Average accuracy: {:.3f}".format(weighted_acc))
 
     # save results
