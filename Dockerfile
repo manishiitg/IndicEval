@@ -2,7 +2,7 @@ FROM vllm/vllm-openai:latest
 
 WORKDIR /stage/
 ENV PIP_ROOT_USER_ACTION=ignore
-
+RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
 # RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
