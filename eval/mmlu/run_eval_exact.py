@@ -88,13 +88,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     prompt_to_output = {
         g.prompt: g.outputs[0].text for g in generations
     }
-    for p, v in prompt_to_output.items():
-        print("p", p)
-        print("v", v)
-        print("----")
-
     outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
-    os.exit(1)
     
 
     def extract_answer(row):
@@ -113,7 +107,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     em_score = exact_match.compute(predictions=outputs, references=targets, ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match : {em_score}")
 
-    for example, output, pred in zip(test_df.to_dict(), outputs, outputs):
+    print(test_df.to_dict())
+    for example, output, pred in zip(test_df.to_dict(), outputs, targets):
         print("example" ,example)
         print("output", output)
         print("pred", pred)
@@ -123,7 +118,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         "answer": example["answer_text"],
         "model_output": output,
         "prediction": pred
-    } for example, output, pred in zip(test_df.to_dict(), outputs, outputs)]
+    } for example, output, pred in zip(test_df.to_dict(), outputs, targets)]
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
