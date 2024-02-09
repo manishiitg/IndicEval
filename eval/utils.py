@@ -249,7 +249,7 @@ def load_hf_lm_and_tokenizer(
     if awq_model:
         from awq import AutoAWQForCausalLM
 
-        model = AutoAWQForCausalLM.from_quantized(model_name_or_path, fuse_layers=True)
+        model = AutoAWQForCausalLM.from_quantized(model_name_or_path + "-awq", fuse_layers=True)
     elif gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
