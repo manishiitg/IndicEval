@@ -184,12 +184,11 @@ def main(args):
         # try:
         if args.data_dir == "data/eval/mmlu_hi_translated":
             dev_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test"))
+            test_df = pd.DataFrame(load_dataset("manishiitg/cais-mmlu", split="test").filter(lambda x: x["subject"] == subject))
         else:
-            # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
-            # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-            dev_df = pd.DataFrame(load_dataset("cais/mmlu", split="dev"))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", split="test"))
+            # dev_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="dev"))[: args.ntrain]
+            # test_df = pd.DataFrame(load_dataset("cais/mmlu", subject, split="test"))
+            raise Exception("unsupported")
         # except:
         #     continue
         
@@ -199,7 +198,7 @@ def main(args):
         if args.model_name_or_path:
             cors, acc, probs = eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, args.eval_batch_size)
         else:
-            cors, acc, probs = eval_openai_chat_engine(args, subject, args.openai_engine, dev_df, test_df, args.eval_batch_size)
+            raise Exception("unsupported")
             
         subcats = subcategories[subject]
         for subcat in subcats:
