@@ -233,21 +233,24 @@ def main(args):
                     cat_cors[key].append(em_score)
         all_cors.append(em_score)
 
+    print("subcat_cors", subcat_cors)
     # In IndicMMLU, we exclude math specific subjects where the translation outputs are not good.
     idxs = []
     for subcat in subcat_cors:
-        try:
-            subcat_acc = np.mean(np.concatenate(subcat_cors[subcat]))
-            print("Average accuracy {:.3f} - {}".format(subcat_acc, subcat))
-        except:
-            idxs.append(subcat)
+        if len(subcat_cors[subcat]) > 0:
+            try:
+                subcat_acc = np.mean(np.concatenate(subcat_cors[subcat]))
+                print("Average accuracy {:.3f} - {}".format(subcat_acc, subcat))
+            except:
+                idxs.append(subcat)
 
-    for idx in idxs:
-        del subcat_cors[idx]
+    # for idx in idxs:
+    #     del subcat_cors[idx]
 
     for cat in cat_cors:
-        cat_acc = np.mean(np.concatenate(cat_cors[cat]))
-        print("Average accuracy {:.3f} - {}".format(cat_acc, cat))
+        if len(cat_cors[cat]) > 0:
+            cat_acc = np.mean(np.concatenate(cat_cors[cat]))
+            print("Average accuracy {:.3f} - {}".format(cat_acc, cat))
     weighted_acc = np.mean(np.concatenate(all_cors))
     print("Average accuracy: {:.3f}".format(weighted_acc))
 
