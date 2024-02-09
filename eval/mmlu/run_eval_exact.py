@@ -152,6 +152,8 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
+        subject = subject[:2] ##test
+
     if args.subjects:
         assert all(
             subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -220,7 +222,7 @@ def main(args):
         # except:
         #     continue
 
-        args.n_instances = 10
+        # args.n_instances = 10
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
