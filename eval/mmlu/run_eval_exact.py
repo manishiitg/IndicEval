@@ -150,9 +150,7 @@ def main(args):
         for row in ds:
             subjects.append(row["subject"])
         subjects = list(set(subjects))
-
-    subjects = subjects[:2]
-
+        
     if args.subjects:
         assert all(
             subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
