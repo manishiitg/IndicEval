@@ -76,17 +76,18 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         
         prompts.append(prompt)
-        sampling_params = vllm.SamplingParams(
-            temperature=0,
-            max_tokens=512,
-            stop=["\n"],
-        )
-        # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
-        generations = model.generate(prompts, sampling_params)
-        prompt_to_output = {
-            g.prompt: g.outputs[0].text for g in generations
-        }
-        outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
+        
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["\n"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text for g in generations
+    }
+    outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
         
     
 
