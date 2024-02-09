@@ -118,12 +118,14 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     predictions = []
     idx = 0
     for index, row in test_df.iterrows():
-        predictions.append({
+        row = {
             "question": row["question"],
             "subject": subject,
             "model_output": outputs[idx],
             "prediction": targets[idx]
-        })
+        }
+        predictions.append(row)
+        print(row)
         idx += 1
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
