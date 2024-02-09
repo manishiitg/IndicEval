@@ -195,7 +195,8 @@ def main(args):
     }
     cat_cors = {cat: [] for cat in categories}
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-    
+
+    print(args)
 
     if args.use_vllm:
         if args.awq:
@@ -218,7 +219,7 @@ def main(args):
                 max_num_batched_tokens=4096,
             )
     else:
-        print("Loading model and tokenizer vllm hf...")
+        print("Loading model and tokenizer hf...")
         model, tokenizer = load_hf_lm_and_tokenizer(
             model_name_or_path=args.model_name_or_path, 
             tokenizer_name_or_path=args.tokenizer_name_or_path, 
