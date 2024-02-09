@@ -15,6 +15,10 @@ from eval.utils import (
     load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 choices = ["A", "B"]
 choices_map = {True: "A", False: "B"}
@@ -110,7 +114,7 @@ def main(args):
         if args.awq:
             print("Loading model and tokenizer vllm awq...")
             model = vllm.LLM(
-                model=args.model_name_or_path + "-awq",
+                model=args.model_name_or_path,
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
                 tokenizer_mode="auto",
                 tensor_parallel_size=torch.cuda.device_count(),

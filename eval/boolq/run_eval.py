@@ -51,6 +51,7 @@ def main(args):
             load_in_8bit=args.load_in_8bit,
             device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
             gptq_model=args.gptq,
+            awq_model=args.awq,
         )
 
     if not os.path.exists(args.save_dir):
@@ -160,6 +161,11 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     main(args)
