@@ -63,9 +63,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         answerStr = ""
         answer = row["answer"]
         if answer == "true":
-            answerStr = "A. true"
+            answerStr = "A. Yes"
         else:
-            answerStr = "B. false"
+            answerStr = "B. No"
         row["answer_text"] = answerStr
         return row
 
