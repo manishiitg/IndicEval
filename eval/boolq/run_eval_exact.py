@@ -20,29 +20,27 @@ import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
 
-choices = ["A", "B", "C", "D", "E"]
-num_to_letter = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
+choices = ["A", "B"]
+choices_map = {True: "A", False: "B"}
 
 
-def format_example(question, answers, label=None):
-    prompt = f"{question.strip()}\n"
-    for choice, answer in zip(choices, answers):
+def format_example(passage, question, label=None):
+    prompt = f"Passage: {passage}\nQuestion: {question.strip()}\n"
+    for choice, answer in zip(choices, ["Yes", "No"]):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
     if label is not None:
-        label = num_to_letter.get(label, label)
+        label = choices_map[label]
         prompt += " {label}\n\n".format(label=label)
     return prompt
 
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"The following are multiple choice questions (with answers) about science.\n\n"
+    prompt = f"The following are binary yes/no choice questions (with answers).\n\n"
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
-            prompt += format_example(
-                question=example["question"], answers=example["choices"]["text"], label=example["answerKey"]
-            )
+            prompt += format_example(passage=example["passage"], question=example["question"], label=example["answer"])
     return prompt
 
 @torch.no_grad()
@@ -62,13 +60,12 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     def extract_answer(row):
-        choices = row['choices']
-        answerKey = row['answerKey']
         answerStr = ""
-        for idx, l in enumerate(choices["label"]):
-            if l == answerKey:
-                answerStr = l + ". " + choices["text"][idx]
-
+        answer = row["answer"]
+        if answer == "true":
+            answerStr = "A. true"
+        else:
+            answerStr = "B. false"
         row["answer_text"] = answerStr
         return row
 
@@ -92,6 +89,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
             "prediction": targets[idx]
         }
         predictions.append(row)
+        print(row)
         idx += 1
 
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
@@ -150,21 +148,22 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset(args.dataset, f"ARC-{args.subset.capitalize()}")
-    dev_data = dataset["validation"]
-    test_data = dataset["test"]
+    dataset = load_dataset("boolq")
+    dev_data = dataset["train"]
+    test_data = dataset["validation"]
 
+    test_data = test_data.select(range(10))
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
-        prompt_end = format_example(question=example["question"], answers=example["choices"]["text"], label=None)
+        prompt_end = format_example(passage=example["passage"], question=example["question"], label=None)
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            
+
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
         include_prompt = True
@@ -179,10 +178,11 @@ def main(args):
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
+
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
-        
+
     em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
     print("Em Score", em_score)
 
@@ -191,9 +191,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--dataset", type=str, default="easy", choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
-    parser.add_argument("--subset", type=str, default="easy", choices=["easy", "challenge"])
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/mmlu/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/boolq/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -205,11 +203,6 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="if specified, we will load the tokenizer from here.",
-    )
-    parser.add_argument(
-        "--n_instances",
-        type=int,
-        help="if specified, a maximum of n_instances per subject will be used for the evaluation.",
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
     parser.add_argument(

@@ -152,7 +152,7 @@ def main(args):
         for row in ds:
             subjects.append(row["subject"])
         subjects = list(set(subjects))
-
+    
 
     if args.subjects:
         assert all(
