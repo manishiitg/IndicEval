@@ -163,10 +163,15 @@ def get_next_word_predictions(
         ]
         
         batch_probs = torch.softmax(batch_logits, dim=-1)
-        # if candidate_token_ids is not None:
-        #     batch_probs = batch_probs[:, candidate_token_ids]
-        print("batch_probs", batch_probs)
+        print("batch_probs before", batch_probs)
+        batch_prediction_indices = torch.argmax(batch_probs, dim=-1)
+        print("batch_prediction_indices before", batch_prediction_indices)
+        xx = tokenizer.convert_ids_to_tokens(batch_prediction_indices)
+        print("xx before", xx)
 
+        if candidate_token_ids is not None:
+            batch_probs = batch_probs[:, candidate_token_ids]
+        print("batch_probs after", batch_probs)
         batch_prediction_indices = torch.argmax(batch_probs, dim=-1)
         print("batch_prediction_indices", batch_prediction_indices)
         xx = tokenizer.convert_ids_to_tokens(batch_prediction_indices)
