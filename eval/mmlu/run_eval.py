@@ -79,6 +79,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     # adding a prefix space here, as that's expected from the prompt
     # TODO: should raise a warning if this returns more than one token
     answer_choice_ids = [tokenizer.encode(" " + answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
+    print("answer_choice_ids" , answer_choice_ids)
+    os.exit(1)
     pred_indices, all_probs = get_next_word_predictions(
         model, tokenizer, prompts, candidate_token_ids=answer_choice_ids, return_token_predictions=False, batch_size=batch_size
     )

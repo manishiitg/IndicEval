@@ -111,6 +111,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
 
     em_score = exact_match.compute(predictions=outputs, references=targets,
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
+    
     print(f"Exact match : {em_score}")
 
     predictions = []
