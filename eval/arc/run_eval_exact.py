@@ -91,7 +91,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
             "model_output": outputs[idx],
             "prediction": targets[idx]
         }
-        print("row", row)
         predictions.append(row)
         idx += 1
 
