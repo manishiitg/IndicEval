@@ -60,9 +60,9 @@ def generate_completions(
         batch_input_ids = tokenized_prompts.input_ids
         attention_mask = tokenized_prompts.attention_mask
 
-        if model.device.type == "cuda":
-            batch_input_ids = batch_input_ids.cuda()
-            attention_mask = attention_mask.cuda()
+        # if model.device.type == "cuda":
+        batch_input_ids = batch_input_ids.cuda()
+        attention_mask = attention_mask.cuda()
 
         try:
             batch_outputs = model.generate(

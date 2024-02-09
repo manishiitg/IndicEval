@@ -13,8 +13,9 @@ from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, quer
 from datasets import load_dataset
 import vllm
 import evaluate
-choices = ["1", "2", "3", "4"]
 exact_match = evaluate.load("exact_match")
+choices = ["1", "2", "3", "4"]
+
 
 
 def format_subject(subject):
