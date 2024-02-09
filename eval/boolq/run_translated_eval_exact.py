@@ -26,7 +26,7 @@ choices_map = {True: "A", False: "B"}
 
 def format_example(passage, question, label=None):
     prompt = f"Passage: {passage}\nQuestion: {question.strip()}\n"
-    for choice, answer in zip(choices, ["Yes", "No"]):
+    for choice, answer in zip(choices, ["हाँ", "नहीं"]):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
     if label is not None:
@@ -85,7 +85,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     idx = 0
     for row in test_data:
         row = {
-            "question": row["question"],
+            "question": row["itv2 hi passage"],
             "model_output": outputs[idx],
             "prediction": targets[idx]
         }
