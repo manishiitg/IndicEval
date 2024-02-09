@@ -234,6 +234,7 @@ def main(args):
         all_cors.append(em_score)
 
     print("subcat_cors", subcat_cors)
+    print("subcat_cors", cat_cors)
     # In IndicMMLU, we exclude math specific subjects where the translation outputs are not good.
     idxs = []
     for subcat in subcat_cors:
