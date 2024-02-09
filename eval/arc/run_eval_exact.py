@@ -155,6 +155,8 @@ def main(args):
     dev_data = dataset["validation"]
     test_data = dataset["test"]
 
+    test_data = test_data.select(range(10))
+
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
