@@ -166,6 +166,7 @@ def get_next_word_predictions(
             batch_probs = batch_probs[:, candidate_token_ids]
         batch_prediction_indices = torch.argmax(batch_probs, dim=-1)
         print("batch_prediction_indices", batch_prediction_indices)
+        os.exit(1)
         if return_token_predictions:
             if candidate_token_ids is not None:
                 candidate_tokens = tokenizer.convert_ids_to_tokens(candidate_token_ids)
