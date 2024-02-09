@@ -160,7 +160,7 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
     else:
-        ds = load_dataset("cais/mmlu", split="test", config="all")
+        ds = load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True)
         subjects = []
         for row in ds:
             subjects.append(row["subject"])
