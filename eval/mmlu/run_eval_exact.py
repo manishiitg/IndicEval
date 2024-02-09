@@ -84,13 +84,23 @@ def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
     if args.model_name_or_path:
         print("Loading model and tokenizer...")
         if args.use_vllm:
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                max_num_batched_tokens=4096,
-            )
+            if args.awq:
+                model = vllm.LLM(
+                    model=args.model_name_or_path + "-awq",
+                    tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                    tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
+                    tensor_parallel_size=torch.cuda.device_count(),
+                    max_num_batched_tokens=4096,
+                    quantization="AWQ",
+                )
+            else:
+                model = vllm.LLM(
+                    model=args.model_name_or_path,
+                    tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                    tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
+                    tensor_parallel_size=torch.cuda.device_count(),
+                    max_num_batched_tokens=4096,
+                )
             sampling_params = vllm.SamplingParams(
                 temperature=0,
                 max_tokens=512,
@@ -382,6 +392,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--use_vllm",
+        action="store_true", 
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+    )
+    parser.add_argument(
+        "--awq",
         action="store_true", 
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
