@@ -150,7 +150,8 @@ def main(args):
         for row in ds:
             subjects.append(row["subject"])
         subjects = list(set(subjects))
-        
+
+
     if args.subjects:
         assert all(
             subj in subjects for subj in args.subjects), f"Some of the subjects you specified are not valid: {args.subjects}"
@@ -207,7 +208,7 @@ def main(args):
             dev_df = pd.DataFrame(load_dataset(
                 "manishiitg/cais-mmlu", split="dev"))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset(
-                "manishiitg/cais-mmlu", split="test"))
+                "manishiitg/cais-mmlu", split="test").filter(lambda x: x["subject"] == subject))
         else:
             dev_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="dev", trust_remote_code=True))[: args.ntrain]
