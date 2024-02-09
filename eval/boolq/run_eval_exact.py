@@ -36,7 +36,7 @@ def format_example(passage, question, label=None):
 
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"The following are binary yes/no choice questions (with answers).\n\n"
+    prompt = f"निम्नलिखित द्विआधारी हाँ/नहीं विकल्प वाले प्रश्न हैं (उत्तर सहित)।\n\n"
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
