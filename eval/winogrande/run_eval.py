@@ -48,8 +48,8 @@ def main(args):
                 # else:
                 #     prompt += " The answer is: "
 
-        if include_prompt:
-            prompts.append(prompt)
+        
+        prompts.append(prompt)
 
     # Get the answer for all examples
     answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in ['true', 'false']]
@@ -57,7 +57,7 @@ def main(args):
         model,
         tokenizer,
         prompts,
-        candidate_token_ids=answer_choice_ids,
+        candidate_token_ids=None,
         return_token_predictions=False,
         batch_size=args.eval_batch_size,
     )

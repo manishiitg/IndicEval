@@ -76,10 +76,6 @@ def main(args):
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
-            # if prompt[-1] in ["\n", " "]:
-            #     prompt += "The answer is: "
-            # else:
-            #     prompt += " The answer is: "
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -95,10 +91,6 @@ def main(args):
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
                 prompt = chat_formatting_function(messages, add_bos=False)
-                # if prompt[-1] in ["\n", " "]:
-                #     prompt += "The answer is: "
-                # else:
-                #     prompt += " The answer is: "
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
@@ -112,7 +104,7 @@ def main(args):
         model,
         tokenizer,
         prompts,
-        candidate_token_ids=answer_choice_ids,
+        candidate_token_ids=None,
         return_token_predictions=False,
         batch_size=args.eval_batch_size,
     )

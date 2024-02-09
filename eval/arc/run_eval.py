@@ -119,7 +119,7 @@ def main(args):
             model,
             tokenizer,
             [prompt],
-            candidate_token_ids=answer_choice_ids,
+            candidate_token_ids=None,
             return_token_predictions=False,
             disable_tqdm=True,
         )
