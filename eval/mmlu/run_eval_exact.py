@@ -160,7 +160,7 @@ def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
         "answer": example["answer_text"],
         "model_output": output,
         "prediction": pred
-    } for example, output, pred in zip(test_df, outputs, predictions)]
+    } for example, output, pred in zip(test_df, outputs, outputs)]
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
