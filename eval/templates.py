@@ -49,7 +49,7 @@ def create_prompt_with_chatml_format(messages, bos="<s>", eos="</s>", add_bos=Tr
                     message["role"]
                 )
             )
-    # formatted_text += "<|assistant|>\n"
+    formatted_text += "<|im_start|>assistant\n"
     # formatted_text = bos + formatted_text if add_bos else formatted_text
     # formatted_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     if not debug_print:

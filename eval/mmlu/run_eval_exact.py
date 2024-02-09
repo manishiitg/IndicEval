@@ -88,11 +88,11 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         g.prompt: g.outputs[0].text for g in generations
     }
     for p in prompts:
-        print(p)
+        print("p", p)
         print("----")
 
     for p in prompt_to_output:
-        print(p)
+        print("o", p)
         print("----")
     outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
     os.exit(1)
