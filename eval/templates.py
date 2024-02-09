@@ -42,7 +42,7 @@ def create_prompt_with_chatml_format(messages, bos="<s>", eos="</s>", add_bos=Tr
         elif message["role"] == "user":
             formatted_text += "<|im_start|>user\n" + message["content"] + "<|im_end|>\n"
         elif message["role"] == "assistant":
-            formatted_text += "<|im_start|>assistant\n" + message["content"].strip() + "\n"
+            formatted_text += "<|im_start|>assistant\n" + message["content"].strip() + "<|im_end|>\n"
         else:
             raise ValueError(
                 "Tulu chat template only supports 'system', 'user' and 'assistant' roles. Invalid role: {}.".format(
