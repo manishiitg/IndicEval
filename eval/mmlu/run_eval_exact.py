@@ -94,7 +94,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     for p in prompt_to_output:
         print("o", p)
         print("----")
-        
+
     outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
     os.exit(1)
     
@@ -219,6 +219,7 @@ def main(args):
                 tensor_parallel_size=torch.cuda.device_count(),
                 # max_num_batched_tokens=4096,
                 quantization="AWQ",
+                max_seq_len=4096,
             )
         else:
             print("Loading model and tokenizer vllm...")
@@ -228,17 +229,19 @@ def main(args):
                 tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
                 tensor_parallel_size=torch.cuda.device_count(),
                 # max_num_batched_tokens=4096,
+                max_seq_len=4096,
             )
     else:
-        print("Loading model and tokenizer hf...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path, 
-            tokenizer_name_or_path=args.tokenizer_name_or_path, 
-            load_in_8bit=args.load_in_8bit, 
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-            use_fast_tokenizer=not args.use_slow_tokenizer,
-        )
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path, 
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path, 
+        #     load_in_8bit=args.load_in_8bit, 
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
         
