@@ -151,7 +151,7 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
-    subject = subject[:2] ##test
+    subjects = subjects[:2] ##test
 
     if args.subjects:
         assert all(
