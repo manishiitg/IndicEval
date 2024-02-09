@@ -267,12 +267,6 @@ def main(args):
                     cat_cors[key].append(em_score)
         all_cors.append(em_score)
 
-        # test_df["correct"] = cors
-        # for j in range(probs.shape[1]):
-        #     choice = choices[j]
-        #     test_df["choice{}_probs".format(choice)] = probs[:, j]
-        # test_df.to_csv(os.path.join(args.save_dir, "{}.csv".format(subject)), index=None)
-
     # In IndicMMLU, we exclude math specific subjects where the translation outputs are not good.
     idxs = []
     for subcat in subcat_cors:
