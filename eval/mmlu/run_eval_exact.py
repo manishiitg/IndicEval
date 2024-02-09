@@ -113,8 +113,10 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match : {em_score}")
 
+    print("len ", len(outputs), len(targets))
     predictions = []
     for index, row in test_df.iterrows():
+        print("index", index)
         print("question", row["question"])
         print("answer", row["answer_text"])
         print("outputs", outputs[index])
