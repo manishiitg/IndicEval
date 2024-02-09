@@ -397,7 +397,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--awq",
-        action="store_true", 
+        action="store_false", 
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
