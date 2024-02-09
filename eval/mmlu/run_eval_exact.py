@@ -49,10 +49,7 @@ def gen_prompt(train_df, subject, k=-1):
 @torch.no_grad()
 def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
     prompts = []
-    tokenizer = AutoTokenizer.from_pretrained(
-            args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            "slow" if args.use_slow_tokenizer else "auto",
-        )
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
     for i in tqdm(range(0, test_df.shape[0])):
         k = args.ntrain
