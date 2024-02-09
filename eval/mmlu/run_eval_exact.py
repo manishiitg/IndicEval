@@ -256,8 +256,8 @@ def main(args):
         else:
             # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
             # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
-            dev_df = pd.DataFrame(load_dataset("cais/mmlu", split="dev"))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", split="test"))
+            dev_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="dev", trust_remote_code=True))[: args.ntrain]
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))
         # except:
         #     continue
         
