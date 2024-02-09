@@ -253,10 +253,11 @@ def main(args):
             # dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[: args.ntrain]
             # test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
             dev_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="dev", trust_remote_code=True))[: args.ntrain]
-            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))[:10]
+            test_df = pd.DataFrame(load_dataset("cais/mmlu", "all", split="test", trust_remote_code=True))
         # except:
         #     continue
-        
+
+        args.n_instances = 10
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
