@@ -151,7 +151,6 @@ def main(args):
             subjects.append(row["subject"])
         subjects = list(set(subjects))
 
-    subjects = subjects[:2] ##test
 
     if args.subjects:
         assert all(
@@ -216,7 +215,7 @@ def main(args):
             test_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="test", trust_remote_code=True))
         
-        args.n_instances = 200
+        args.n_instances = 2
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
