@@ -47,9 +47,8 @@ def gen_prompt(train_df, subject, k=-1):
 
 
 @torch.no_grad()
-def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
+def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1):
     prompts = []
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
     for i in tqdm(range(0, test_df.shape[0])):
         k = args.ntrain
@@ -77,66 +76,18 @@ def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         
         prompts.append(prompt)
-
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        if args.use_vllm:
-            if args.awq:
-                model = vllm.LLM(
-                    model=args.model_name_or_path + "-awq",
-                    tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                    tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
-                    tensor_parallel_size=torch.cuda.device_count(),
-                    max_num_batched_tokens=4096,
-                    quantization="AWQ",
-                )
-            else:
-                model = vllm.LLM(
-                    model=args.model_name_or_path,
-                    tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                    tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
-                    tensor_parallel_size=torch.cuda.device_count(),
-                    max_num_batched_tokens=4096,
-                )
-            sampling_params = vllm.SamplingParams(
-                temperature=0,
-                max_tokens=512,
-                stop=["\n"],
-            )
-            # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
-            generations = model.generate(prompts, sampling_params)
-            prompt_to_output = {
-                g.prompt: g.outputs[0].text for g in generations
-            }
-            outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
-        else:
-            model, tokenizer = load_hf_lm_and_tokenizer(
-                model_name_or_path=args.model_name_or_path, 
-                tokenizer_name_or_path=args.tokenizer_name_or_path, 
-                load_in_8bit=args.load_in_8bit, 
-                device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-                gptq_model=args.gptq,
-                use_fast_tokenizer=not args.use_slow_tokenizer,
-            )
-            new_line_token = tokenizer.encode("\n", add_special_tokens=False)[-1] # get the last token because the tokenizer may add space tokens at the start.
-            outputs = generate_completions(
-                model=model,
-                tokenizer=tokenizer,
-                prompts=prompts,
-                max_new_tokens=512,
-                batch_size=args.eval_batch_size,
-                stop_id_sequences=[[new_line_token]],
-                do_sample=False,
-            )
-    else:
-        instances = [{"id": prompt, "prompt": prompt} for _, prompt in enumerate(prompts)]
-        results = query_openai_chat_model(
-            engine=args.openai_engine,
-            instances=instances,
-            batch_size=args.eval_batch_size if args.eval_batch_size else 10,
-            output_path=os.path.join(args.save_dir, f"openai_results.jsonl"),
+        sampling_params = vllm.SamplingParams(
+            temperature=0,
+            max_tokens=512,
+            stop=["\n"],
         )
-        outputs = [result["output"] for result in results]
+        # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+        generations = model.generate(prompts, sampling_params)
+        prompt_to_output = {
+            g.prompt: g.outputs[0].text for g in generations
+        }
+        outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
+        
     
 
     def extract_answer(row):
@@ -160,7 +111,7 @@ def eval_hf_model(args, subject, dev_df, test_df, batch_size=1):
         "answer": example["answer_text"],
         "model_output": output,
         "prediction": pred
-    } for example, output, pred in zip(test_df, outputs, outputs)]
+    } for example, output, pred in zip(test_df.to_dict(), outputs, outputs)]
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
@@ -242,6 +193,36 @@ def main(args):
         subcat: [] for subcat_lists in subcategories.values() for subcat in subcat_lists
     }
     cat_cors = {cat: [] for cat in categories}
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+    print("Loading model and tokenizer...")
+
+    if args.use_vllm:
+        if args.awq:
+            model = vllm.LLM(
+                model=args.model_name_or_path + "-awq",
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                max_num_batched_tokens=4096,
+                quantization="AWQ",
+            )
+        else:
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                max_num_batched_tokens=4096,
+            )
+    else:
+        model, tokenizer2 = load_hf_lm_and_tokenizer(
+            model_name_or_path=args.model_name_or_path, 
+            tokenizer_name_or_path=args.tokenizer_name_or_path, 
+            load_in_8bit=args.load_in_8bit, 
+            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+            gptq_model=args.gptq,
+            use_fast_tokenizer=not args.use_slow_tokenizer,
+        )
 
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
         
@@ -262,7 +243,7 @@ def main(args):
             test_df = test_df.sample(args.n_instances, random_state=42)
 
         if args.model_name_or_path:
-            em_score = eval_hf_model(args, subject, dev_df, test_df, args.eval_batch_size)
+            em_score = eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, args.eval_batch_size)
         else:
             raise Exception("unsupported flow")    
         
