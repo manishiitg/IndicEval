@@ -262,11 +262,11 @@ def main(args):
             {
                 "average_acc": weighted_acc,
                 "subcat_acc": {
-                    subcat: np.mean(np.concatenate(subcat_cors[subcat]))
+                    subcat: np.mean(subcat_cors[subcat])
                     for subcat in subcat_cors
                 },
                 "cat_acc": {
-                    cat: np.mean(np.concatenate(cat_cors[cat]))
+                    cat: np.mean(cat_cors[cat])
                     for cat in cat_cors
                 },
             },
