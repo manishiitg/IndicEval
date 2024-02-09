@@ -80,7 +80,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
-        stop=["\n", "<|im_end|>"],
+        stop=["<|im_end|>"],
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
@@ -207,8 +207,6 @@ def main(args):
     }
     cat_cors = {cat: [] for cat in categories}
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-
-    print(args)
 
     if args.use_vllm:
         if args.awq:
