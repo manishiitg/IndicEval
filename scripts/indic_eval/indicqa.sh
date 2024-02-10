@@ -20,7 +20,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # no-context
-        python3 -m eval.indicqa.run_eval_exact \
+        python3 -m eval.indicqa.run_translate_test_eval \
             --ntrain 1 \
             --max_context_length 768 \
             --no_context \
@@ -38,7 +38,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # with context
-        python3 -m eval.indicqa.run_eval_exact \
+        python3 -m eval.indicqa.run_translate_test_eval \
             --ntrain 1 \
             --max_context_length 768 \
             --save_dir $FOLDER \
