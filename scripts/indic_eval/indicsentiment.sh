@@ -7,7 +7,7 @@ model_names=(
     "manishiitg/open-aditi-hi-v1-awq"
     "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
 )
-FOLDER_BASE=/sky-notebook/eval-results
+FOLDER_BASE=/sky-notebook/eval-results/indicsentiment
 
 
 for model_name_or_path in "${model_names[@]}"; do
