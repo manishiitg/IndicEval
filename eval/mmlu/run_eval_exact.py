@@ -29,8 +29,12 @@ def format_subject(subject):
 def format_example(df, idx, include_answer=True):
     prompt = df.iloc[idx, 0]
     ch = df.iloc[idx, 2]
+
+    print("ch", ch)
+
     if isinstance(ch, str): # in hi data is string but in en its list
         ch = ch.split('\n')
+
     answer = df.iloc[idx, -1]
     for ix, opt in enumerate(ch):
         prompt += "\n{}. {}".format(ix, opt)
