@@ -66,6 +66,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         row["answer_text"] = answerStr
         return row
 
+    print("prompts", prompts)
     # Apply the function to each row of the DataFrame
     test_data = test_data.map(extract_answer)
 
