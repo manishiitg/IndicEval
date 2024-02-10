@@ -83,6 +83,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         print(row)
         idx += 1
 
+    os.exit(1)
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
@@ -156,6 +157,7 @@ def main(args):
     dataset = dataset.map(lambda x: {"ctx": x["ctx"].strip()})
     dataset = dataset.map(lambda x: {"endings": [ending.strip() for ending in x["endings"]]})
     test_data = dataset["validation"]
+    test_data = test_data.select(range(100))
     test_data = test_data.map(lambda x: {"label": int(x["label"])})
 
     prompts = []
@@ -188,8 +190,6 @@ def main(args):
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
-            print("prompt", prompt)
-            os.exit(1)
 
 
 
