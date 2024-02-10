@@ -16,28 +16,32 @@ import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
 
-choices = ["A", "B", "C", "D"]
+choices = ["Positive", "Negative"]
+choice_map = {
+    "Negative" : "सकारात्मक",
+    "Positive" : "नकारात्मक",
+
+}
+choices_to_id = {choice: i for i, choice in enumerate(choices)}
 
 
-def format_example(ctx, endings, label=None):
-    prompt = f"{ctx}\n"
-    for choice, ending in zip(choices, endings):
-        prompt += f"{choice}. {ending}\n"
-    prompt += "\nAnswer:"
+def format_example(text, label=None):
+    user_prompt = "समीक्षा: {text}".format(text=text)
+    assistant_prompt = "\nभाव:"
     if label is not None:
-        prompt += " {label}\n\n".format(label=label)
-    return prompt
-
+        label = choice_map[label]
+        assistant_prompt += " {label}".format(label=label)
+    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    return messages
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"Complete the description with an appropriate ending:\n\n"
+    prompt = "समीक्षा की भावना का अनुमान लगाएं. भावना के संभावित विकल्प हैं: 'सकारात्मक' और 'नकारात्मक'।"
+    messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
-            label = choices[example["label"]]
-            prompt += format_example(ctx=example["ctx"], endings=example["endings"], label=label)
-    return prompt
-
+            messages += format_example(text=example["ITV2 HI REVIEW"], label=example["LABEL"])
+    return messages
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -56,13 +60,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     def extract_answer(row):
-        answerStr = ""
-        answer = row["answer"]
-        if answer == "true":
-            answerStr = "A. Yes"
-        else:
-            answerStr = "B. No"
-        row["answer_text"] = answerStr
+        row["answer_text"] = choice_map[row["LABEL"]]
         return row
 
     # Apply the function to each row of the DataFrame
@@ -74,7 +72,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     idx = 0
     for row in test_data:
         row = {
-            "question": row["question"],
+            "question": row["INDIC REVIEW"],
             "model_output": outputs[idx],
             "prediction": targets[idx]
         }
@@ -90,18 +88,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {em_score}")
 
-    outputs = [output[0] for output in outputs]
-    targets = [target[0] for target in targets]
-    # directly measuring A with A instead of of full option match
-
-    em_score_options = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
-    print(f"Exact match Only Options: {em_score_options}")
-
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "exact_match": em_score,
-            "em_score_options" : em_score_options,
         }, fout, indent=4)
 
     return em_score
@@ -151,23 +140,23 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset(args.dataset)
-    dataset = dataset.map(lambda x: {"ctx": x["ctx"].strip()})
-    dataset = dataset.map(lambda x: {"endings": [ending.strip() for ending in x["endings"]]})
-    test_data = dataset["validation"]
-    test_data = test_data.map(lambda x: {"label": int(x["label"])})
+    dataset = load_dataset("ai4bharat/IndicSentiment", "translation-hi")
+    dataset = dataset.filter(lambda x: x["LABEL"] is not None)
+    dataset = dataset.map(lambda x: {"LABEL": x["LABEL"].lower().strip()})
+    dev_data = dataset["validation"].shuffle(args.seed)
+    test_data = dataset["test"]
 
     prompts = []
     for i, example in enumerate(test_data):
-        dev_data = test_data.filter(lambda x: x["ctx"] != example["ctx"])
         k = args.ntrain
-        prompt_end = format_example(ctx=example["ctx"], endings=example["endings"], label=None)
-        train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
+        prompt_end = format_example(example["INDIC REVIEW"])
+        train_prompt = gen_prompt(dev_data, k)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+        else:
+            prompt = "\n\n".join([x["content"] for x in prompt])
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -181,16 +170,13 @@ def main(args):
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
+                prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            else:
+                prompt = "\n\n".join([x["content"] for x in prompt])
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
-            print("prompt", prompt)
-            os.exit(1)
-
-
 
     em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
     print("Em Score", em_score)
@@ -200,8 +186,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--dataset", type=str, default="Rowan/hellaswag")
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/hellaswag/llama-7B/")
+    parser.add_argument(
+        "--lang",
+        type=str,
+        default="hi",
+        choices=[
+            "as",
+            "bn",
+            "gu",
+            "hi",
+            "kn",
+            "ml",
+            "mr",
+            "or",
+            "pa",
+            "ta",
+            "te",
+            "ur",
+        ],
+    )
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicsentiment/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -237,12 +241,12 @@ if __name__ == "__main__":
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
     parser.add_argument(
-        "--awq",
+        "--use_vllm",
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     parser.add_argument(
-        "--use_vllm",
+        "--awq",
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
