@@ -157,10 +157,11 @@ def main(args):
     test_data = dataset["validation"]
     test_data = test_data.map(lambda x: {"label": int(x["label"])})
 
+    k = args.ntrain
+    sample_data = test_data.select(range(k*3))
     prompts = []
     for i, example in enumerate(test_data):
-        k = args.ntrain
-        dev_data = test_data.select(range(k*2)).filter(lambda x: x["ctx"] != example["ctx"])
+        dev_data = sample_data.filter(lambda x: x["ctx"] != example["ctx"])
 
         prompt_end = format_example(ctx=example["ctx"], endings=example["endings"], label=None)
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
