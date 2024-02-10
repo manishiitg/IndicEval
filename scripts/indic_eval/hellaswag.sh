@@ -9,8 +9,9 @@ export CUDA_VISIBLE_DEVICES=0
 model_names=(
     "manishiitg/open-aditi-hi-v2"
     "manishiitg/open-aditi-hi-v1"
+    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
 )
-FOLDER_BASE=/sky-notebook/eval-results
+FOLDER_BASE=/sky-notebook/eval-results/hellaswag
 
 
 for model_name_or_path in "${model_names[@]}"; do
@@ -22,31 +23,20 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
 
     if [ ! -f "$FILE" ]; then
-        python3 -m eval.hellaswag.run_eval \
+        python3 -m eval.hellaswag.run_eval_exact \
             --ntrain 0 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
             --eval_batch_size 4 \
             --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+            --awq \
+            --use_vllm
+    
+    else
+        cat "$FILE"
 
-    fi
-
-    NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-
-    if [ ! -f "$FILE" ]; then
-        # 5-shot
-        python3 -m eval.hellaswag.run_eval \
-            --ntrain 5 \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
     fi
 done
 
@@ -64,7 +54,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
-        python3 -m eval.hellaswag.run_eval \
+        python3 -m eval.hellaswag.run_eval_exact \
             --ntrain 0 \
             --dataset "Thanmay/hellaswag-translated" \
             --save_dir $FOLDER \
@@ -72,23 +62,11 @@ for model_name_or_path in "${model_names[@]}"; do
             --tokenizer_name_or_path $model_name_or_path \
             --eval_batch_size 4 \
             --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
-    fi
-
-    NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-
-    if [ ! -f "$FILE" ]; then
-        # 5-shot
-        python3 -m eval.hellaswag.run_eval \
-            --ntrain 5 \
-            --dataset "Thanmay/hellaswag-translated" \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+            --awq \
+            --use_vllm
+    
+    else
+        cat "$FILE"
     fi
 done
