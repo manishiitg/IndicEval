@@ -175,6 +175,7 @@ def main(args):
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
 
+    os.exit(1)
     # save results
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
         json.dump(metrics, fout, indent=4)
