@@ -20,7 +20,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
-        python3 -m eval.indicsentiment.run_translate_test_eval_excat \
+        python3 -m eval.indicsentiment.run_translate_test_eval_exact \
             --ntrain 0 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
