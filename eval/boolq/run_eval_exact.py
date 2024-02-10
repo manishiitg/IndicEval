@@ -9,10 +9,7 @@ import json
 from tqdm import tqdm
 import time
 from datasets import load_dataset
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from eval.utils import (
-    get_next_word_predictions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 from transformers import AutoTokenizer

@@ -96,7 +96,7 @@ def main(args):
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
     # TODO: should raise a warning if this returns more than one token
-    answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
+    # answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
     pred_indices, all_probs = get_next_word_predictions(
         model,
         tokenizer,
