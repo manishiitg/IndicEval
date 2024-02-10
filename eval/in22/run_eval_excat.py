@@ -1,7 +1,6 @@
 import argparse
 import os
 import random
-from sklearn import metrics
 import torch
 import numpy as np
 import pandas as pd
@@ -17,34 +16,35 @@ from eval.utils import (
     dynamic_import_function,
 )
 from bleurt import score
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 lang_map = {
     "asm_Beng": "Assamese",
-    "kas_Arab": "Kashmiri",
-    "pan_Guru": "Punjabi",
     "ben_Beng": "Bengali",
-    "kas_Deva": "Kashmiri",
-    "san_Deva": "Sanskrit",
     "brx_Deva": "Bodo",
-    "mai_Deva": "Maithili",
-    "sat_Olck": "Santali",
     "doi_Deva": "Dogri",
-    "mal_Mlym": "Malayalam",
-    "snd_Arab": "Sindhi",
     "eng_Latn": "English",
-    "mar_Deva": "Marathi",
-    "snd_Deva": "Sindhi",
-    "gom_Deva": "Konkani",
-    "mni_Beng": "Manipuri",
-    "tam_Taml": "Tamil",
     "guj_Gujr": "Gujarati",
-    "mni_Mtei": "Manipuri",
-    "tel_Telu": "Telugu",
+    "gom_Deva": "Konkani",
     "hin_Deva": "Hindi",
-    "npi_Deva": "Nepali",
-    "urd_Arab": "Urdu",
     "kan_Knda": "Kannada",
+    "kas_Arab": "Kashmiri",
+    "mai_Deva": "Maithili",
+    "mal_Mlym": "Malayalam",
+    "mar_Deva": "Marathi",
+    "mni_Mtei": "Manipuri",
+    "npi_Deva": "Nepali",
     "ory_Orya": "Odia",
+    "pan_Guru": "Punjabi",
+    "san_Deva": "Sanskrit",
+    "sat_Olck": "Santali",
+    "snd_Deva": "Sindhi",
+    "tam_Taml": "Tamil",
+    "tel_Telu": "Telugu",
+    "urd_Arab": "Urdu",
 }
 
 
@@ -69,37 +69,84 @@ def gen_prompt(dev_data, src_lang, tgt_lang, k=-1):
             )
     return prompt
 
+@torch.no_grad()
+def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
+    return outputs
 
 def main(args):
     random.seed(args.seed)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-        )
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.use_vllm:
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+    else:
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path,
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
+        #     load_in_8bit=args.load_in_8bit,
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("facebook/flores", f"{args.src_lang}-{args.tgt_lang}")
+    dataset = load_dataset(args.dataset, f"{args.src_lang}-{args.tgt_lang}")
     dataset = dataset.map(
         lambda x: {
             f"sentence_{args.src_lang}": x[f"sentence_{args.src_lang}"].strip(),
             f"sentence_{args.tgt_lang}": x[f"sentence_{args.tgt_lang}"].strip(),
         }
     )
-    dev_data = dataset["dev"]
-    test_data = dataset["devtest"]
+    test_data = dataset["gen"] if args.dataset == "ai4bharat/IN22-Gen" else dataset["conv"]
+    test_data = test_data.select(range(50))
 
     prompts = []
     for i, example in enumerate(test_data):
+        dev_data = test_data.filter(
+            lambda x: x[f"sentence_{args.src_lang}"] != example[f"sentence_{args.src_lang}"]
+        ).shuffle(args.seed)
         k = args.ntrain
         prompt_end = format_example(
             src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
@@ -138,18 +185,12 @@ def main(args):
         if include_prompt:
             prompts.append(prompt)
 
-    outputs = generate_completions(
-        model=model,
-        tokenizer=tokenizer,
-        prompts=prompts,
-        max_new_tokens=256,
-        batch_size=args.eval_batch_size,
-        stop_id_sequences=None,
-    )
-    # remove unnecessary space
-    outputs = [output.strip().split("\n")[0] for output in outputs]
+    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
-    with open(os.path.join(args.save_dir, f"flores_{args.src_lang}_{args.tgt_lang}_predictions.jsonl"), "w") as fout:
+    print(outputs)
+    os.exit(1)
+
+    with open(os.path.join(args.save_dir, f"in22_{args.src_lang}_{args.tgt_lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
@@ -190,6 +231,9 @@ if __name__ == "__main__":
     parser.add_argument("--ntrain", type=int, default=5, help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
+        "--dataset", type=str, default="ai4bharat/IN22-Gen", choices=["ai4bharat/IN22-Gen", "ai4bharat/IN22-Conv"]
+    )
+    parser.add_argument(
         "--src_lang",
         type=str,
         default="eng_Latn",
@@ -201,7 +245,7 @@ if __name__ == "__main__":
         default="hin_Deva",
         choices=list(lang_map.keys()),
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/flores/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/in22-gen/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
@@ -241,6 +285,16 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+    )
+    parser.add_argument(
+        "--use_vllm",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     main(args)
