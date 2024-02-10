@@ -189,8 +189,7 @@ def main(args):
         if include_prompt:
             prompts.append(prompt)
         
-    em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
-    print("Em Score", em_score)
+    eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import json
 from tqdm import tqdm
 import time
 from eval.mmlu.categories import subcategories, categories
-from eval.utils import get_next_word_predictions, load_hf_lm_and_tokenizer, query_openai_chat_model, dynamic_import_function, generate_completions
+from eval.utils import dynamic_import_function
 from datasets import load_dataset
 import vllm
 import evaluate
@@ -109,12 +109,6 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
     test_df['answer_text'] = test_df.apply(extract_answer, axis=1)
 
     targets = test_df['answer_text'].tolist()
-
-    em_score = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
-    
-    print(f"Exact match : {em_score}")
-
     predictions = []
     idx = 0
     for index, row in test_df.iterrows():
@@ -132,9 +126,22 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
 
+    em_score = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match: {subject} {em_score}")
+
+    outputs = [output[0] for output in outputs]
+    targets = [target[0] for target in targets]
+    # directly measuring A with A instead of of full option match
+
+    em_score_options = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match Only Options: {subject} {em_score_options}")
+
     with open(os.path.join(args.save_dir, f"metrics-{subject}.json"), "w") as fout:
         json.dump({
-            "exact_match": em_score
+            "exact_match": em_score,
+            "em_score_options" : em_score_options,
         }, fout, indent=4)
 
     return em_score
@@ -219,7 +226,6 @@ def main(args):
             test_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="test", trust_remote_code=True))
         
-        args.n_instances = 2
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
@@ -237,8 +243,6 @@ def main(args):
                     cat_cors[key].append(em_score)
         all_cors.append(em_score)
 
-    print("subcat_cors", subcat_cors)
-    print("subcat_cors", cat_cors)
     # In IndicMMLU, we exclude math specific subjects where the translation outputs are not good.
     idxs = []
     for subcat in subcat_cors:
