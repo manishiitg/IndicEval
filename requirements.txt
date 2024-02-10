@@ -34,3 +34,5 @@ flask
 vllm 
 openpyxl
 sacrebleu
+google-generativeai
+huggingface_hub

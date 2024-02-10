@@ -7,12 +7,15 @@ from datasets import load_dataset
 from eval.utils import (
     dynamic_import_function,
 )
+from huggingface_hub import HfApi
 from eval.lm_judge.gemini_judge import get_lm_judge_rating
 from transformers import AutoTokenizer
 import vllm
+from datasets import Dataset
+from datetime import date
 
 
-def format_example(prompt, system, language):
+def format_example(system, prompt, language):
     if len(system) == 0:
         if language == "Hindi":
             system = "आप एक सहायक सहायक हैं. कृपया लंबा और विस्तृत उत्तर दें."
@@ -104,10 +107,10 @@ def main(args):
             example["language"]
         )
 
+        simple_prompts.append("\n\n".join([x["content"] for x in prompt]))
         if args.use_chat_format:
             prompt = chat_formatting_function(prompt)
 
-        simple_prompts.append("\n\n".join([x["content"] for x in prompt]))
         prompts.append(prompt)
 
     outputs = eval_hf_model(args, model, tokenizer,
@@ -143,13 +146,36 @@ def main(args):
     avg = avg / len(ratings)
     # save results
 
+    final_data = []
     with open(os.path.join(args.save_dir, f"lm_judge_judgement.jsonl"), "w") as fout:
         for row in ratings:
             example["prediction_text"] = row
             fout.write(json.dumps(example) + "\n")
 
+            row["date"] = date.today().strftime("%m/%d/%Y")
+            row["model_name"] = args.model_name_or_path
+
+    if args.push_output:
+
+        api = HfApi()
+        if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
+            ds = load_dataset(args.push_output)
+            for row in ds:
+                final_data.append(row)
+
+        dataset = process_and_update_dataset(final_data)
+        dataset.push_to_hub(args.push_output, private=False)
+
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
         json.dump({"avg_rating": avg}, fout, indent=4)
+
+
+def process_and_update_dataset(new_data):
+    new_data_formatted = {key: [item[key]
+                                for item in new_data] for key in new_data[0].keys()}
+    new_dataset_chunk = Dataset.from_dict(new_data_formatted)
+    dataset2 = new_dataset_chunk
+    return dataset2
 
 
 if __name__ == "__main__":
@@ -205,6 +231,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--awq",
         action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+    )
+    parser.add_argument(
+        "--push_output",
+        type=str,
+        default="manishiitg/lm_judge",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
