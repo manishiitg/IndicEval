@@ -136,9 +136,6 @@ def main(args):
     dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
     test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
 
-
-    test_data = test_data.select(range(10))
-
     k = args.ntrain
     prompts = []
     for i, example in enumerate(test_data):
@@ -158,8 +155,6 @@ def main(args):
         
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
-
-    print("outputs", outputs)
 
     # flush all the GPU memory
     del model
@@ -185,7 +180,6 @@ def main(args):
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
 
-    os.exit(1)
     # save results
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
         json.dump(metrics, fout, indent=4)
