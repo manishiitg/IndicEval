@@ -160,6 +160,13 @@ def main(args):
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
     print("outputs", outputs)
+
+    # flush all the GPU memory
+    del model
+    torch.cuda.empty_cache()
+    import gc
+
+    gc.collect()
     
     print("Calculating Rouge and BLEURT ...")
     rouge = evaluate.load("rouge")
