@@ -19,8 +19,10 @@ exact_match = evaluate.load("exact_match")
 
 choices = ["Positive", "Negative"]
 choice_map = {
-    "Negative" : "सकारात्मक",
-    "Positive" : "नकारात्मक",
+    # "Negative" : "सकारात्मक",
+    # "Positive" : "नकारात्मक",
+    "Negative" : "Negative",
+    "Positive" : "Positive",
 }
 choices_to_id = {choice: i for i, choice in enumerate(choices)}
 
