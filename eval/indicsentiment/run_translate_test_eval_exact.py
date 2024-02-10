@@ -91,8 +91,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {em_score}")
 
-    os.exit(1)
-
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "exact_match": em_score,
@@ -150,8 +148,6 @@ def main(args):
     dataset = dataset.map(lambda x: {"LABEL": x["LABEL"].strip()})
     dev_data = dataset["validation"].shuffle(args.seed)
     test_data = dataset["test"]
-
-    test_data = test_data.select(range(10))
 
     prompts = []
     for i, example in enumerate(test_data):
