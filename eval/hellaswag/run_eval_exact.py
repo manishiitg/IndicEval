@@ -58,7 +58,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     def extract_answer(row):
         answerStr = ""
-        print(row)
         label = int(row["label"])
         endings = row["endings"]
         answerStr = endings[label]
@@ -75,7 +74,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     idx = 0
     for row in test_data:
         row = {
-            "question": row["question"],
+            "ctx": row["ctx"],
             "model_output": outputs[idx],
             "prediction": targets[idx]
         }
