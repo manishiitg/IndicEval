@@ -138,7 +138,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             "prediction": targets[idx]
         }
         predictions.append(row)
-        print(row)
+        
         idx += 1
 
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
