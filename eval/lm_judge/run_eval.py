@@ -136,7 +136,7 @@ def main(args):
 
         api = HfApi()
         if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
-            ds = load_dataset(args.push_output)
+            ds = load_dataset(args.push_output, split="train")
             for row in ds:
                 final_data.append(row)
 
