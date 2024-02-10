@@ -1,7 +1,6 @@
 import argparse
 import os
 import random
-from sklearn import metrics
 import torch
 import numpy as np
 import pandas as pd
@@ -12,8 +11,6 @@ import time
 import evaluate
 from datasets import load_dataset
 from eval.utils import (
-    generate_completions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 from transformers import AutoTokenizer
