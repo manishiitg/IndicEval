@@ -29,9 +29,6 @@ def format_subject(subject):
 def format_example(df, idx, include_answer=True):
     prompt = df.iloc[idx, 0]
     ch = df.iloc[idx, 2]
-
-    print("ch", ch)
-
     if isinstance(ch, str): # in hi data is string but in en its list
         ch = ch.split('\n')
 
@@ -95,9 +92,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                 prompt, truncation=False, add_special_tokens=False).input_ids
 
         prompts.append(prompt)
-        print(prompt)
-        os.exit(1)
-
+        
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
