@@ -2,14 +2,12 @@ import argparse
 import os
 import random
 import torch
-import numpy as np
 import json
-import evaluate
 from datasets import load_dataset
 from eval.utils import (
     dynamic_import_function,
 )
-from gemini_judge import get_lm_judge_rating
+from eval.lm_judge.gemini_judge import get_lm_judge_rating
 from transformers import AutoTokenizer
 import vllm
 
