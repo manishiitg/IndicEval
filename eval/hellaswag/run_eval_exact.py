@@ -155,7 +155,6 @@ def main(args):
     dataset = dataset.map(lambda x: {"ctx": x["ctx"].strip()})
     dataset = dataset.map(lambda x: {"endings": [ending.strip() for ending in x["endings"]]})
     test_data = dataset["validation"]
-    test_data = test_data.select(range(100))
     test_data = test_data.map(lambda x: {"label": int(x["label"])})
 
     prompts = []
