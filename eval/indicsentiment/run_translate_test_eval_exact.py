@@ -26,8 +26,8 @@ choices_to_id = {choice: i for i, choice in enumerate(choices)}
 
 
 def format_example(text, label=None):
-    user_prompt = "समीक्षा: {text}".format(text=text)
-    assistant_prompt = user_prompt + "\nभाव:"
+    user_prompt = "Review: {text}".format(text=text)
+    assistant_prompt = user_prompt + "\nSentiment:"
     if label is not None:
         label = choice_map[label]
         assistant_prompt += " {label}".format(label=label)
@@ -35,7 +35,7 @@ def format_example(text, label=None):
     return messages
 
 def gen_prompt(dev_data, k=-1):
-    prompt = "समीक्षा की भावना का अनुमान लगाएं. भावना के संभावित विकल्प हैं: 'सकारात्मक' और 'नकारात्मक'। केवल 'सकारात्मक' या 'नकारात्मक' उत्तर दें।"
+    prompt = "समीक्षा की भावना का पता लगाएं. भावना के संभावित विकल्प हैं: 'सकारात्मक' और 'नकारात्मक'। केवल 'सकारात्मक' या 'नकारात्मक' उत्तर दें।"
     messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))
