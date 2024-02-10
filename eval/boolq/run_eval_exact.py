@@ -179,6 +179,7 @@ def main(args):
 
     em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
     print("Em Score", em_score)
+    os.exit(1)
 
 
 if __name__ == "__main__":
