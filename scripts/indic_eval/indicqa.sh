@@ -3,8 +3,9 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 model_names=(
-    "manishiitg/open-aditi-hi-v2"
-    "manishiitg/open-aditi-hi-v1"
+    "manishiitg/open-aditi-hi-v2-awq"
+    "manishiitg/open-aditi-hi-v1-awq"
+    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
 )
 FOLDER_BASE=/sky-notebook/eval-results
 
@@ -19,7 +20,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # no-context
-        python3 -m eval.indicqa.run_eval \
+        python3 -m eval.indicqa.run_eval_exact \
             --ntrain 1 \
             --max_context_length 768 \
             --no_context \
@@ -37,7 +38,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # with context
-        python3 -m eval.indicqa.run_eval \
+        python3 -m eval.indicqa.run_eval_exact \
             --ntrain 1 \
             --max_context_length 768 \
             --save_dir $FOLDER \
