@@ -9,10 +9,7 @@ import json
 from tqdm import tqdm
 import time
 from datasets import load_dataset
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from eval.utils import (
-    get_next_word_predictions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 from transformers import AutoTokenizer
@@ -49,7 +46,7 @@ def gen_prompt(dev_data, k=-1):
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
         temperature=0,
-        max_tokens=512,
+        max_tokens=10 if args.option_match else 512,
         stop=["<|im_end|>"],
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
@@ -76,6 +73,11 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     test_data = test_data.map(extract_answer)
 
     targets = test_data['answer_text']
+
+    if args.option_match:
+        outputs = [output[0] for output in outputs]
+        targets = [target[0] for target in targets]
+        # directly measuring A with A instead of of full option match
 
     em_score = exact_match.compute(predictions=outputs, references=targets,
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
@@ -241,6 +243,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+    )
+    parser.add_argument(
+        "--option_match",
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
