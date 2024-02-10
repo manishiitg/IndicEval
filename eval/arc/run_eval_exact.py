@@ -101,7 +101,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     em_score_options = exact_match.compute(predictions=outputs, references=targets,
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
-    print(f"Exact match Only Options: {em_score}")
+    print(f"Exact match Only Options: {em_score_options}")
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
