@@ -12,6 +12,7 @@ from datasets import load_dataset
 from eval.utils import (
     dynamic_import_function,
 )
+from transformers import AutoTokenizer
 import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
