@@ -50,7 +50,7 @@ def format_example(infobox, lang, summary=None):
 
 
 def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
-    prompt = f"The following text contains information collected from wikipedia infoboxes of well-known people. Generate the summary in natural language using the given information. Summary should be in one sentence only."
+    prompt = f"The following text contains information collected from wikipedia infoboxes of well-known people. Generate the summary in hindi natural language using the given information. Summary should be in one sentence only."
     messages = [{"role": "system", "content": prompt}]
 
     if k > 0:
