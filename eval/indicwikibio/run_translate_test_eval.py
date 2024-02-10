@@ -4,18 +4,18 @@ import random
 import torch
 import numpy as np
 import pandas as pd
-import time
 import json
-from tqdm import tqdm
 import time
 import evaluate
 from datasets import load_dataset
 from eval.utils import (
-    generate_completions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 from bleurt import score
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 lang_map = {
     "as": "Assamese",
@@ -63,19 +63,63 @@ def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
             )
     return messages
 
+@torch.no_grad()
+def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
+    return outputs
 
 def main(args):
     random.seed(args.seed)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-        )
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.use_vllm:
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+    else:
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path,
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
+        #     load_in_8bit=args.load_in_8bit,
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -116,16 +160,7 @@ def main(args):
         
         prompts.append(prompt)
 
-    outputs = generate_completions(
-        model=model,
-        tokenizer=tokenizer,
-        prompts=prompts,
-        max_new_tokens=50,
-        batch_size=args.eval_batch_size,
-        stop_id_sequences=None,
-    )
-    # remove unnecessary space
-    outputs = [output.strip().split("\n")[0] for output in outputs]
+    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
     with open(os.path.join(args.save_dir, f"indicwikibio_{args.lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):

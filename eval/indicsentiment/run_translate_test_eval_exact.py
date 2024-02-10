@@ -174,7 +174,7 @@ def main(args):
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
-                prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+                prompt = chat_formatting_function(prompt)
             else:
                 prompt = "\n\n".join([x["content"] for x in prompt])
 
