@@ -19,7 +19,6 @@ for model_name_or_path in "${model_names[@]}"; do
 
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
     if [ ! -f "$FILE" ]; then
-        # 1-shot
         python3 -m eval.indicheadline.run_translate_test_eval \
         --ntrain 0 \
         --max_context_length 3750 \
