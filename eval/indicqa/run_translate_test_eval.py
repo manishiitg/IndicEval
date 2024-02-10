@@ -150,7 +150,7 @@ def main(args):
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
 
-    test_data = test_data.select(range(500))
+    test_data = test_data.select(range(100))
 
     k = args.ntrain
     sample_data = test_data.select(range(k*3))
