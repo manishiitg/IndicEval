@@ -130,8 +130,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {subject} {em_score}")
 
-    outputs = [output[0] for output in outputs]
-    targets = [target[0] for target in targets]
+    outputs = [output[0] if len(output) > 0  else "" for output in outputs]
+    targets = [target[0] if len(target) > 0  else ""  for target in targets]
     # directly measuring A with A instead of of full option match
 
     em_score_options = exact_match.compute(predictions=outputs, references=targets,
