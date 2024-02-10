@@ -30,11 +30,11 @@ choices_to_id = {choice: i for i, choice in enumerate(choices)}
 
 def format_example(text, label=None):
     user_prompt = "Review: {text}".format(text=text)
-    assistant_prompt = "\nSentiment:"
+    assistant_prompt = user_prompt + "\nSentiment:"
     if label is not None:
         label = choice_map[label]
         assistant_prompt += " {label}".format(label=label)
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    messages = [{"role":"user", "content":user_prompt}]
     return messages
 
 def gen_prompt(dev_data, k=-1):
@@ -55,13 +55,15 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
-    print("prompts", prompts)
-    print("prompt_to_output", prompt_to_output)
+    
     prompt_to_output = {
         g.prompt: g.outputs[0].text.strip() for g in generations
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
+
+    print("prompts", prompts)
+    print("prompt_to_output", prompt_to_output)
 
     def extract_answer(row):
         row["answer_text"] = choice_map[row["LABEL"]]
