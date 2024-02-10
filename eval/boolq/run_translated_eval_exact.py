@@ -75,7 +75,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     test_data = test_data.map(extract_answer)
 
     targets = test_data['answer_text']
-
+    
     em_score = exact_match.compute(predictions=outputs, references=targets,
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     

@@ -68,6 +68,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     targets = test_data['answer_text']
 
     outputs = [output.split(".")[0] for output in outputs]
+    targets = [output.split(".")[0] for output in targets]
+    # directly measuring A with A instead of A. True with A.True
+    
     em_score = exact_match.compute(predictions=outputs, references=targets,
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     
@@ -87,7 +90,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         print(row)
         idx += 1
 
-    os.exit(1)
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
@@ -147,8 +149,6 @@ def main(args):
     dataset = load_dataset("boolq")
     dev_data = dataset["train"]
     test_data = dataset["validation"]
-
-    test_data = test_data.select(range(10))
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
