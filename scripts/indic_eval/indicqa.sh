@@ -32,6 +32,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --awq \
             --use_vllm
+    else
+        cat "$FILE"
     fi
 
     NUM_SHOTS=with-context
@@ -51,5 +53,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --awq \
             --use_vllm
+    else
+        cat "$FILE"
     fi
 done

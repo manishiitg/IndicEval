@@ -148,7 +148,7 @@ def main(args):
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
 
-    dataset = load_dataset("ai4bharat/IndicQA", "indiaqa.hi")
+    dataset = load_dataset("ai4bharat/IndicQA", "indicqa.hi")
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
