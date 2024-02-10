@@ -32,4 +32,5 @@ for model_name_or_path in "${model_names[@]}"; do
             --awq
     else
         cat "$FILE"
+    fi
 done
