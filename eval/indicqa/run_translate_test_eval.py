@@ -23,13 +23,13 @@ exact_match = evaluate.load("exact_match")
 
 templates = {
     "with_context": (
-        "Answer the following question based on the information in the given passage. . If you cannot answer based on passage reply 'DONT KNOW'",
+        "Answer the following question based on the information in the given passage. Select answer text from passage only. If you cannot answer based on passage reply 'unanswerable'",
         "Passage:",
         "Question:",
         "Answer:",
     ),
     "no_context": (
-        "Answer the following question. If you don't know the answer reply 'DONT KNOW'",
+        "Answer the following question. If you don't know the answer reply 'unanswerable'",
         "Question:",
         "Answer:"),
 }
@@ -62,7 +62,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     def extract_answer(row):
         answerStr = row["answers"]["text"][0]
         if answerStr == "":
-            answerStr = 'DONT KNOW'
+            answerStr = 'unanswerable'
         row["answer_text"] = answerStr
         return row
 
@@ -92,6 +92,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {em_score}")
 
+    os.exit(1)
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "exact_match": em_score,
@@ -151,6 +152,8 @@ def main(args):
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
 
+    test_data = test_data.select(range(500))
+
     k = args.ntrain
     sample_data = test_data.select(range(k*3))
     prompts = []
@@ -185,7 +188,7 @@ def main(args):
                     + "\n"
                     assistant_prompt = a_template + " " + answer
                 train_prompt.extend(
-                    [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+                    [{"role":"user", "content":user_prompt + "\n" + assistant_prompt},]
                 )
 
         if args.no_context:
