@@ -21,7 +21,7 @@ Final provide a final rating in format Overall Rating: <overall_rating>
 [The End of Assistant's Answer]
 """
 
-genai.configure(api_key="AIzaSyCsXdyGjzyvLJRBJqjhmXiRV4Gs1GL_edk")
+genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-pro')
 
 rating_pattern = r'Overall Rating: (\d+(?:\.\d+)?)/'
