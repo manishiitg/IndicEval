@@ -157,7 +157,7 @@ def main(args):
         prompts.append(prompt)
         
 
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.batch_size)
+    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
     print("outputs", outputs)
     
