@@ -2,11 +2,7 @@ import argparse
 import os
 import random
 import torch
-import numpy as np
-import pandas as pd
-import time
 import json
-from tqdm import tqdm
 import time
 from datasets import load_dataset
 from eval.utils import (
@@ -23,7 +19,7 @@ choices_map = {True: "A", False: "B"}
 
 def format_example(passage, question, label=None):
     prompt = f"Passage: {passage}\nQuestion: {question.strip()}\n"
-    for choice, answer in zip(choices, ["हाँ", "नहीं"]):
+    for choice, answer in zip(choices, ["Yes", "No"]):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
     if label is not None:
@@ -33,7 +29,7 @@ def format_example(passage, question, label=None):
 
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"निम्नलिखित द्विआधारी हाँ/नहीं विकल्प वाले प्रश्न हैं (उत्तर सहित)।\n\n"
+    prompt = f"The following are binary yes/no option questions (with answers).\n\n"
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
@@ -79,8 +75,8 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     predictions = []
     idx = 0
     for row in test_data:
-        outputs[idx] = outputs[idx].split('.')[0]
-        targets[idx] = targets[idx].split('.')[0]
+        # outputs[idx] = outputs[idx].split('.')[0]
+        # targets[idx] = targets[idx].split('.')[0]
         row = {
             "question": row["question"],
             "model_output": outputs[idx],
