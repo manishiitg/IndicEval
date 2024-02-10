@@ -37,7 +37,11 @@ def format_example(df, idx, include_answer=True):
 
     answer = df.iloc[idx, -1]
     for ix, opt in enumerate(ch):
-        prompt += "\n{}. {}".format(ix, opt)
+        option_str = "{})".format(ix)
+        if option_str not in opt:
+            prompt += "\n{} {}".format(option_str, opt)
+        else:
+            prompt += "\n{}".format(opt)
     prompt += "\nAnswer:"
     if include_answer:
         prompt += " {}\n\n".format(answer)
