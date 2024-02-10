@@ -82,7 +82,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         print(row)
         idx += 1
 
-    os.exit(1)
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
