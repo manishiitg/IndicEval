@@ -7,8 +7,8 @@ export CUDA_VISIBLE_DEVICES=0
 # -------------------------------------------------------------
 
 model_names=(
-    "manishiitg/open-aditi-hi-v2"
-    "manishiitg/open-aditi-hi-v1"
+    "manishiitg/open-aditi-hi-v2-awq"
+    "manishiitg/open-aditi-hi-v1-awq"
     "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
 )
 FOLDER_BASE=/sky-notebook/eval-results/hellaswag
