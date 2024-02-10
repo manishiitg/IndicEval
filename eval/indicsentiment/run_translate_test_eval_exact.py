@@ -145,7 +145,7 @@ def main(args):
 
     dataset = load_dataset("ai4bharat/IndicSentiment", "translation-hi")
     dataset = dataset.filter(lambda x: x["LABEL"] is not None)
-    dataset = dataset.map(lambda x: {"LABEL": x["LABEL"].lower().strip()})
+    dataset = dataset.map(lambda x: {"LABEL": x["LABEL"].strip()})
     dev_data = dataset["validation"].shuffle(args.seed)
     test_data = dataset["test"]
 
