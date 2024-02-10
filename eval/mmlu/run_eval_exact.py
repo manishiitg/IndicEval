@@ -116,7 +116,11 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         answer_index = int(row['answer'])  # Adjust for zero-based indexing
         if answer_index < len(choices):
             # Remove the number and the bracket
-            return choices[answer_index].strip()
+            choice = choices[answer_index].strip()
+            option_str = "{})".format(answer_index)
+            if option_str in choice:
+                choice = "{} {}".format(option_str, choice)
+            return choice
         else:
             return None  # Or handle the case where the answer index is out of range
 
