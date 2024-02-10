@@ -165,8 +165,8 @@ def main(args):
         else:
             prompt, p_template, q_template, a_template = templates["with_context"]
 
+        train_prompt = [{"role":"system", "content":prompt}]
         if k > 0:
-            train_prompt = [{"role":"system", "content":prompt}]
             exemplars = dev_data.select(range(k))
             for dev_example in exemplars:
                 answer = (
@@ -212,6 +212,8 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         prompts.append(prompt)
+        print(prompt)
+        os.exit(1)
 
     em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
     print("Em Score", em_score)
