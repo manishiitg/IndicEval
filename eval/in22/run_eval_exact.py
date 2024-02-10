@@ -140,7 +140,6 @@ def main(args):
         }
     )
     test_data = dataset["gen"] if args.dataset == "ai4bharat/IN22-Gen" else dataset["conv"]
-    test_data = test_data.select(range(50))
 
     prompts = []
     for i, example in enumerate(test_data):
@@ -186,9 +185,6 @@ def main(args):
             prompts.append(prompt)
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
-
-    print(outputs)
-    os.exit(1)
 
     with open(os.path.join(args.save_dir, f"in22_{args.src_lang}_{args.tgt_lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
