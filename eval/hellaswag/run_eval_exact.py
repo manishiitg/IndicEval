@@ -159,8 +159,9 @@ def main(args):
 
     prompts = []
     for i, example in enumerate(test_data):
-        dev_data = test_data.filter(lambda x: x["ctx"] != example["ctx"])
         k = args.ntrain
+        dev_data = test_data.select(range(k*2)).filter(lambda x: x["ctx"] != example["ctx"])
+
         prompt_end = format_example(ctx=example["ctx"], endings=example["endings"], label=None)
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
         prompt = train_prompt + prompt_end
