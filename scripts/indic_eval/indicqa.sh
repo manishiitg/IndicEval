@@ -45,7 +45,7 @@ for model_name_or_path in "${model_names[@]}"; do
         # with context
         python3 -m eval.indicqa.run_translate_test_eval \
             --ntrain 0 \
-            --max_context_length 3000 \
+            --max_context_length 3750 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
