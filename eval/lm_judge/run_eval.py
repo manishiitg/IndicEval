@@ -140,7 +140,6 @@ def main(args):
             for row in ds:
                 final_data.append(row)
 
-        print(final_data)
         dataset = process_and_update_dataset(final_data)
         dataset.push_to_hub(args.push_output, private=False)
             
