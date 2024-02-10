@@ -9,57 +9,24 @@ from datasets import load_dataset
 from eval.utils import (
     dynamic_import_function,
 )
-from bleurt import score
+from gemini_judge import get_lm_judge_rating
 from transformers import AutoTokenizer
 import vllm
-import evaluate
-exact_match = evaluate.load("exact_match")
-
-lang_map = {
-    "as": "Assamese",
-    "bn": "Bengali",
-    "kn": "Kannada",
-    "hi": "Hindi",
-    "ml": "Malayalam",
-    "or": "Oriya",
-    "pa": "Punjabi",
-    "ta": "Tamil",
-    "te": "Telugu",
-}
 
 
-def trim_context(context, max_context_length, tokenizer):
-    tokenized_context = tokenizer.encode(context, add_special_tokens=False)
-    if len(tokenized_context) > max_context_length:
-        context = tokenizer.decode(
-            tokenized_context[:max_context_length], skip_special_tokens=True, clean_up_tokenization_spaces=True
-        )
-    return context
+def format_example(prompt, system, language):
+    if len(system) == 0:
+        if language == "Hindi":
+            system = "आप एक सहायक सहायक हैं. कृपया लंबा और विस्तृत उत्तर दें."
+        else:
+            system = "You are a helpful assistant. Please give a long and detailed answer."
 
-
-def format_example(infobox, lang, summary=None):
-    lang = "English" #lang_map[lang].capitalize()
-    user_prompt = f"{lang} infobox: {infobox}"
-    assistant_prompt = f"\n{lang} summary:"
-    if summary is not None:
-        assistant_prompt += f" {summary}"
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": prompt},
+    ]
     return messages
 
-
-def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
-    prompt = f"The following text contains information collected from wikipedia infoboxes of well-known people. Generate the summary in hindi natural language using the given information. Summary should be in one sentence only."
-    messages = [{"role": "system", "content": prompt}]
-
-    if k > 0:
-        exemplars = dev_data.select(range(k))
-        for example in exemplars:
-            messages += format_example(
-                trim_context(example["infobox"], max_context_length, tokenizer),
-                lang=lang,
-                summary=example["summary"],
-            )
-    return messages
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -78,6 +45,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     return outputs
+
 
 def main(args):
     random.seed(args.seed)
@@ -122,45 +90,32 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/indic-wikibio-hi")
-    # for split in dataset.column_names:
-    #     column_names = dataset[split].column_names
-    #     itv2_column_names = []
-    #     for column_name in column_names:
-    #         if "itv2 hi" in column_name.lower():
-    #             itv2_column_names.append(column_name)
-    #     remove_column_names = [x[8:] for x in itv2_column_names]
-    #     dataset[split] = dataset[split].remove_columns(remove_column_names)
-    #     for itv2_column_name in itv2_column_names:
-    #         dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
-            
-    dataset = dataset.map(lambda x: {"infobox": x["infobox"].strip()})
-    dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
-    dev_data = dataset["validation"]
+    dataset = load_dataset("ai4bharat/human-eval")
     test_data = dataset["test"]
 
     prompts = []
+    simple_prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
-        prompt_end = format_example(
-            trim_context(example["infobox"], args.max_context_length, tokenizer), lang=args.lang
+        prompt = format_example(
+            example["system"] if "system" in example else "",
+            example["prompt"],
+            example["language"]
         )
-        train_prompt = gen_prompt(dev_data, args.lang, args.max_context_length, tokenizer, k)
-        prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
-        else:
-            prompt = "\n\n".join([x["content"] for x in prompt])
-        
-        
+            prompt = chat_formatting_function(prompt)
+
+        simple_prompts.append("\n\n".join([x["content"] for x in prompt]))
         prompts.append(prompt)
 
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+    outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
 
-    with open(os.path.join(args.save_dir, f"indicwikibio_{args.lang}_predictions.jsonl"), "w") as fout:
+    with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
@@ -172,42 +127,40 @@ def main(args):
 
     gc.collect()
 
-    print("Calculating Rouge and BLEURT ...")
-    rouge = evaluate.load("rouge")
-    bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
+    ratings = []
 
-    predictions = [output for output in outputs]
-    references = [example["summary"] for example in test_data]
+    for prompt, output in zip(simple_prompts, outputs):
+        try:
+            rating, text = get_lm_judge_rating(prompt, output)
+            print(
+                f"got rating {rating} with reason {text} for prompt {prompt} output {output}")
+            ratings.append({rating, text, prompt, output})
+        except ValueError as e:
+            print(f"got error {e} for prompt {prompt} output {output}")
 
-    rouge_metrics = rouge.compute(predictions=predictions, references=references)
-    metrics = {
-        "rouge1": rouge_metrics["rouge1"],
-        "rouge2": rouge_metrics["rouge2"],
-        "rougeL": rouge_metrics["rougeL"],
-        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
-    }
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
+    avg = 0
 
+    for r in ratings:
+        avg += float(r["rating"])
+    avg = avg / len(ratings)
     # save results
+
+    with open(os.path.join(args.save_dir, f"lm_judge_judgement.jsonl"), "w") as fout:
+        for row in ratings:
+            example["prediction_text"] = row
+            fout.write(json.dumps(example) + "\n")
+
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-        json.dump(metrics, fout, indent=4)
+        json.dump({"avg_rating": avg}, fout, indent=4)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=1, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=1,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--lang", type=str, default="hi", choices=["as", "bn", "kn", "hi", "ml", "or", "pa", "ta", "te"]
-    )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicwikibio/llama-7B/")
-    parser.add_argument(
-        "--bleurt_model_name_or_path",
-        type=str,
-        default="./BLEURT-20",
-        help="bleurt model to load for evaluation.",
-    )
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/indicwikibio/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -223,7 +176,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_context_length", type=int, default=768, help="maximum number of tokens in the context passage."
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
     parser.add_argument(
         "--load_in_8bit",
         action="store_true",
