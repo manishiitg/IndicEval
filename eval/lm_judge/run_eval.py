@@ -118,15 +118,18 @@ def main(args):
 
     final_data = []
     with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
-        for example, output, simple_prompt in zip(test_data, outputs, simple_prompts):
+        for example, output, simple_prompt, prompt in zip(test_data, outputs, simple_prompts, prompts):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
-            example["date"] = date.today().strftime("%m/%d/%Y")
-            example["model_name"] = args.model_name_or_path
-            example["simple_prompt"] = simple_prompt
-            example["judgement_pending"] = True
-            example["judgement"] = ""
-            example["rating"] = float(-1)
+            row = {}
+            row["prompt"] = prompt
+            row["response"] = output
+            row["date"] = date.today().strftime("%m/%d/%Y")
+            row["model_name"] = args.model_name_or_path
+            row["simple_prompt"] = simple_prompt
+            row["judgement_pending"] = True
+            row["judgement"] = ""
+            row["rating"] = float(-1)
             final_data.append(example)
 
     if args.push_output:
