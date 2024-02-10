@@ -136,6 +136,9 @@ def main(args):
     dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
     test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
 
+
+    test_data = test_data.select(range(10))
+
     k = args.ntrain
     prompts = []
     for i, example in enumerate(test_data):
@@ -152,11 +155,11 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
         
         prompts.append(prompt)
-        print(prompt)
-        os.exit(1)
-
+        
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.batch_size)
+
+    print("outputs", outputs)
     
     print("Calculating Rouge and BLEURT ...")
     rouge = evaluate.load("rouge")
