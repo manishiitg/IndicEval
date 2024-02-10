@@ -130,7 +130,7 @@ def main(args):
             row["judgement_pending"] = True
             row["judgement"] = ""
             row["rating"] = float(-1)
-            final_data.append(example)
+            final_data.append(row)
 
     if args.push_output:
 
