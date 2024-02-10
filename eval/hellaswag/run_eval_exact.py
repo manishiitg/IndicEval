@@ -59,12 +59,11 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     def extract_answer(row):
         answerStr = ""
         print(row)
-        answer = row["answer"]
-        if answer == "true":
-            answerStr = "A. Yes"
-        else:
-            answerStr = "B. No"
-        row["answer_text"] = answerStr
+        label = int(row["label"])
+        endings = row["endings"]
+        answerStr = endings[label]
+        choice = choices[label]
+        row["answer_text"] = choice + ". " + answerStr
         return row
 
     # Apply the function to each row of the DataFrame
