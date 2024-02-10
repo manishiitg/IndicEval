@@ -49,12 +49,12 @@ def format_example(input, lang, headline=None):
     assistant_prompt = f"\n{lang.capitalize()} headline:"
     if headline is not None:
         assistant_prompt += f" {headline}"
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    messages = [{"role":"user", "content":user_prompt + "\n" + assistant_prompt}]
     return messages
 
 
 def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
-    prompt = f"Generate a headline for the following article(s) as accurately as possible."
+    prompt = f"Generate a headline for the following article(s) in hindi as accurately as possible."
     messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))
@@ -159,6 +159,7 @@ def main(args):
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
+    print("prompts", prompts)
     print("outputs", outputs)
     
     print("Calculating Rouge and BLEURT ...")
