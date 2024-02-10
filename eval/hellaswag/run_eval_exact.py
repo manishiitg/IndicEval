@@ -9,10 +9,7 @@ import json
 from tqdm import tqdm
 import time
 from datasets import load_dataset
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from eval.utils import (
-    get_next_word_predictions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 import vllm
@@ -73,11 +70,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     targets = test_data['answer_text']
 
-    em_score = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
-    
-    print(f"Exact match : {em_score}")
-
     predictions = []
     idx = 0
     for row in test_data:
@@ -94,9 +86,22 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
 
+    em_score = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match: {em_score}")
+
+    outputs = [output[0] for output in outputs]
+    targets = [target[0] for target in targets]
+    # directly measuring A with A instead of of full option match
+
+    em_score_options = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match Only Options: {em_score_options}")
+
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
-            "exact_match": em_score
+            "exact_match": em_score,
+            "em_score_options" : em_score_options,
         }, fout, indent=4)
 
     return em_score
