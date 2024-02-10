@@ -37,6 +37,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
+    else
+        cat "$FILE"
     fi
 done
 
@@ -96,6 +98,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
+    else
+        cat "$FILE"
     fi
 done
 
@@ -154,6 +158,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
+    else
+        cat "$FILE"
     fi
 done
 
@@ -214,6 +220,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
+    else
+        cat "$FILE"
     fi
 done
 
