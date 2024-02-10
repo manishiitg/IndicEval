@@ -35,7 +35,7 @@ def format_example(text, label=None):
     return messages
 
 def gen_prompt(dev_data, k=-1):
-    prompt = "समीक्षा की भावना का अनुमान लगाएं. भावना के संभावित विकल्प हैं: 'सकारात्मक' और 'नकारात्मक'।"
+    prompt = "समीक्षा की भावना का अनुमान लगाएं. भावना के संभावित विकल्प हैं: 'सकारात्मक' और 'नकारात्मक'। केवल 'सकारात्मक' या 'नकारात्मक' उत्तर दें।"
     messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))

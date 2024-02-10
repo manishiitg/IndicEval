@@ -16,16 +16,20 @@ from eval.utils import (
     load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 templates = {
     "with_context": (
-        "Answer the following question based on the information in the given passage.",
+        "Answer the following question based on the information in the given passage. . If you cannot answer based on passage reply 'DONT KNOW'",
         "Passage:",
         "Question:",
         "Answer:",
     ),
     "no_context": (
-        "Answer the following question.",
+        "Answer the following question. If you don't know the answer reply 'DONT KNOW'",
         "Question:",
         "Answer:"),
 }
@@ -39,19 +43,104 @@ def trim_context(context, max_context_length, tokenizer):
         )
     return context
 
+@torch.no_grad()
+def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
+    def extract_answer(row):
+        answerStr = row["answers"]["text"][0]
+        if answerStr == "":
+            answerStr = 'DONT KNOW'
+        row["answer_text"] = answerStr
+        return row
+
+    # Apply the function to each row of the DataFrame
+    test_data = test_data.map(extract_answer)
+
+    targets = test_data['answer_text']
+
+    predictions = []
+    idx = 0
+    for row in test_data:
+        row = {
+            "question": row["question"],
+            "id" : row["id"],
+            "model_output": outputs[idx],
+            "prediction": targets[idx]
+        }
+        predictions.append(row)
+        print(row)
+        idx += 1
+
+    with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
+        for prediction in predictions:
+            fout.write(json.dumps(prediction) + "\n")
+
+    em_score = exact_match.compute(predictions=outputs, references=targets,
+                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+    print(f"Exact match: {em_score}")
+
+    os.exit(1)
+
+    with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
+        json.dump({
+            "exact_match": em_score,
+        }, fout, indent=4)
+
+    return em_score
+
 
 def main(args):
     random.seed(args.seed)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-        )
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.use_vllm:
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+    else:
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path,
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
+        #     load_in_8bit=args.load_in_8bit,
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -59,26 +148,19 @@ def main(args):
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
 
-    dataset = load_dataset("Thanmay/indic-qa-hindi")
-    for split in dataset.column_names:
-        column_names = dataset[split].column_names
-        itv2_column_names = []
-        for column_name in column_names:
-            if "itv2 hi" in column_name.lower():
-                itv2_column_names.append(column_name)
-        remove_column_names = [x[8:] for x in itv2_column_names]
-        dataset[split] = dataset[split].remove_columns(remove_column_names)
-        for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
-
+    dataset = load_dataset("ai4bharat/IndicQA", "indiaqa.hi")
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
 
+    test_data = test_data.select(range(10))
+
+    k = args.ntrain
+    sample_data = test_data.select(range(k*3))
     prompts = []
     for i, example in enumerate(test_data):
-        dev_data = test_data.filter(lambda x: x["question"] != example["question"]).shuffle(args.seed)
-        k = args.ntrain
+        dev_data = sample_data.filter(lambda x: x["question"] != example["question"]).shuffle(args.seed)
+        
 
         if args.no_context:
             prompt, q_template, a_template = templates["no_context"]
@@ -124,51 +206,18 @@ def main(args):
                 + "\n"
             )
         assistant_prompt = a_template
-        prompt_end = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+        prompt_end = [{"role":"user", "content":user_prompt + "\n" + assistant_prompt}]
         
         prompt = train_prompt + prompt_end
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         prompts.append(prompt)
 
-    new_line_token = tokenizer.encode("\n", add_special_tokens=False)[
-        -1
-    ]  # get the last token because the tokenizer may add space tokens at the start.
-    outputs = generate_completions(
-        model=model,
-        tokenizer=tokenizer,
-        prompts=prompts,
-        max_new_tokens=50,
-        batch_size=args.eval_batch_size,
-        stop_id_sequences=None,
-    )
-    # remove unnecessary space
-    outputs = [output.strip().split("\n")[0] for output in outputs]
-
-    with open(os.path.join(args.save_dir, f"indicqa_{args.lang}_predictions.jsonl"), "w") as fout:
-        for example, output in zip(test_data, outputs):
-            example["prediction_text"] = output
-            fout.write(json.dumps(example) + "\n")
-
-    print("Calculating F1, EM ...")
-    metric = evaluate.load("squad")
-
-    predictions = [{"id": example["id"], "prediction_text": output} for example, output in zip(test_data, outputs)]
-    references = [{"id": example["id"], "answers": example["answers"]} for example in test_data]
-    for i in range(len(references)):
-        if references[i]["answers"]["text"][0] == "":
-            references[i]["answers"]["text"][0] = "unanswerable"
-
-    metrics = metric.compute(predictions=predictions, references=references)
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
-
-    # save results
-    with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-        json.dump(metrics, fout, indent=4)
+    em_score = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
+    print("Em Score", em_score)
 
 
 if __name__ == "__main__":
