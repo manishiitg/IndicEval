@@ -41,29 +41,29 @@ done
 #                       Indic BoolQ
 # -------------------------------------------------------------
 
-for model_name_or_path in "${model_names[@]}"; do
-    model_name=${model_name_or_path##*/}
-    TASK_NAME=boolq-hi
-    NUM_SHOTS=0short
+# for model_name_or_path in "${model_names[@]}"; do
+#     model_name=${model_name_or_path##*/}
+#     TASK_NAME=boolq-hi
+#     NUM_SHOTS=0short
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+#     FILE=$FOLDER/metrics.json
+#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-    if [ ! -f "$FILE" ]; then
-        # zero-shot
-        python3 -m eval.boolq.run_translated_eval \
-            --ntrain 0 \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 4 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq
+#     if [ ! -f "$FILE" ]; then
+#         # zero-shot
+#         python3 -m eval.boolq.run_translated_eval \
+#             --ntrain 0 \
+#             --save_dir $FOLDER \
+#             --model_name_or_path $model_name_or_path \
+#             --tokenizer_name_or_path $model_name_or_path \
+#             --eval_batch_size 4 \
+#             --use_chat_format \
+#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+#             --awq
 
-    fi
-done
+#     fi
+# done
 
 # -------------------------------------------------------------
 #                            BoolQ
@@ -94,25 +94,25 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 done
 
-for model_name_or_path in "${model_names[@]}"; do
-    model_name=${model_name_or_path##*/}
-    TASK_NAME=boolq
-    NUM_SHOTS=0short
+# for model_name_or_path in "${model_names[@]}"; do
+#     model_name=${model_name_or_path##*/}
+#     TASK_NAME=boolq
+#     NUM_SHOTS=0short
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
-    FILE=$FOLDER/metrics.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+#     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+#     FILE=$FOLDER/metrics.json
+#     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-    if [ ! -f "$FILE" ]; then
-        # zero-shot
-        python3 -m eval.boolq.run_eval \
-            --ntrain 0 \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 4 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq
-    fi
-done
+#     if [ ! -f "$FILE" ]; then
+#         # zero-shot
+#         python3 -m eval.boolq.run_eval \
+#             --ntrain 0 \
+#             --save_dir $FOLDER \
+#             --model_name_or_path $model_name_or_path \
+#             --tokenizer_name_or_path $model_name_or_path \
+#             --eval_batch_size 4 \
+#             --use_chat_format \
+#             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+#             --awq
+#     fi
+# done
