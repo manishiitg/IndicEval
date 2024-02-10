@@ -58,6 +58,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     def extract_answer(row):
         answerStr = ""
+        print(row)
         answer = row["answer"]
         if answer == "true":
             answerStr = "A. Yes"
