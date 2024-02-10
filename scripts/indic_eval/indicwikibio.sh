@@ -19,7 +19,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         # 1-shot
-        python3 -m eval.indicwikibio.run_eval \
+        python3 -m eval.indicwikibio.run_eval_exact \
             --ntrain 0 \
             --max_context_length 3750 \
             --save_dir $FOLDER \
