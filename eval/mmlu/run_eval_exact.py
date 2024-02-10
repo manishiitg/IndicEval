@@ -97,7 +97,11 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     def extract_answer(row):
-        choices = row['choices'].split('\n')
+
+        if isinstance(row['choices'], str): # in hi data is string but in en its list
+            choices = row['choices'].split('\n')
+        else:
+            choices = row["choices"]
         answer_index = int(row['answer'])  # Adjust for zero-based indexing
         if answer_index < len(choices):
             # Remove the number and the bracket
