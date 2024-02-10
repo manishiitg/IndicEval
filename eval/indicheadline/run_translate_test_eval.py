@@ -159,7 +159,6 @@ def main(args):
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
 
-    print("prompts", prompts)
     print("outputs", outputs)
     
     print("Calculating Rouge and BLEURT ...")
