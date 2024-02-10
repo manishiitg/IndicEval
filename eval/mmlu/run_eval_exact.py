@@ -118,7 +118,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             # Remove the number and the bracket
             choice = choices[answer_index].strip()
             option_str = "{})".format(answer_index)
-            if option_str in choice:
+            if option_str not in choice:
                 choice = "{} {}".format(option_str, choice)
             return choice
         else:
