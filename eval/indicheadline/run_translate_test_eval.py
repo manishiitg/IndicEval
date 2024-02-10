@@ -11,11 +11,13 @@ import time
 import evaluate
 from datasets import load_dataset
 from eval.utils import (
-    generate_completions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
 from bleurt import score
+from transformers import AutoTokenizer
+import vllm
+import evaluate
+exact_match = evaluate.load("exact_match")
 
 lang_map = {
     "as": "Assamese",
@@ -64,45 +66,80 @@ def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
             )
     return messages
 
+@torch.no_grad()
+def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
+    return outputs
 
 def main(args):
     random.seed(args.seed)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
-        )
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.use_vllm:
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+    else:
+        # print("Loading model and tokenizer hf...")
+        # model, tokenizer = load_hf_lm_and_tokenizer(
+        #     model_name_or_path=args.model_name_or_path,
+        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
+        #     load_in_8bit=args.load_in_8bit,
+        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+        #     gptq_model=args.gptq,
+        #     use_fast_tokenizer=not args.use_slow_tokenizer,
+        # )
+        raise Exception("only vllm is supported")
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/indic-hgen-hi")
-    for split in dataset.column_names:
-        column_names = dataset[split].column_names
-        itv2_column_names = []
-        for column_name in column_names:
-            if "itv2 hi" in column_name.lower():
-                itv2_column_names.append(column_name)
-        remove_column_names = [x[8:] for x in itv2_column_names]
-        dataset[split] = dataset[split].remove_columns(remove_column_names)
-        for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+    dataset = load_dataset("ai4bharat/IndicHeadlineGeneration","hi")
             
     dataset = dataset.map(lambda x: {"input": x["input"].strip()})
     dataset = dataset.map(lambda x: {"target": x["target"].strip()})
     dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
     test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
 
+    k = args.ntrain
     prompts = []
     for i, example in enumerate(test_data):
-        k = args.ntrain
+        
         prompt_end = format_example(
             input=trim_context(example["input"], args.max_context_length, tokenizer), lang=args.lang
         )
@@ -110,36 +147,17 @@ def main(args):
         prompt = train_prompt + prompt_end
         
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
         
-        if include_prompt:
-            prompts.append(prompt)
+        prompts.append(prompt)
+        print(prompt)
+        os.exit(1)
 
-    outputs = generate_completions(
-        model=model,
-        tokenizer=tokenizer,
-        prompts=prompts,
-        max_new_tokens=50,
-        batch_size=args.eval_batch_size,
-        stop_id_sequences=None,
-    )
-    # remove unnecessary space
-    outputs = [output.strip().split("\n")[0] for output in outputs]
 
-    with open(os.path.join(args.save_dir, f"indicheadline_{args.lang}_predictions.jsonl"), "w") as fout:
-        for example, output in zip(test_data, outputs):
-            example["prediction_text"] = output
-            fout.write(json.dumps(example) + "\n")
-
-    # flush all the GPU memory
-    del model
-    torch.cuda.empty_cache()
-    import gc
-
-    gc.collect()
-
+    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.batch_size)
+    
     print("Calculating Rouge and BLEURT ...")
     rouge = evaluate.load("rouge")
     bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
@@ -218,6 +236,16 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+    )
+    parser.add_argument(
+        "--use_vllm",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     main(args)
