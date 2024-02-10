@@ -126,17 +126,17 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/indic-wikibio-hi", args.lang)
-    for split in dataset.column_names:
-        column_names = dataset[split].column_names
-        itv2_column_names = []
-        for column_name in column_names:
-            if "itv2 hi" in column_name.lower():
-                itv2_column_names.append(column_name)
-        remove_column_names = [x[8:] for x in itv2_column_names]
-        dataset[split] = dataset[split].remove_columns(remove_column_names)
-        for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+    dataset = load_dataset("Thanmay/indic-wikibio-hi")
+    # for split in dataset.column_names:
+    #     column_names = dataset[split].column_names
+    #     itv2_column_names = []
+    #     for column_name in column_names:
+    #         if "itv2 hi" in column_name.lower():
+    #             itv2_column_names.append(column_name)
+    #     remove_column_names = [x[8:] for x in itv2_column_names]
+    #     dataset[split] = dataset[split].remove_columns(remove_column_names)
+    #     for itv2_column_name in itv2_column_names:
+    #         dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
             
     dataset = dataset.map(lambda x: {"infobox": x["infobox"].strip()})
     dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
