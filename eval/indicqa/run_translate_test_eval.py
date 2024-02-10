@@ -155,7 +155,7 @@ def main(args):
     sample_data = test_data.select(range(k*3))
     prompts = []
     for i, example in enumerate(test_data):
-        dev_data = sample_data.filter(lambda x: x["question"] != example["question"]).shuffle(args.seed)
+        dev_data = sample_data.filter(lambda x: x["question"] != example["question"])#.shuffle(args.seed)
         
 
         if args.no_context:
