@@ -21,7 +21,6 @@ for model_name_or_path in "${model_names[@]}"; do
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
-
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.boolq.run_translated_eval_exact \
@@ -34,7 +33,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
-
+    else
+        cat "$FILE"
     fi
 done
 
@@ -91,7 +91,8 @@ for model_name_or_path in "${model_names[@]}"; do
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             --use_vllm \
             --awq
-
+    else
+        cat "$FILE"
     fi
 done
 
