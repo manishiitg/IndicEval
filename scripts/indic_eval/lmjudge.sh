@@ -37,4 +37,17 @@ python3 -m eval.lm_judge.run_eval \
     --eval_batch_size 1 \
     --use_chat_format \
     --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format \
-    --use_vllm \
+    --use_vllm
+
+
+model_name_or_path=sarvamai/OpenHathi-7B-Hi-v0.1-Base
+model_name=OpenHathi-7B-Hi-v0.1-Base
+FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
+python3 -m eval.lm_judge.run_eval \
+    --save_dir $FOLDER \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1 \
+    --use_chat_format \
+    --chat_formatting_function eval.templates.create_prompt_with_llama2_chat_format \
+    --use_vllm
