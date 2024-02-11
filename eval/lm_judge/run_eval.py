@@ -15,6 +15,7 @@ from datetime import date
 
 ### in this we simply save prompts outputs to a huggingface repo
 ### i using gemini pro (Free) as LM judge to rate the ouputs
+# https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
 
 
 @torch.no_grad()
@@ -89,6 +90,7 @@ def main(args):
     simple_prompts = []
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
+        print("messages", messages)
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
         prompt = chat_formatting_function(messages)
         prompts.append(prompt)
