@@ -8,7 +8,7 @@ mkdir -p data/eval
 # mv data/downloads/mmlu_data/data data/eval/mmlu && rm -r data/downloads/mmlu_data data/downloads/mmlu_data.tar
 
 # Downloads the BLEURT-base checkpoint.
-wget https://storage.googleapis.com/bleurt-oss-21/BLEURT-20.zip
+wget https://storage.googleapis.com/bleurt-oss-21/BLEURT-20.zip .
 unzip BLEURT-20.zip
 
 # # Big-Bench-Hard dataset
