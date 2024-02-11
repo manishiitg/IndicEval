@@ -73,3 +73,43 @@ def sort_data(data):
 # Sort the data
 sorted_data = sort_data(scores)
 print(json.dumps(sorted_data, indent=4))
+
+# Function to convert JSON to Markdown
+def json_to_markdown(data):
+    markdown_output = ""
+    
+    # Iterate over tasks
+    for task, sub_tasks in data.items():
+        # Add a header for the task
+        markdown_output += f"## {task.capitalize()}\n\n"
+        
+        # Iterate over sub-tasks
+        for sub_task, shots in sub_tasks.items():
+            # Add a header for the sub-task
+            markdown_output += f"### {sub_task.capitalize()}\n\n"
+            
+            # Iterate over shots
+            for shot, models in shots.items():
+                # Add a header for the shot
+                markdown_output += f"#### {shot.capitalize()}\n\n"
+                
+                # Create a table header
+                markdown_output += "| Model | Metric | Value |\n"
+                markdown_output += "| --- | --- | --- |\n"
+                
+                # Iterate over models
+                for model, metrics in models.items():
+                    # Add a row for each model with the first metric
+                    metric_name, metric_value = next(iter(metrics.items()))
+                    markdown_output += f"| {model} | {metric_name} | {metric_value} |\n"
+                
+                # Add a newline after the table
+                markdown_output += "\n"
+    
+    return markdown_output
+
+# Convert JSON to Markdown
+markdown_output = json_to_markdown(sorted_data)
+
+# Print the Markdown output
+print(markdown_output)
