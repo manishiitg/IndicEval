@@ -53,7 +53,7 @@ def sort_data(data):
                         break  # Break after the first metric is found
     
     # Sort the list based on the metric
-    sorted_data.sort(key=lambda x: x[5])
+    sorted_data.sort(key=lambda x: x[5], reverse=True)
     
     # Create a new JSON structure with the sorted data
     sorted_json = {}
