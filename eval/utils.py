@@ -7,6 +7,13 @@ import os
 from importlib import import_module
 from transformers import StoppingCriteria
 
+from open_instruct.finetune import encode_with_prompt_completion_format
+from eval.dispatch_openai_requests import (
+    dispatch_openai_chat_requesets,
+    dispatch_openai_prompt_requesets,
+)
+
+
 class KeyWordsCriteria(StoppingCriteria):
     def __init__(self, stop_id_sequences):
         assert isinstance(
@@ -177,6 +184,52 @@ def get_next_word_predictions(
     return predictions, probs
 
 
+@torch.no_grad()
+def score_completions(model, tokenizer, scoring_examples, disable_tqdm=False):
+    """
+    Each scoring example is a dict, which contains the following keys:
+    - prompt: the prompt to score
+    - completions: a list of completions to score
+    """
+
+    if not disable_tqdm:
+        progress = tqdm.tqdm(total=len(scoring_examples), desc="Scoring Completions")
+
+    # unroll the scoring examples
+    unrolled_examples = []
+    for scoring_example in scoring_examples:
+        prompt = scoring_example["prompt"]
+        for completion in scoring_example["completions"]:
+            unrolled_examples.append({"prompt": prompt, "completion": completion})
+
+    scores = []
+    # currently we don't support batching, because we want to directly use the loss returned by the model to score each completion.
+    for unrolled_example in unrolled_examples:
+        encoded_example = encode_with_prompt_completion_format(
+            unrolled_example, tokenizer, max_seq_length=None
+        )
+        # unsqueeze the batch dimension
+        for key, value in encoded_example.items():
+            encoded_example[key] = value.unsqueeze(0)
+        if model.device.type == "cuda":
+            encoded_example = {key: value.cuda() for key, value in encoded_example.items()}
+        outputs = model(**encoded_example)
+        loss = outputs.loss
+        scores.append(-loss.item())
+        if not disable_tqdm:
+            progress.update(1)
+
+    # roll up the scores
+    rolled_up_scores = {}
+    for unrolled_example, score in zip(unrolled_examples, scores):
+        prompt = unrolled_example["prompt"]
+        completion = unrolled_example["completion"]
+        if prompt not in rolled_up_scores:
+            rolled_up_scores[prompt] = {}
+        rolled_up_scores[prompt][completion] = score
+
+    return rolled_up_scores
+
 
 def load_hf_lm_and_tokenizer(
     model_name_or_path,
@@ -251,6 +304,162 @@ def load_hf_lm_and_tokenizer(
         )
 
     return model, tokenizer
+
+
+def query_openai_chat_model(
+    engine,
+    instances,
+    output_path=None,
+    batch_size=10,
+    retry_limit=5,
+    reuse_existing_outputs=True,
+    **completion_kwargs,
+):
+    """
+    Query OpenAI chat model and save the results to output_path.
+    `instances` is a list of dictionaries, each dictionary contains a key "prompt" and a key "id".
+    """
+    existing_data = {}
+    if reuse_existing_outputs and output_path is not None and os.path.exists(output_path):
+        with open(output_path, "r") as f:
+            for line in f:
+                instance = json.loads(line)
+                existing_data[instance["id"]] = instance
+
+    # by default, we use temperature 0.0 to get the most likely completion.
+    if "temperature" not in completion_kwargs:
+        completion_kwargs["temperature"] = 0.0
+
+    results = []
+    if output_path is not None:
+        fout = open(output_path, "w")
+
+    retry_count = 0
+    progress_bar = tqdm.tqdm(total=len(instances))
+    for i in range(0, len(instances), batch_size):
+        batch = instances[i : i + batch_size]
+        if all([x["id"] in existing_data for x in batch]):
+            results.extend([existing_data[x["id"]] for x in batch])
+            if output_path is not None:
+                for instance in batch:
+                    fout.write(json.dumps(existing_data[instance["id"]]) + "\n")
+                    fout.flush()
+            progress_bar.update(batch_size)
+            continue
+        messages_list = []
+        for instance in batch:
+            messages = [{"role": "user", "content": instance["prompt"]}]
+            messages_list.append(messages)
+        while retry_count < retry_limit:
+            try:
+                outputs = asyncio.run(
+                    dispatch_openai_chat_requesets(
+                        messages_list=messages_list,
+                        model=engine,
+                        **completion_kwargs,
+                    )
+                )
+                retry_count = 0
+                break
+            except Exception as e:
+                retry_count += 1
+                print(f"Error while requesting OpenAI API.")
+                print(e)
+                print(f"Sleep for {30*retry_count} seconds.")
+                time.sleep(30 * retry_count)
+                print(f"Retry for the {retry_count} time.")
+        if retry_count == retry_limit:
+            raise RuntimeError(
+                f"Failed to get response from OpenAI API after {retry_limit} retries."
+            )
+        assert len(outputs) == len(batch)
+        for instance, output in zip(batch, outputs):
+            instance[f"output"] = output["choices"][0]["message"]["content"]
+            instance["response_metadata"] = output
+            results.append(instance)
+            if output_path is not None:
+                fout.write(json.dumps(instance) + "\n")
+                fout.flush()
+        progress_bar.update(batch_size)
+    return results
+
+
+def query_openai_model(
+    engine,
+    instances,
+    output_path=None,
+    batch_size=10,
+    retry_limit=5,
+    reuse_existing_outputs=True,
+    **completion_kwargs,
+):
+    """
+    Query OpenAI chat model and save the results to output_path.
+    `instances` is a list of dictionaries, each dictionary contains a key "prompt" and a key "id".
+    """
+    existing_data = {}
+    if reuse_existing_outputs and output_path is not None and os.path.exists(output_path):
+        with open(output_path, "r") as f:
+            for line in f:
+                instance = json.loads(line)
+                existing_data[instance["id"]] = instance
+
+    # by default, we use temperature 0.0 to get the most likely completion.
+    if "temperature" not in completion_kwargs:
+        completion_kwargs["temperature"] = 0.0
+
+    results = []
+    if output_path is not None:
+        fout = open(output_path, "w")
+
+    retry_count = 0
+    progress_bar = tqdm.tqdm(total=len(instances))
+    for i in range(0, len(instances), batch_size):
+        batch = instances[i : i + batch_size]
+        if all([x["id"] in existing_data for x in batch]):
+            results.extend([existing_data[x["id"]] for x in batch])
+            if output_path is not None:
+                for instance in batch:
+                    fout.write(json.dumps(existing_data[instance["id"]]) + "\n")
+                    fout.flush()
+            progress_bar.update(batch_size)
+            continue
+        messages_list = []
+        for instance in batch:
+            messages = instance["prompt"]
+            messages_list.append(messages)
+        while retry_count < retry_limit:
+            try:
+                outputs = asyncio.run(
+                    dispatch_openai_prompt_requesets(
+                        prompt_list=messages_list,
+                        model=engine,
+                        **completion_kwargs,
+                    )
+                )
+                retry_count = 0
+                break
+            except Exception as e:
+                retry_count += 1
+                print(f"Error while requesting OpenAI API.")
+                print(e)
+                print(f"Sleep for {30*retry_count} seconds.")
+                time.sleep(30 * retry_count)
+                print(f"Retry for the {retry_count} time.")
+        if retry_count == retry_limit:
+            raise RuntimeError(
+                f"Failed to get response from OpenAI API after {retry_limit} retries."
+            )
+        assert len(outputs) == len(batch)
+        for instance, output in zip(batch, outputs):
+            instance[f"output"] = output["choices"][0]["text"]
+            instance["response_metadata"] = output
+            results.append(instance)
+            if output_path is not None:
+                fout.write(json.dumps(instance) + "\n")
+                fout.flush()
+        progress_bar.update(batch_size)
+    return results
 
 
 def dynamic_import_function(function_path):
