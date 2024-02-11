@@ -90,7 +90,6 @@ def main(args):
     simple_prompts = []
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
-        print("messages", messages)
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
         prompt = chat_formatting_function(messages)
         prompts.append(prompt)
@@ -119,7 +118,8 @@ def main(args):
         if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
             ds = load_dataset(args.push_output, split="train")
             for row in ds:
-                final_data.append(row)
+                if row["model_name"] != args.model_name_or_path:
+                    final_data.append(row)
 
         dataset = process_and_update_dataset(final_data)
         dataset.push_to_hub(args.push_output, private=False)
