@@ -115,3 +115,18 @@ markdown_output = json_to_markdown_table(sorted_data)
 
 # Print the Markdown output
 print(markdown_output)
+
+# Function to save Markdown output to a file
+def save_markdown_to_file(markdown_text, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(markdown_text)
+
+# Function to save sorted JSON data to a file
+def save_json_to_file(data, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, indent=4)
+
+# Save the Markdown output to a file
+save_markdown_to_file(markdown_output, directory + 'output.md')
+# Save the sorted JSON data to a file
+save_json_to_file(sorted_data, directory + 'sorted_data.json')
