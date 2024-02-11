@@ -36,4 +36,40 @@ for root, dirs, files in os.walk(directory):
             else:
                 print(file_path)
 
-print(json.dumps(scores, indent=4))
+# Function to sort the data
+def sort_data(data):
+    # List to hold the sorted data
+    sorted_data = []
+    
+    # Iterate over tasks, sub-tasks, shots, and models
+    for task, sub_tasks in data.items():
+        for sub_task, shots in sub_tasks.items():
+            for shot, models in shots.items():
+                for model, metrics in models.items():
+                    # Check if the metric is available
+                    for metric_name, metric_value in metrics.items():
+                        # Add the data to the list
+                        sorted_data.append((task, sub_task, shot, model, metric_name, metric_value))
+                        break  # Break after the first metric is found
+    
+    # Sort the list based on the metric
+    sorted_data.sort(key=lambda x: x[5])
+    
+    # Create a new JSON structure with the sorted data
+    sorted_json = {}
+    for task, sub_task, shot, model, metric_name, metric_value in sorted_data:
+        if task not in sorted_json:
+            sorted_json[task] = {}
+        if sub_task not in sorted_json[task]:
+            sorted_json[task][sub_task] = {}
+        if shot not in sorted_json[task][sub_task]:
+            sorted_json[task][sub_task][shot] = {}
+        if model not in sorted_json[task][sub_task][shot]:
+            sorted_json[task][sub_task][shot][model] = {}
+        sorted_json[task][sub_task][shot][model][metric_name] = metric_value
+    
+    return sorted_json
+
+# Sort the data
+sorted_data = sort_data(scores)
+print(json.dumps(sorted_data, indent=4))
