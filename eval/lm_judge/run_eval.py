@@ -86,13 +86,26 @@ def main(args):
     dataset = load_dataset("manishiitg/human_eval")
     test_data = dataset["train"]
 
+    existing_data = []
+    api = HfApi()
+    if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
+        ds = load_dataset(args.push_output, split="train")
+        for row in ds:
+            if row["model_name"] == args.model_name_or_path:
+                existing_data.append(row)
+
     prompts = []
     simple_prompts = []
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
         prompt = chat_formatting_function(messages)
-        prompts.append(prompt)
+        exists = False
+        for p in existing_data:
+            if p["prompt"] == prompt:
+                exists = True
+        if not exists:
+            prompts.append(prompt)
 
     outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
 
@@ -112,17 +125,17 @@ def main(args):
             row["rating"] = float(-1)
             final_data.append(row)
 
-    if args.push_output:
 
-        api = HfApi()
-        if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
-            ds = load_dataset(args.push_output, split="train")
-            for row in ds:
-                if row["model_name"] != args.model_name_or_path:
-                    final_data.append(row)
 
-        dataset = process_and_update_dataset(final_data)
-        dataset.push_to_hub(args.push_output, private=False)
+    api = HfApi()
+    if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
+        ds = load_dataset(args.push_output, split="train")
+        for row in ds:
+            # if row["model_name"] != args.model_name_or_path:
+            final_data.append(row)
+
+    dataset = process_and_update_dataset(final_data)
+    dataset.push_to_hub(args.push_output, private=False)
 
 
 def process_and_update_dataset(new_data):
