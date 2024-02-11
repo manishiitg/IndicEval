@@ -8,8 +8,8 @@ for root, dirs, files in os.walk(directory):
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
             print(file_path)
-
-            splits = file_path.replace(directory, "").split(['/'])
+            
+            splits = file_path.replace(directory, "").split('/')
             task = splits[0]
             sub_task = splits[1]
             model = splits[2]
