@@ -136,7 +136,6 @@ def main(args):
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("facebook/flores", f"{args.src_lang}-{args.tgt_lang}")
-    dataset = dataset.select(range(10))
     dataset = dataset.map(
         lambda x: {
             f"sentence_{args.src_lang}": x[f"sentence_{args.src_lang}"].strip(),
