@@ -94,10 +94,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
 
-    em_score = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
-    print(f"Exact match : {em_score}")
-
     outputs = [output[0] if len(output) > 0  else "" for output in outputs]
     targets = [target[0] if len(target) > 0  else ""  for target in targets]
     # directly measuring A with A instead of of full option match
@@ -108,11 +104,10 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
-            "exact_match": em_score,
-            "em_score_options" : em_score_options,
+            "exact_match": em_score_options,
         }, fout, indent=4)
 
-    return em_score
+    return em_score_options
 
 def main(args):
     random.seed(args.seed)
