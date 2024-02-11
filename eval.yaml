@@ -1,0 +1,57 @@
+resources:
+  use_spot: True
+  cloud: gcp
+  disk_size: 128
+  accelerators: A100:1
+  
+file_mounts:
+  /sky-notebook:
+    source: gs://sky-notebook
+    mode: MOUNT
+
+run: |
+  cd /home/gcpuser
+  pip install torch torchvision torchaudio datasets
+  pip install packaging
+  git clone https://github.com/manishiitg/IndicInstruct.git
+  cd IndicInstruct
+  pip install -r requirements.txt
+  cd ..
+  git clone https://github.com/google-research/bleurt.git
+  cd bleurt
+  pip install .
+  cd ..
+  pip install sacrebleu
+  git clone https://github.com/casper-hansen/AutoAWQ
+  cd AutoAWQ
+  pip install -e .
+  cd ..
+  git clone https://github.com/Dao-AILab/flash-attention.git
+  cd flash-attention
+  pip install . --no-build-isolation
+  cd ..
+  cd IndicInstruct
+  huggingface-cli login --token xxxx
+  bash scripts/prepare_eval_data.sh
+  bash scripts/indic_eval/boolq.sh
+  bash scripts/indic_eval/arc.sh
+  bash scripts/indic_eval/flores.sh
+  bash scripts/indic_eval/hellaswag.sh
+  bash scripts/indic_eval/in22_gen.sh
+
+  bash scripts/indic_eval/indicheadline.sh
+  bash scripts/indic_eval/indicqa.sh
+  bash scripts/indic_eval/indicsentiment.sh
+  bash scripts/indic_eval/indicwikibio.sh
+  bash scripts/indic_eval/mmlu.sh
+  bash scripts/indic_eval/lm_judge.sh
+  python3 print.py
+  
+  # bash scripts/indic_eval/implicit_hate.sh
+  # bash scripts/indic_eval/indicxnli.sh
+  # bash scripts/indic_eval/indicxparaphrase.sh
+  # bash scripts/indic_eval/indiccopa.sh
+  # bash scripts/indic_eval/hatecheckhin.sh
+
+  # bash scripts/indic_eval/winogrande.sh
+  # bash scripts/indic_eval/xlsum.sh
