@@ -36,3 +36,4 @@ openpyxl
 sacrebleu
 google-generativeai
 huggingface_hub
+datasets
