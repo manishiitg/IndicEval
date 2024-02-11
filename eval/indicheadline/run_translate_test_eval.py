@@ -155,6 +155,8 @@ def main(args):
         
 
     outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+    if len(outputs) > 2:
+        print(outputs[:2])
 
     # flush all the GPU memory
     del model

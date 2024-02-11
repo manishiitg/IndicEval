@@ -77,6 +77,8 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
 
+    if len(outputs) > 2:
+        print(outputs[:2])
     return outputs
 
 def main(args):

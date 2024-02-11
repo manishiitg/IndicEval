@@ -141,6 +141,8 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         
         idx += 1
 
+    if len(predictions) > 2:
+        print(predictions[:2])
     with open(os.path.join(args.save_dir, f"predictions-{subject}.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")

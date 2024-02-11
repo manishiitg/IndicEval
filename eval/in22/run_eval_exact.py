@@ -205,6 +205,8 @@ def main(args):
 
     predictions = [output for output in outputs]
     references = [[example[f"sentence_{args.tgt_lang}"]] for example in test_data]
+    if len(predictions) > 2:
+        print(predictions[:2])
 
     metrics = {
         "bleu": sacrebleu.compute(predictions=predictions, references=references)["score"],
