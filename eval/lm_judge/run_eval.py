@@ -13,6 +13,9 @@ import vllm
 from datasets import Dataset
 from datetime import date
 
+### in this we simply save prompts outputs to a huggingface repo
+### i using gemini pro (Free) as LM judge to rate the ouputs
+
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -86,8 +89,8 @@ def main(args):
     simple_prompts = []
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
-        simple_prompts.append("\n\n".join([messages["content"] for x in prompt]))
-        prompt = chat_formatting_function(prompt)
+        simple_prompts.append("\n\n".join([x["content"] for x in messages]))
+        prompt = chat_formatting_function(messages)
         prompts.append(prompt)
 
     outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
