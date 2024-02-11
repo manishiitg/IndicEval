@@ -22,7 +22,16 @@ for root, dirs, files in os.walk(directory):
                     try:
                         metric = json.load(json_file)
                         print(json.dumps(metric, indent=4))
-
+                        
+                        if model not in scores:
+                            scores[model] = {}
+                        if task not in scores[model]:
+                            scores[model][task] = {}
+                        if sub_task not in scores[model][task]:
+                            scores[model][task][sub_task] = {}
+                        if shot not in scores[model][task][sub_task]:
+                            scores[model][task][sub_task][shot] = {}
+                            
                         scores[model][task][sub_task][shot] = metric
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
