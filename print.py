@@ -74,42 +74,60 @@ def sort_data(data):
 sorted_data = sort_data(scores)
 print(json.dumps(sorted_data, indent=4))
 
-# Function to convert JSON to Markdown
-def json_to_markdown(data):
+# Function to convert JSON to Markdown table grouped by model
+def json_to_markdown_table(data):
     markdown_output = ""
     
-    # Iterate over tasks
+    # Create a dictionary to hold models and their data
+    models_data = {}
+    
+    # Iterate over tasks, sub-tasks, shots, and models to collect data
     for task, sub_tasks in data.items():
-        # Add a header for the task
-        markdown_output += f"## {task.capitalize()}\n\n"
+        for sub_task, shots in sub_tasks.items():
+            for shot, models in shots.items():
+                for model, metrics in models.items():
+                    # Add the data to the models_data dictionary
+                    if model not in models_data:
+                        models_data[model] = {}
+                    if sub_task not in models_data[model]:
+                        models_data[model][sub_task] = {}
+                    if shot not in models_data[model][sub_task]:
+                        models_data[model][sub_task][shot] = {}
+                    # Add the metric to the model's data
+                    for metric_name, metric_value in metrics.items():
+                        if metric_name not in models_data[model][sub_task][shot]:
+                            models_data[model][sub_task][shot][metric_name] = []
+                        models_data[model][sub_task][shot][metric_name].append(metric_value)
+    
+    # Iterate over the models and create a table for each one
+    for model, sub_tasks in models_data.items():
+        # Add a header for the model
+        markdown_output += f"## {model}\n\n"
         
         # Iterate over sub-tasks
         for sub_task, shots in sub_tasks.items():
             # Add a header for the sub-task
             markdown_output += f"### {sub_task.capitalize()}\n\n"
             
-            # Iterate over shots
-            for shot, models in shots.items():
-                # Add a header for the shot
-                markdown_output += f"#### {shot.capitalize()}\n\n"
-                
-                # Create a table header
-                markdown_output += "| Model | Metric | Value |\n"
-                markdown_output += "| --- | --- | --- |\n"
-                
-                # Iterate over models
-                for model, metrics in models.items():
-                    # Add a row for each model with the first metric
-                    metric_name, metric_value = next(iter(metrics.items()))
-                    markdown_output += f"| {model} | {metric_name} | {metric_value} |\n"
-                
-                # Add a newline after the table
-                markdown_output += "\n"
+            # Create a table header
+            markdown_output += "| Shot | Metric | Average Value |\n"
+            markdown_output += "| --- | --- | --- |\n"
+            
+            # Iterate over shots and calculate averages
+            for shot, metrics in shots.items():
+                for metric_name, metric_values in metrics.items():
+                    # Calculate the average
+                    average_value = sum(metric_values) / len(metric_values)
+                    # Add a row for the shot and metric with the average value
+                    markdown_output += f"| {shot} | {metric_name} | {average_value:.4f} |\n"
+            
+            # Add a newline after the table
+            markdown_output += "\n"
     
     return markdown_output
 
-# Convert JSON to Markdown
-markdown_output = json_to_markdown(sorted_data)
+# Convert JSON to Markdown table grouped by model
+markdown_output = json_to_markdown_table(sorted_data)
 
 # Print the Markdown output
 print(markdown_output)
