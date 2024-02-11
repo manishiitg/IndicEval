@@ -5,6 +5,8 @@ directory = "/sky-notebook/eval-results/"
 
 scores = {}
 
+skip_model = ["open-aditi-hi-v2-dpo-awq"]
+
 for root, dirs, files in os.walk(directory):
     for file in files:
         if file.endswith('.json'):
@@ -18,6 +20,9 @@ for root, dirs, files in os.walk(directory):
                 model = splits[2]
                 shot = splits[3]
                 file = splits[4]
+
+                if model in skip_model:
+                    continue
                 
                 with open(file_path, 'r') as json_file:
                     try:
