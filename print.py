@@ -3,6 +3,8 @@ import json
 
 directory = "/sky-notebook/eval-results/"
 
+scores = {}
+
 for root, dirs, files in os.walk(directory):
     for file in files:
         if file.endswith('.json'):
@@ -18,8 +20,12 @@ for root, dirs, files in os.walk(directory):
             if file == "metrics.json":
                 with open(file_path, 'r') as json_file:
                     try:
-                        data = json.load(json_file)
-                        print(f"Contents of {file}:")
-                        print(json.dumps(data, indent=4))
+                        metric = json.load(json_file)
+                        print(json.dumps(metric, indent=4))
+
+                        scores[model][task][sub_task][shot] = metric
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
+
+
+print(json.dumps(scores, indent=4))
