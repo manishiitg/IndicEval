@@ -8,28 +8,33 @@ model_names=(
 )
 FOLDER_BASE=/sky-notebook/eval-results/lmjudge
 
-
+TASK_NAME=lmjudge
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=lmjudge
-    NUM_SHOTS=0short
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
-    if [ ! -f "$FILE" ]; then
-        # 1-shot
-        python3 -m eval.lm_judge.run_eval \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
-            --awq
-    else
-        cat "$FILE"
-    fi
+    python3 -m eval.lm_judge.run_eval \
+        --save_dir $FOLDER \
+        --model_name_or_path $model_name_or_path \
+        --tokenizer_name_or_path $model_name_or_path \
+        --eval_batch_size 1 \
+        --use_chat_format \
+        --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+        --use_vllm \
+        --awq
 done
+
+model_name_or_path=ai4bharat/Airavata
+model_name=Airavata
+FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
+python3 -m eval.lm_judge.run_eval \
+    --save_dir $FOLDER \
+    --model_name_or_path $model_name_or_path \
+    --tokenizer_name_or_path $model_name_or_path \
+    --eval_batch_size 1 \
+    --use_chat_format \
+    --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format \
+    --use_vllm \

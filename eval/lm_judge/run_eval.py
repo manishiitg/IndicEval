@@ -8,25 +8,10 @@ from eval.utils import (
     dynamic_import_function,
 )
 from huggingface_hub import HfApi
-from eval.lm_judge.gemini_judge import get_lm_judge_rating
 from transformers import AutoTokenizer
 import vllm
 from datasets import Dataset
 from datetime import date
-
-
-def format_example(system, prompt, language):
-    if len(system) == 0:
-        if language == "Hindi":
-            system = "आप एक सहायक सहायक हैं. कृपया लंबा और विस्तृत उत्तर दें."
-        else:
-            system = "You are a helpful assistant. Please give a long and detailed answer."
-
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": prompt},
-    ]
-    return messages
 
 
 @torch.no_grad()
@@ -94,27 +79,18 @@ def main(args):
     chat_formatting_function = dynamic_import_function(
         args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("ai4bharat/human-eval")
-    test_data = dataset["test"]
+    dataset = load_dataset("manishiitg/human-eval")
+    test_data = dataset["train"]
 
     prompts = []
     simple_prompts = []
     for i, example in enumerate(test_data):
-        k = args.ntrain
-        prompt = format_example(
-            example["system"] if "system" in example else "",
-            example["prompt"],
-            example["language"]
-        )
-
-        simple_prompts.append("\n\n".join([x["content"] for x in prompt]))
-        if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)
-
+        messages = json.loads(example["messages"])
+        simple_prompts.append("\n\n".join([messages["content"] for x in prompt]))
+        prompt = chat_formatting_function(prompt)
         prompts.append(prompt)
-
-    outputs = eval_hf_model(args, model, tokenizer,
-                            prompts, test_data, args.eval_batch_size)
+    
+    outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
 
     final_data = []
     with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
@@ -142,54 +118,6 @@ def main(args):
 
         dataset = process_and_update_dataset(final_data)
         dataset.push_to_hub(args.push_output, private=False)
-            
-    # flush all the GPU memory
-    del model
-    torch.cuda.empty_cache()
-    import gc
-
-    gc.collect()
-
-    # ratings = []
-
-    # for prompt, output in zip(simple_prompts, outputs):
-    #     try:
-    #         rating, text = get_lm_judge_rating(prompt, output)
-    #         print(
-    #             f"got rating {rating} with reason {text} for prompt {prompt} output {output}")
-    #         ratings.append({rating, text, prompt, output})
-    #     except ValueError as e:
-    #         print(f"got error {e} for prompt {prompt} output {output}")
-
-    # avg = 0
-
-    # for r in ratings:
-    #     avg += float(r["rating"])
-    # avg = avg / len(ratings)
-    # # save results
-
-    # final_data = []
-    # with open(os.path.join(args.save_dir, f"lm_judge_judgement.jsonl"), "w") as fout:
-    #     for row in ratings:
-    #         example["prediction_text"] = row
-    #         fout.write(json.dumps(example) + "\n")
-
-    #         row["date"] = date.today().strftime("%m/%d/%Y")
-    #         row["model_name"] = args.model_name_or_path
-
-    # if args.push_output:
-
-    #     api = HfApi()
-    #     if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
-    #         ds = load_dataset(args.push_output)
-    #         for row in ds:
-    #             final_data.append(row)
-
-    #     dataset = process_and_update_dataset(final_data)
-    #     dataset.push_to_hub(args.push_output, private=False)
-
-    # with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-    #     json.dump({"avg_rating": avg}, fout, indent=4)
 
 
 def process_and_update_dataset(new_data):
@@ -258,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--push_output",
         type=str,
-        default="manishiitg/lm_judge",
+        default="manishiitg/llm_judge",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
