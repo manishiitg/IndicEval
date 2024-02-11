@@ -56,9 +56,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         answerStr = ""
         answer = row["answer"]
         if answer == "true":
-            answerStr = "A"
+            answerStr = "A. Yes"
         else:
-            answerStr = "B"
+            answerStr = "B. No"
         row["answer_text"] = answerStr
         return row
 
@@ -81,7 +81,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     # debug
     if len(predictions) > 2:
         print(predictions[:2])
-        
+
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
