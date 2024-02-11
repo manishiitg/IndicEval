@@ -9,7 +9,6 @@ for root, dirs, files in os.walk(directory):
     for file in files:
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
-            print(file_path)
             
             splits = file_path.replace(directory, "").split('/')
             task = splits[0]
@@ -21,7 +20,6 @@ for root, dirs, files in os.walk(directory):
                 with open(file_path, 'r') as json_file:
                     try:
                         metric = json.load(json_file)
-                        print(json.dumps(metric, indent=4))
                         
                         if model not in scores:
                             scores[model] = {}
@@ -31,10 +29,11 @@ for root, dirs, files in os.walk(directory):
                             scores[model][task][sub_task] = {}
                         if shot not in scores[model][task][sub_task]:
                             scores[model][task][sub_task][shot] = {}
-                            
+
                         scores[model][task][sub_task][shot] = metric
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
-
+            else:
+                print(file_path)
 
 print(json.dumps(scores, indent=4))
