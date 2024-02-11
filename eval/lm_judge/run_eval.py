@@ -79,7 +79,7 @@ def main(args):
     chat_formatting_function = dynamic_import_function(
         args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("manishiitg/human-eval")
+    dataset = load_dataset("manishiitg/human_eval")
     test_data = dataset["train"]
 
     prompts = []
@@ -89,7 +89,7 @@ def main(args):
         simple_prompts.append("\n\n".join([messages["content"] for x in prompt]))
         prompt = chat_formatting_function(prompt)
         prompts.append(prompt)
-    
+
     outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
 
     final_data = []
