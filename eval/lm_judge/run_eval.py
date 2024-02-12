@@ -45,7 +45,7 @@ def main(args):
 
     if args.use_vllm:
         if args.awq:
-            print("Loading model and tokenizer vllm awq...")
+            print("Loading model and tokenizer vllm awq...", torch.cuda.device_count())
             model = vllm.LLM(
                 model=args.model_name_or_path,
                 tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
