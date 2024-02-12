@@ -3,11 +3,11 @@ export CUDA_VISIBLE_DEVICES=0
 
 model_names=(
     # "LoneStriker/Smaug-72B-v0.1-AWQ"
-    # "Qwen/Qwen1.5-72B-Chat-AWQ"
-    # "manishiitg/open-aditi-hi-v2-awq"
-    # "manishiitg/open-aditi-hi-v1-awq"
-    # "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
-    "manishiitg/open-aditi-hi-v2-dpo-awq"
+    "Qwen/Qwen1.5-72B-Chat-AWQ"
+    "manishiitg/open-aditi-hi-v2-awq"
+    "manishiitg/open-aditi-hi-v1-awq"
+    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
+    "manishiitg/open-aditi-hi-v2"
 )
 FOLDER_BASE=/sky-notebook/eval-results/lmjudge
 
@@ -19,6 +19,12 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+    fi
+
     python3 -m eval.lm_judge.run_eval \
         --save_dir $FOLDER \
         --model_name_or_path $model_name_or_path \
@@ -27,7 +33,7 @@ for model_name_or_path in "${model_names[@]}"; do
         --use_chat_format \
         --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
         --use_vllm \
-        --awq
+        $awq_param
 done
 
 model_name_or_path=ai4bharat/Airavata
