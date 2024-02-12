@@ -54,6 +54,7 @@ def main(args):
                 # max_num_batched_tokens=4096,
                 quantization="AWQ",
                 max_model_len=4096,
+                dtype="float16",
             )
         else:
             print("Loading model and tokenizer vllm...")
