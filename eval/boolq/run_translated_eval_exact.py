@@ -154,7 +154,7 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/boolq-translated")
+    dataset = load_dataset("Thanmay/boolq-translated", "hi")
     dev_data = dataset["train"]
     test_data = dataset["validation"]
 
