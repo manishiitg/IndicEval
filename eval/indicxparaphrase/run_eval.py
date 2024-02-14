@@ -130,7 +130,7 @@ def main(args):
         if label == 0:
             answerStr = "1. " + sent1
         else:
-            answerStr = "2. " + sent1
+            answerStr = "2. " + sent2
 
         row["answer_text"] = answerStr
         return row
@@ -144,7 +144,7 @@ def main(args):
     idx = 0
     for row in test_data:
         row = {
-            "ctx": row["ctx"],
+            "english": row["english"],
             "model_output": outputs[idx],
             "prediction": targets[idx]
         }
