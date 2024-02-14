@@ -89,8 +89,6 @@ def main(args):
 
     prompts = []
     for i, example in enumerate(test_data):
-        dev_data = test_data.filter(lambda x: x["english"] != example["english"]).shuffle(args.seed)
-        k = args.ntrain
         prompt_end = format_example(
             english=example["english"], sentence1=example["sentence1"], sentence2=example["sentence2"], lang=args.lang
         )

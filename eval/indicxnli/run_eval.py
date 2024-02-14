@@ -18,24 +18,23 @@ from eval.utils import (
 
 choices = ["true", "unknown", "false"]
 
-
 def format_example(premise, hypothesis, label=None):
-    prompt = "Premise: {premise}\nHypothesis: {hypothesis}".format(premise=premise, hypothesis=hypothesis)
-    prompt += "\nAnswer:"
+    user_prompt = "Premise: {premise}\nHypothesis: {hypothesis}".format(premise=premise, hypothesis=hypothesis)
+    assistant_prompt = "Answer:"
     if label is not None:
-        prompt += " {label}\n\n".format(label=label)
-    return prompt
-
+        assistant_prompt += " {label}".format(label=label)
+    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    return messages
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"Answer whether the hypothesis is more likely to be true (entailment), false (contradiction), or unknown (neutral) based on the given premise.\n\n"
+    prompt = f"Answer whether the hypothesis is more likely to be true (entailment), false (contradiction), or unknown (neutral) based on the given premise."
+    messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             label = choices[example["label"]]
-            prompt += format_example(premise=example["premise"], hypothesis=example["hypothesis"], label=label)
-    return prompt
-
+            messages += format_example(premise=example["premise"], hypothesis=example["hypothesis"], label=label)
+    return messages
 
 def main(args):
     random.seed(args.seed)
@@ -55,7 +54,18 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Divyanshu/indicxnli", f"{args.lang}")
+    dataset = load_dataset("Thanmay/indic-xnli")
+    for split in dataset.column_names:
+        column_names = dataset[split].column_names
+        itv2_column_names = []
+        for column_name in column_names:
+            if "itv2 hi" in column_name.lower():
+                itv2_column_names.append(column_name)
+        remove_column_names = [x[8:] for x in itv2_column_names]
+        dataset[split] = dataset[split].remove_columns(remove_column_names)
+        for itv2_column_name in itv2_column_names:
+            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+
     dataset = dataset.map(lambda x: {"premise": x["premise"].strip()})
     dataset = dataset.map(lambda x: {"hypothesis": x["hypothesis"].strip()})
     dev_data = dataset["validation"]
@@ -69,12 +79,9 @@ def main(args):
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
-            # if prompt[-1] in ["\n", " "]:
-                #     prompt += "The answer is: "
-                # else:
-                #     prompt += " The answer is: "
+            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+        else:
+            prompt = "\n\n".join([x["content"] for x in prompt])
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
@@ -88,12 +95,9 @@ def main(args):
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += "The answer is: "
-                else:
-                    prompt += " The answer is: "
+                prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            else:
+                prompt = "\n\n".join([x["content"] for x in prompt])
 
             tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
