@@ -30,3 +30,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             $awq_param
+    else
+        cat "$FILE"
+    fi
+done
