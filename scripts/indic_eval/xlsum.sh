@@ -21,7 +21,6 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         python3 -m eval.xlsum.run_hi_eval \
-            --ntrain 1 \
             --max_context_length 3750 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
