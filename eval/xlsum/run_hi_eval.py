@@ -172,7 +172,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=1,
+    parser.add_argument("--ntrain", type=int, default=0,
                         help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--save_dir", type=str,
