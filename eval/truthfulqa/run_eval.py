@@ -119,7 +119,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data):
                                            ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match Only Options: {em_score_options}")
 
-    os.exit(1)
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "em_score_options": em_score_options,
@@ -172,7 +171,6 @@ def main(args):
         dataset_name = "truthful_qa"
 
     dataset = load_dataset(dataset_name, subset, split=split)
-    dataset = dataset.select(range(10))
 
     prompts = []
     for i, example in enumerate(dataset):
