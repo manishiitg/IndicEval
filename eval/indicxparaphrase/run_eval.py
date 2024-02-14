@@ -105,8 +105,6 @@ def main(args):
 
         prompts.append(prompt)
 
-    print(prompts[0])
-
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
@@ -170,7 +168,6 @@ def main(args):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match Only Options: {em_score_options}")
 
-    os.exit(1)
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "em_score_options" : em_score_options,
