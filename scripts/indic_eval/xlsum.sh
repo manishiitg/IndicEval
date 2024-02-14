@@ -19,14 +19,12 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param=""
 
     if [ ! -f "$FILE" ]; then
-        # 1-shot
         python3 -m eval.xlsum.run_eval \
             --ntrain 1 \
             --max_context_length 3750 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             $awq_param

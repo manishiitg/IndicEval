@@ -183,7 +183,6 @@ if __name__ == "__main__":
         default=1000,
         help="if specified, a maximum of n_instances will be used for the evaluation."
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
