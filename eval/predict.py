@@ -61,22 +61,14 @@ def parse_args():
         help="Output .jsonl file, with each line containing `id`, `prompt` or `messages`, and `output`.",
     )
     parser.add_argument("--batch_size", type=int, default=1, help="batch size for prediction.")
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
+    
     parser.add_argument(
         "--load_in_float16",
         action="store_true",
         help="By default, huggingface model will be loaded in the torch.dtype specificed in its model_config file."
         "If specified, the model dtype will be converted to float16 using `model.half()`.",
     )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
+    
     parser.add_argument(
         "--use_vllm",
         action="store_true",
@@ -151,7 +143,7 @@ if __name__ == "__main__":
                 raise ValueError("Either `messages` or `prompt` should be in the instance.")
             
             prompts.append(prompt)
-            
+
         if args.use_vllm:
             model = vllm.LLM(
                 model=args.model_name_or_path,

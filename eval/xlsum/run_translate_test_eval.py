@@ -12,10 +12,11 @@ import evaluate
 from datasets import load_dataset
 from eval.utils import (
     generate_completions,
-    load_hf_lm_and_tokenizer,
     dynamic_import_function,
 )
+from transformers import AutoTokenizer
 from bleurt import score
+import vllm
 
 
 def trim_context(context, max_context_length, tokenizer):
@@ -27,24 +28,23 @@ def trim_context(context, max_context_length, tokenizer):
     return context
 
 
-def format_example(text, lang, summary=None):
-    user_prompt = f"{lang.capitalize()} article: {text}"
-    assistant_prompt = f"\n{lang.capitalize()} summary:"
+def format_example(text, summary=None):
+    user_prompt = f"article: {text}"
+    assistant_prompt = f"\nsummary:"
     if summary is not None:
-        assistant_prompt += f" {summary}"
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
-    return messages
+        assistant_prompt += f" {summary} \n\n"
+    
+    return user_prompt + assistant_prompt
 
 
-def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
-    prompt = f"Summarize the following {"English".capitalize()} article(s) as accurately as possible in few sentences."
+def gen_prompt(dev_data, max_context_length, tokenizer, k=-1):
+    prompt = f"Summarize the following article(s) as accurately as possible in few sentences."
     messages = [{"role": "system", "content": prompt}]
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             messages += format_example(
                 text=trim_context(example["text"], max_context_length=max_context_length, tokenizer=tokenizer),
-                lang=lang,
                 summary=example["summary"],
             )
     return messages
@@ -52,15 +52,27 @@ def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
 
 def main(args):
     random.seed(args.seed)
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        model, tokenizer = load_hf_lm_and_tokenizer(
-            model_name_or_path=args.model_name_or_path,
-            tokenizer_name_or_path=args.tokenizer_name_or_path,
-            load_in_8bit=args.load_in_8bit,
-            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-            gptq_model=args.gptq,
+    if args.awq:
+        print("Loading model and tokenizer vllm awq...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            quantization="AWQ",
+            max_model_len=4096,
+        )
+    else:
+        print("Loading model and tokenizer vllm...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            max_model_len=4096,
         )
 
     if not os.path.exists(args.save_dir):
@@ -68,17 +80,7 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/xlsum-hi")
-    for split in dataset.column_names:
-        column_names = dataset[split].column_names
-        itv2_column_names = []
-        for column_name in column_names:
-            if "itv2 hi" in column_name.lower():
-                itv2_column_names.append(column_name)
-        remove_column_names = [x[8:] for x in itv2_column_names]
-        dataset[split] = dataset[split].remove_columns(remove_column_names)
-        for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+    dataset = load_dataset("csebuetnlp/xlsum", "hindi")
             
     dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
     dataset = dataset.map(lambda x: {"text": x["text"].strip()})
@@ -89,26 +91,31 @@ def main(args):
     for i, example in enumerate(test_data):
         k = args.ntrain
         prompt_end = format_example(
-            text=trim_context(example["text"], args.max_context_length, tokenizer), lang=args.lang
+            text=trim_context(example["text"], args.max_context_length, tokenizer)
         )
-        train_prompt = gen_prompt(dev_data, args.lang, args.max_context_length, tokenizer, k)
+        train_prompt = gen_prompt(dev_data, args.max_context_length, tokenizer, k)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
-    outputs = generate_completions(
-        model=model,
-        tokenizer=tokenizer,
-        prompts=prompts,
-        max_new_tokens=50,
-        batch_size=args.eval_batch_size,
-        stop_id_sequences=None,
+        prompts.append(prompt)
+
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=512,
+        stop=["<|im_end|>"],
     )
-    # remove unnecessary space
-    outputs = [output.strip().split("\n", "") for output in outputs]
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
 
     with open(os.path.join(args.save_dir, f"xlsum_{args.lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
@@ -158,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
-        default=".//home/gcpuser/IndicInstruct/BLEURT-20",
+        default="./BLEURT-20",
         help="bleurt model to load for evaluation.",
     )
     parser.add_argument(
@@ -174,7 +181,7 @@ if __name__ == "__main__":
         help="if specified, we will load the tokenizer from here.",
     )
     parser.add_argument(
-        "--max_context_length", type=int, default=768, help="maximum number of tokens in the context passage."
+        "--max_context_length", type=int, default=3750, help="maximum number of tokens in the context passage."
     )
     parser.add_argument(
         "--n_instances",
@@ -183,16 +190,6 @@ if __name__ == "__main__":
         help="if specified, a maximum of n_instances will be used for the evaluation."
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -203,6 +200,11 @@ if __name__ == "__main__":
         type=str,
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     main(args)

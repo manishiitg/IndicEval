@@ -252,16 +252,8 @@ if __name__ == "__main__":
         help="if specified, we will load the tokenizer from here.",
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
+    
+    
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -278,10 +270,6 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
-    parser.add_argument(
-        "--use_vllm",
-        action="store_true",
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
-    )
+    
     args = parser.parse_args()
     main(args)

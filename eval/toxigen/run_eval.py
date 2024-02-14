@@ -69,7 +69,7 @@ def main(args):
             else:
                 # we will use the original text from toxigen as the prompt.
                 prompt = example["text"]
-            if include_prompt:
+            
             prompts.append(prompt)
 
         if args.use_vllm:
@@ -211,16 +211,8 @@ if __name__ == "__main__":
         default="cuda",
         help="device to use for toxicity classifier.",
     )
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
+    
+    
     parser.add_argument(
         "--use_chat_format", 
         action="store_true", 

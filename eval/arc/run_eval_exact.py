@@ -209,16 +209,8 @@ if __name__ == "__main__":
         help="if specified, a maximum of n_instances per subject will be used for the evaluation.",
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
+    
+    
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -230,11 +222,7 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
-    parser.add_argument(
-        "--use_vllm",
-        action="store_true",
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
-    )
+    
     parser.add_argument(
         "--awq",
         action="store_true",
