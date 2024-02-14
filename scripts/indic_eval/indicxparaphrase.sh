@@ -1,7 +1,6 @@
-model_names=(
-    "manishiitg/open-aditi-hi-v2"
-    "manishiitg/open-aditi-hi-v1"
-)
+#!/bin/bash
+
+source ./common_vars.sh
 FOLDER_BASE=/sky-notebook/eval-results
 
 
