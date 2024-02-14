@@ -197,43 +197,31 @@ def main(args):
         subcat: [] for subcat_lists in subcategories.values() for subcat in subcat_lists
     }
     cat_cors = {cat: [] for cat in categories}
+    
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    if args.use_vllm:
-        if args.awq:
-            print("Loading model and tokenizer vllm awq...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                quantization="AWQ",
-                max_model_len=4096,
-            )
-        else:
-            print("Loading model and tokenizer vllm...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                max_model_len=4096,
-            )
+    if args.awq:
+        print("Loading model and tokenizer vllm awq...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            quantization="AWQ",
+            max_model_len=4096,
+        )
     else:
-        # print("Loading model and tokenizer hf...")
-        # model, tokenizer = load_hf_lm_and_tokenizer(
-        #     model_name_or_path=args.model_name_or_path,
-        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
-        #     load_in_8bit=args.load_in_8bit,
-        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-        #     gptq_model=args.gptq,
-        #     use_fast_tokenizer=not args.use_slow_tokenizer,
-        # )
-        raise Exception("only vllm is supported")
-
+        print("Loading model and tokenizer vllm...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            max_model_len=4096,
+        )
     for subject in tqdm(subjects, desc=f"Evaluating subjects: "):
 
         if args.data_dir == "data/eval/mmlu_hi_translated":
@@ -336,12 +324,7 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the slow tokenizer."
     )
-    parser.add_argument(
-        "--openai_engine",
-        type=str,
-        default=None,
-        help="if specified, we will use the OpenAI API to generate the predictions."
-    )
+    
     parser.add_argument(
         "--subjects",
         nargs="*",
@@ -379,11 +362,7 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`."
     )
-    parser.add_argument(
-        "--use_vllm",
-        action="store_true",
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
-    )
+    
     parser.add_argument(
         "--awq",
         action="store_true",

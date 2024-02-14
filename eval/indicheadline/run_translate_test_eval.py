@@ -90,39 +90,27 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    if args.use_vllm:
-        if args.awq:
-            print("Loading model and tokenizer vllm awq...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                quantization="AWQ",
-                max_model_len=4096,
-            )
-        else:
-            print("Loading model and tokenizer vllm...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                max_model_len=4096,
-            )
+    if args.awq:
+        print("Loading model and tokenizer vllm awq...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            quantization="AWQ",
+            max_model_len=4096,
+        )
     else:
-        # print("Loading model and tokenizer hf...")
-        # model, tokenizer = load_hf_lm_and_tokenizer(
-        #     model_name_or_path=args.model_name_or_path,
-        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
-        #     load_in_8bit=args.load_in_8bit,
-        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-        #     gptq_model=args.gptq,
-        #     use_fast_tokenizer=not args.use_slow_tokenizer,
-        # )
-        raise Exception("only vllm is supported")
+        print("Loading model and tokenizer vllm...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            max_model_len=4096,
+        )
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -198,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
-        default=".//home/gcpuser/IndicInstruct/BLEURT-20",
+        default="./BLEURT-20",
         help="bleurt model to load for evaluation.",
     )
     parser.add_argument(
@@ -214,7 +202,7 @@ if __name__ == "__main__":
         help="if specified, we will load the tokenizer from here.",
     )
     parser.add_argument(
-        "--max_context_length", type=int, default=768, help="maximum number of tokens in the context passage."
+        "--max_context_length", type=int, default=3750, help="maximum number of tokens in the context passage."
     )
     parser.add_argument(
         "--n_instances",
@@ -223,16 +211,8 @@ if __name__ == "__main__":
         help="if specified, a maximum of n_instances will be used for the evaluation."
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    parser.add_argument(
-        "--load_in_8bit",
-        action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference.",
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model.",
-    )
+    
+    
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -249,10 +229,6 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
-    parser.add_argument(
-        "--use_vllm",
-        action="store_true",
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
-    )
+    
     args = parser.parse_args()
     main(args)

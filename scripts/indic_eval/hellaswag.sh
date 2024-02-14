@@ -1,17 +1,6 @@
+#!/bin/bash
 
-
-
-
-# -------------------------------------------------------------
-#                       Hellaswag
-# -------------------------------------------------------------
-
-model_names=(
-    "manishiitg/open-aditi-hi-v2-awq"
-    "manishiitg/open-aditi-hi-v1-awq"
-    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
-    "manishiitg/open-aditi-hi-v2-dpo-awq-1.1"
-)
+source ./scripts/indic_eval/common_vars.sh
 FOLDER_BASE=/sky-notebook/eval-results/hellaswag
 
 
@@ -24,6 +13,12 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+    fi
+
     if [ ! -f "$FILE" ]; then
         python3 -m eval.hellaswag.run_eval_exact \
             --ntrain 0 \
@@ -33,9 +28,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq \
-            --use_vllm
-    
+            $awq_param
     else
         cat "$FILE"
 
@@ -55,6 +48,11 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.hellaswag.run_eval_exact \
@@ -66,8 +64,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq \
-            --use_vllm
+            $awq_param
     
     else
         cat "$FILE"

@@ -7,12 +7,6 @@ import os
 from importlib import import_module
 from transformers import StoppingCriteria
 
-from open_instruct.finetune import encode_with_prompt_completion_format
-from eval.dispatch_openai_requests import (
-    dispatch_openai_chat_requesets,
-    dispatch_openai_prompt_requesets,
-)
-
 
 class KeyWordsCriteria(StoppingCriteria):
     def __init__(self, stop_id_sequences):
@@ -183,52 +177,6 @@ def get_next_word_predictions(
     ), "number of predictions should be equal to number of prompts"
     return predictions, probs
 
-
-@torch.no_grad()
-def score_completions(model, tokenizer, scoring_examples, disable_tqdm=False):
-    """
-    Each scoring example is a dict, which contains the following keys:
-    - prompt: the prompt to score
-    - completions: a list of completions to score
-    """
-
-    if not disable_tqdm:
-        progress = tqdm.tqdm(total=len(scoring_examples), desc="Scoring Completions")
-
-    # unroll the scoring examples
-    unrolled_examples = []
-    for scoring_example in scoring_examples:
-        prompt = scoring_example["prompt"]
-        for completion in scoring_example["completions"]:
-            unrolled_examples.append({"prompt": prompt, "completion": completion})
-
-    scores = []
-    # currently we don't support batching, because we want to directly use the loss returned by the model to score each completion.
-    for unrolled_example in unrolled_examples:
-        encoded_example = encode_with_prompt_completion_format(
-            unrolled_example, tokenizer, max_seq_length=None
-        )
-        # unsqueeze the batch dimension
-        for key, value in encoded_example.items():
-            encoded_example[key] = value.unsqueeze(0)
-        if model.device.type == "cuda":
-            encoded_example = {key: value.cuda() for key, value in encoded_example.items()}
-        outputs = model(**encoded_example)
-        loss = outputs.loss
-        scores.append(-loss.item())
-        if not disable_tqdm:
-            progress.update(1)
-
-    # roll up the scores
-    rolled_up_scores = {}
-    for unrolled_example, score in zip(unrolled_examples, scores):
-        prompt = unrolled_example["prompt"]
-        completion = unrolled_example["completion"]
-        if prompt not in rolled_up_scores:
-            rolled_up_scores[prompt] = {}
-        rolled_up_scores[prompt][completion] = score
-
-    return rolled_up_scores
 
 
 def load_hf_lm_and_tokenizer(

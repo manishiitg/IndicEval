@@ -1,11 +1,6 @@
-model_names=(
-    "Qwen/Qwen1.5-72B-Chat-AWQ"
-    "manishiitg/open-aditi-hi-v2-awq"
-    "manishiitg/open-aditi-hi-v1-awq"
-    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
-    "manishiitg/open-aditi-hi-v2-dpo-awq-1.1"
-    "manishiitg/open-aditi-hi-v2"
-)
+#!/bin/bash
+
+source ./scripts/indic_eval/common_vars.sh
 FOLDER_BASE=/sky-notebook/eval-results/lmjudge
 
 TASK_NAME=lmjudge
@@ -29,7 +24,6 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 1 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
             $awq_param
     fi
 done
@@ -45,8 +39,7 @@ if [ ! -f "$FILE" ]; then
         --tokenizer_name_or_path $model_name_or_path \
         --eval_batch_size 1 \
         --use_chat_format \
-        --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format \
-        --use_vllm
+        --chat_formatting_function eval.templates.create_prompt_with_tulu_chat_format
 fi
 
 
@@ -60,6 +53,5 @@ if [ ! -f "$FILE" ]; then
         --tokenizer_name_or_path $model_name_or_path \
         --eval_batch_size 1 \
         --use_chat_format \
-        --chat_formatting_function eval.templates.create_prompt_with_llama2_chat_format \
-        --use_vllm
+        --chat_formatting_function eval.templates.create_prompt_with_llama2_chat_format
 fi

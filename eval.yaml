@@ -2,7 +2,7 @@ resources:
   use_spot: True
   cloud: gcp
   disk_size: 128
-  accelerators: A100:1
+  accelerators: A100:4
   
 file_mounts:
   /sky-notebook:

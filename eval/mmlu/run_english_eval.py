@@ -280,12 +280,7 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the slow tokenizer."
     )
-    parser.add_argument(
-        "--openai_engine",
-        type=str,
-        default=None,
-        help="if specified, we will use the OpenAI API to generate the predictions."
-    )
+    
     parser.add_argument(
         "--subjects",
         nargs="*",

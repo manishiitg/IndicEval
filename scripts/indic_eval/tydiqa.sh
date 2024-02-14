@@ -1,16 +1,19 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results/indicxnli
+FOLDER_BASE=/sky-notebook/eval-results/tydiqa
+
+
 
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=indicxnli
+    TASK_NAME=tydiqa
     NUM_SHOTS=0short
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
     if echo "$model_name" | grep -qi "awq"; then
         awq_param="--awq"
@@ -19,31 +22,44 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     if [ ! -f "$FILE" ]; then
-        # zero-shot
-        python3 -m eval.indicxnli.run_eval \
-            --ntrain 0 \
+        python3 -m eval.tydiqa.run_eval \
+            --lang english \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 8 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
             $awq_param
+    else
+        cat "$FILE"
     fi
+done
 
-    NUM_SHOTS=5short
+for model_name_or_path in "${model_names[@]}"; do
+    model_name=${model_name_or_path##*/}
+    TASK_NAME=tydiqa-hi
+    NUM_SHOTS=0short
+    
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
+    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
-        # 5-shot
-        python3 -m eval.indicxnli.run_eval \
-            --ntrain 5 \
+        python3 -m eval.tydiqa.run_eval \
+            --lang hindi \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 4 \
             --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+            $awq_param
+    else
+        cat "$FILE"
     fi
 done
