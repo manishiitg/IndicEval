@@ -33,20 +33,30 @@ def format_example(text, summary=None):
     assistant_prompt = f"\nsummary:"
     if summary is not None:
         assistant_prompt += f" {summary} \n\n"
-    
+
     return user_prompt + assistant_prompt
 
 
-def gen_prompt(dev_data, max_context_length, tokenizer, k=-1):
+def gen_prompt(dev_data, text, max_context_length, tokenizer, k=-1):
     prompt = f"Summarize the following article(s) as accurately as possible in few sentences."
     messages = [{"role": "system", "content": prompt}]
+
+    user = ""
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
-            messages += format_example(
-                text=trim_context(example["text"], max_context_length=max_context_length, tokenizer=tokenizer),
+            user += format_example(
+                text=trim_context(
+                    example["text"], max_context_length=max_context_length, tokenizer=tokenizer),
                 summary=example["summary"],
             )
+
+    user += format_example(
+        text=trim_context(
+            text, max_context_length=max_context_length, tokenizer=tokenizer),
+    )
+
+    messages.append({"role": "user", "content": user})
     return messages
 
 
@@ -78,25 +88,25 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("csebuetnlp/xlsum", "hindi")
-            
+
     dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
     dataset = dataset.map(lambda x: {"text": x["text"].strip()})
-    dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
-    test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
+    dev_data = dataset["validation"].select(
+        range(min(len(dataset["validation"]), args.n_instances)))
+    test_data = dataset["test"].select(
+        range(min(len(dataset["test"]), args.n_instances)))
 
     dataset.select(range(10))
 
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
-        prompt_end = format_example(
-            text=trim_context(example["text"], args.max_context_length, tokenizer)
-        )
-        train_prompt = gen_prompt(dev_data, args.max_context_length, tokenizer, k)
-        prompt = train_prompt + prompt_end
+        prompt = gen_prompt(
+            dev_data, example["text"], args.max_context_length, tokenizer, k)
 
         if args.use_chat_format:
             prompt = chat_formatting_function(prompt)
@@ -104,6 +114,8 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         prompts.append(prompt)
+
+    print("prompts", prompts)
 
     sampling_params = vllm.SamplingParams(
         temperature=0,
@@ -118,6 +130,8 @@ def main(args):
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
+    
+    print("outputs", outputs)
 
     with open(os.path.join(args.save_dir, f"xlsum_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
@@ -138,7 +152,8 @@ def main(args):
     predictions = [output for output in outputs]
     references = [example["summary"] for example in test_data]
 
-    rouge_metrics = rouge.compute(predictions=predictions, references=references)
+    rouge_metrics = rouge.compute(
+        predictions=predictions, references=references)
     metrics = {
         "rouge1": rouge_metrics["rouge1"],
         "rouge2": rouge_metrics["rouge2"],
@@ -157,9 +172,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=1, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=1,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/xlsum/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/xlsum/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
