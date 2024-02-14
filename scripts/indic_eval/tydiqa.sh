@@ -23,7 +23,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         python3 -m eval.tydiqa.run_eval \
-            --lang en \
+            --lang english \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
@@ -52,7 +52,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
     if [ ! -f "$FILE" ]; then
         python3 -m eval.tydiqa.run_eval \
-            --lang hi \
+            --lang hindi \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
