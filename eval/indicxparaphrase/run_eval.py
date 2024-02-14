@@ -86,7 +86,6 @@ def main(args):
     dataset = dataset.map(lambda x: {"sentence1": x["sentence1"].strip()})
     dataset = dataset.map(lambda x: {"sentence2": x["sentence2"].strip()})
     test_data = dataset["test"]
-    test_data = test_data.select(range(10))
 
     prompts = []
     for i, example in enumerate(test_data):
