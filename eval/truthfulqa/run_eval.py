@@ -194,6 +194,9 @@ def main(args):
 
         prompts.append(prompt)
 
+    for p in prompts:
+        print(p)
+
     eval_hf_model(args, model, tokenizer, prompts, dataset)
 
 
