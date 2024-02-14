@@ -24,6 +24,11 @@ for model_name_or_path in "${model_names[@]}"; do
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.arc.run_eval_exact \
@@ -36,11 +41,10 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
-            --awq
+            $awq_param
     else
         cat "$FILE"
-    fi
+    fi 
 done
 
 
@@ -84,6 +88,10 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
 
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
@@ -97,8 +105,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
-            --awq
+            $awq_param
     else
         cat "$FILE"
     fi
@@ -145,6 +152,11 @@ for model_name_or_path in "${model_names[@]}"; do
 
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.arc.run_eval_exact \
@@ -157,8 +169,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
-            --awq
+            $awq_param
     else
         cat "$FILE"
     fi
@@ -207,6 +218,11 @@ for model_name_or_path in "${model_names[@]}"; do
 
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.arc.run_eval_exact \
@@ -219,8 +235,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --use_vllm \
-            --awq
+            $awq_param
     else
         cat "$FILE"
     fi

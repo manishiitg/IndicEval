@@ -96,39 +96,28 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    if args.use_vllm:
-        if args.awq:
-            print("Loading model and tokenizer vllm awq...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                quantization="AWQ",
-                max_model_len=4096,
-            )
-        else:
-            print("Loading model and tokenizer vllm...")
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                # max_num_batched_tokens=4096,
-                max_model_len=4096,
-            )
+    if args.awq:
+        print("Loading model and tokenizer vllm awq...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            quantization="AWQ",
+            max_model_len=4096,
+        )
     else:
-        # print("Loading model and tokenizer hf...")
-        # model, tokenizer = load_hf_lm_and_tokenizer(
-        #     model_name_or_path=args.model_name_or_path,
-        #     tokenizer_name_or_path=args.tokenizer_name_or_path,
-        #     load_in_8bit=args.load_in_8bit,
-        #     device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-        #     gptq_model=args.gptq,
-        #     use_fast_tokenizer=not args.use_slow_tokenizer,
-        # )
-        raise Exception("only vllm is supported")
+        print("Loading model and tokenizer vllm...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            # max_num_batched_tokens=4096,
+            max_model_len=4096,
+        )
+
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)

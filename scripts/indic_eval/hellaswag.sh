@@ -24,6 +24,11 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         python3 -m eval.hellaswag.run_eval_exact \
             --ntrain 0 \
@@ -33,9 +38,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq \
-            --use_vllm
-    
+            $awq_param
     else
         cat "$FILE"
 
@@ -55,6 +58,11 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.hellaswag.run_eval_exact \
@@ -66,8 +74,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq \
-            --use_vllm
+            $awq_param
     
     else
         cat "$FILE"
