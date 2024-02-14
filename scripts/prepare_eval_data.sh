@@ -8,4 +8,4 @@ unzip BLEURT-20.zip
 # TyDiQA-GoldP dataset
 mkdir -p data/eval/tydiqa
 wget -P data/eval/tydiqa/ https://storage.googleapis.com/tydiqa/v1.0/tydiqa-v1.0-dev.jsonl.gz
-unzip tydiqa-v1.0-dev.jsonl.gz
+gzip -df data/eval/tydiqa/tydiqa-v1.0-dev.jsonl.gz
