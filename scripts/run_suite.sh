@@ -1,5 +1,6 @@
 bash scripts/indic_eval/lmjudge.sh
 bash scripts/prepare_eval_data.sh
+bash scripts/indic_eval/indicxparaphrase.sh
 bash scripts/indic_eval/truthfulqa.sh
 bash scripts/indic_eval/xlsum.sh
 bash scripts/indic_eval/boolq.sh
