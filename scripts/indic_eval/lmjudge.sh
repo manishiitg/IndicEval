@@ -26,7 +26,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param=""
     fi
 
-    accelerate launch python3 -m eval.lm_judge.run_eval \
+    accelerate launch python -m eval.lm_judge.run_eval \
         --save_dir $FOLDER \
         --model_name_or_path $model_name_or_path \
         --tokenizer_name_or_path $model_name_or_path \
