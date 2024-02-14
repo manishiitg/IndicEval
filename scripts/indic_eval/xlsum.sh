@@ -20,7 +20,7 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     if [ ! -f "$FILE" ]; then
-        python3 -m eval.xlsum.run_hi_eval \
+        python3 -m eval.xlsum.run_eval \
             --lang hindi \
             --max_context_length 3750 \
             --save_dir $FOLDER \
@@ -49,7 +49,7 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     if [ ! -f "$FILE" ]; then
-        python3 -m eval.xlsum.run_en_eval \
+        python3 -m eval.xlsum.run_eval \
             --lang english \
             --max_context_length 3750 \
             --save_dir $FOLDER \
