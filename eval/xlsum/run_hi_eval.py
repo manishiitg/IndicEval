@@ -100,7 +100,7 @@ def main(args):
     test_data = dataset["test"].select(
         range(min(len(dataset["test"]), args.n_instances)))
 
-    dataset.select(range(10))
+    dev_data = dev_data.select(range(10))
 
     prompts = []
     for i, example in enumerate(test_data):
