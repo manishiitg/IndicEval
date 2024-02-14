@@ -17,7 +17,7 @@ import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
 
-choices = ["A", "B", "C", "D", "E"]
+choices = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 def format_example(question, answers, label=None):
     prompt = f"{question.strip()}\n"
@@ -76,7 +76,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data):
             if labels[ix] == 1:
                 answerIdx = ix
 
-        choice = labels[answerIdx]
+        choice = choices[labels[answerIdx]]
         answer = mc1_targets_choices[answerIdx]
 
         answerStr = f"{choice}. {answer.strip()}\n"
