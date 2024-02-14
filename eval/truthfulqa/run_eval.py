@@ -41,8 +41,7 @@ def gen_prompt(question, choices):
     )
 
     messages.append({"role": "user", "content": prompt})
-
-    return prompt
+    return messages
 
 
 @torch.no_grad()
@@ -190,7 +189,7 @@ def main(args):
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, add_bos=False)
         else:
-            prompt = "\n\n".join([x["content"] for x in prompt])
+            prompt = "\n\n".join([x["content"] for x in messages])
 
         prompts.append(prompt)
 
