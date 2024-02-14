@@ -5,6 +5,7 @@ Forked from https://github.com/AI4Bharat/IndicInstruct
 LLM Evaluation for indic models
 
 Supports 
+- multi gpu support
 - faster inference via vllm
 - awq support
 - llm judge

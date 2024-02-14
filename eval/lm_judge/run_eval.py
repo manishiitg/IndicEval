@@ -12,6 +12,7 @@ from transformers import AutoTokenizer
 import vllm
 from datasets import Dataset
 from datetime import date
+import torch
 
 ### in this we simply save prompts outputs to a huggingface repo
 ### i using gemini pro (Free) as LM judge to rate the ouputs
@@ -209,4 +210,5 @@ if __name__ == "__main__":
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
+    args.eval_batch_size = args.eval_batch_size * torch.cuda.device_count()
     main(args)
