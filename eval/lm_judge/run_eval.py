@@ -14,9 +14,6 @@ from datasets import Dataset
 from datetime import date
 import torch
 
-print(torch.cuda.device_count())
-os.exit(1)
-
 ### in this we simply save prompts outputs to a huggingface repo
 ### i using gemini pro (Free) as LM judge to rate the ouputs
 # https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
@@ -213,4 +210,5 @@ if __name__ == "__main__":
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
+    args.eval_batch_size = args.eval_batch_size * torch.cuda.device_count()
     main(args)
