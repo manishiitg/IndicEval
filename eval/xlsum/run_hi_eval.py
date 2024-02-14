@@ -87,6 +87,8 @@ def main(args):
     dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
     test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
 
+    dataset.select(range(10))
+
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
@@ -145,6 +147,8 @@ def main(args):
     }
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
+
+    os.exit(1)
 
     # save results
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
