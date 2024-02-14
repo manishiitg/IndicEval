@@ -173,6 +173,7 @@ def main(args):
         dataset_name = "truthful_qa"
 
     dataset = load_dataset(dataset_name, subset, split=split)
+    dataset = dataset.select(range(10))
 
     prompts = []
     for i, example in enumerate(dataset):
