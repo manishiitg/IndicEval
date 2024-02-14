@@ -17,6 +17,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
         python3 -m eval.xlsum.run_eval \
