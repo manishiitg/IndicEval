@@ -45,18 +45,20 @@ def main(args):
 
     test_data = []
     with open(os.path.join(args.data_dir, "tydiqa-v1.0-dev.jsonl")) as fin:
-        dev_data = json.load(fin)
-        for article in dev_data["data"]:
-            for paragraph in article["paragraphs"]:
-                for qa in paragraph["qas"]:
-                    example = {
-                        "id": qa["id"],
-                        "lang": qa["id"].split("-")[0],
-                        "context": paragraph["context"],
-                        "question": qa["question"],
-                        "answers": qa["answers"]
-                    }
-                    test_data.append(example)
+        for lin in fin:
+            print("line", lin)
+            dev_data = json.load(lin)
+            for article in dev_data["data"]:
+                for paragraph in article["paragraphs"]:
+                    for qa in paragraph["qas"]:
+                        example = {
+                            "id": qa["id"],
+                            "lang": qa["id"].split("-")[0],
+                            "context": paragraph["context"],
+                            "question": qa["question"],
+                            "answers": qa["answers"]
+                        }
+                        test_data.append(example)
     data_languages = set([example["lang"] for example in test_data])
 
     if args.max_num_examples_per_lang:
