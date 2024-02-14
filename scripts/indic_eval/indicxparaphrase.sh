@@ -21,7 +21,6 @@ for model_name_or_path in "${model_names[@]}"; do
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.indicxparaphrase.run_eval \
-            --ntrain 0 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
