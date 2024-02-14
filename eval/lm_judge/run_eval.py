@@ -12,6 +12,10 @@ from transformers import AutoTokenizer
 import vllm
 from datasets import Dataset
 from datetime import date
+import torch
+
+print(torch.cuda.device_count())
+os.exit(1)
 
 ### in this we simply save prompts outputs to a huggingface repo
 ### i using gemini pro (Free) as LM judge to rate the ouputs
