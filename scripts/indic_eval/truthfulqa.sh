@@ -37,7 +37,7 @@ done
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=truthfulqa-hi
+    TASK_NAME=truthfulqa
     NUM_SHOTS=0short
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
