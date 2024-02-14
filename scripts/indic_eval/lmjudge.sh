@@ -14,7 +14,7 @@ for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
-    FILE=$FOLDER/metrics.json
+    FILE=$FOLDER/lm_judge_predictions.json
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
     if echo "$model_name" | grep -qi "awq"; then
@@ -22,16 +22,17 @@ for model_name_or_path in "${model_names[@]}"; do
     else
         awq_param=""
     fi
-
-    python3 -m eval.lm_judge.run_eval \
-        --save_dir $FOLDER \
-        --model_name_or_path $model_name_or_path \
-        --tokenizer_name_or_path $model_name_or_path \
-        --eval_batch_size 1 \
-        --use_chat_format \
-        --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-        --use_vllm \
-        $awq_param
+    if [ ! -f "$FILE" ]; then
+        python3 -m eval.lm_judge.run_eval \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 1 \
+            --use_chat_format \
+            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+            --use_vllm \
+            $awq_param
+    fi
 done
 
 model_name_or_path=ai4bharat/Airavata
