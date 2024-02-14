@@ -7,14 +7,12 @@ import vllm
 import evaluate
 import numpy as np
 from eval.utils import (
-    generate_completions, 
-    load_hf_lm_and_tokenizer, 
-    query_openai_chat_model,
     dynamic_import_function,
 )
-
+from transformers import AutoTokenizer
 
 encoding_templates_with_context = {
+    "hindi": ("दिए गए गद्यांश में दी गई जानकारी के आधार पर निम्नलिखित प्रश्न का उत्तर दीजिए।", "Passage:", "सवाल:", "उत्तर:"),
     "english": ("Answer the following question based on the information in the given passage.", "Passage:", "Question:", "Answer:"),
     "arabic": ("أجب على السؤال التالي بناءً على المعلومات في المقطع المعطى.", "المقطع:", "السؤال:", "الإجابة:"),
     "bengali": ("প্রদত্ত অধ্যায়ের তথ্যের উপর ভিত্তি করে নিম্নলিখিত প্রশ্নের উত্তর দিন।", "অধ্যায়:", "প্রশ্ন:", "উত্তর:"),
@@ -27,6 +25,7 @@ encoding_templates_with_context = {
 }
 
 encoding_templates_without_context = {
+    "hindi": ("निम्नलिखित प्रश्न का उत्तर|", "Passage:", "सवाल:", "उत्तर:"),
     "english": ("Answer the following question.", "Question:", "Answer:"),
     "arabic": ("أجب على السؤال التالي.", "السؤال:", "الإجابة:"),
     "bengali": ("নিম্নলিখিত প্রশ্নের উত্তর দিন।", "প্রশ্ন:", "উত্তর:"),
@@ -45,13 +44,13 @@ def main(args):
     print("Loading data...")
 
     test_data = []
-    with open(os.path.join(args.data_dir, "tydiqa-goldp-v1.1-dev.json")) as fin:
+    with open(os.path.join(args.data_dir, "tydiqa-v1.0-dev.jsonl")) as fin:
         dev_data = json.load(fin)
         for article in dev_data["data"]:
             for paragraph in article["paragraphs"]:
                 for qa in paragraph["qas"]:
                     example = {
-                        "id": qa["id"], 
+                        "id": qa["id"],
                         "lang": qa["id"].split("-")[0],
                         "context": paragraph["context"],
                         "question": qa["question"],
@@ -59,86 +58,63 @@ def main(args):
                     }
                     test_data.append(example)
     data_languages = set([example["lang"] for example in test_data])
+
     if args.max_num_examples_per_lang:
         sampled_examples = []
         for lang in data_languages:
-            examples_for_lang = [example for example in test_data if example["lang"] == lang]
+            examples_for_lang = [
+                example for example in test_data if example["lang"] == lang]
             if len(examples_for_lang) > args.max_num_examples_per_lang:
-                examples_for_lang = random.sample(examples_for_lang, args.max_num_examples_per_lang)
+                examples_for_lang = random.sample(
+                    examples_for_lang, args.max_num_examples_per_lang)
             sampled_examples += examples_for_lang
         test_data = sampled_examples
-    
-    print(f"Loaded {len(test_data)} examples from {len(data_languages)} languages: {data_languages}")
 
-    if args.n_shot > 0:
-        train_data_for_langs = {lang: [] for lang in data_languages}
-        with open(os.path.join(args.data_dir, "tydiqa-goldp-v1.1-train.json")) as fin:
-            train_data = json.load(fin)
-            for article in train_data["data"]:
-                for paragraph in article["paragraphs"]:
-                    for qa in paragraph["qas"]:
-                        lang = qa["id"].split("-")[0]
-                        if lang in data_languages:
-                            example = {
-                                "id": qa["id"],
-                                "lang": lang,
-                                "context": paragraph["context"],
-                                "question": qa["question"],
-                                "answers": qa["answers"]
-                            }
-                            train_data_for_langs[lang].append(example)
-            for lang in data_languages:
-                # sample n_shot examples from each language
-                train_data_for_langs[lang] = random.sample(train_data_for_langs[lang], args.n_shot)
-        # assert that we have exactly n_shot examples for each language
-        assert all([len(train_data_for_langs[lang]) == args.n_shot for lang in data_languages])
+    print(
+        f"Loaded {len(test_data)} examples from {len(data_languages)} languages: {data_languages}")
 
-    
     # assert we have templates for all data languages
-    assert all([lang in encoding_templates_with_context.keys() for lang in data_languages])
-        
-    if args.model_name_or_path:
-        print("Loading model and tokenizer...")
-        if args.use_vllm:
-            model = vllm.LLM(
-                model=args.model_name_or_path,
-                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-                tokenizer_mode="slow" if args.use_slow_tokenizer else "auto",
-                tensor_parallel_size=torch.cuda.device_count(),
-                max_num_batched_tokens=4096,
-            )
-            tokenizer = model.llm_engine.tokenizer
-        else:
-            model, tokenizer = load_hf_lm_and_tokenizer(
-                model_name_or_path=args.model_name_or_path, 
-                tokenizer_name_or_path=args.tokenizer_name_or_path, 
-                load_in_8bit=args.load_in_8bit, 
-                device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
-                gptq_model=args.gptq,
-                use_fast_tokenizer=not args.use_slow_tokenizer,
-            )
-    else:
-        import tiktoken
-        tokenizer = tiktoken.get_encoding("cl100k_base")
+    assert all([lang in encoding_templates_with_context.keys()
+               for lang in data_languages])
 
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+
+    if args.awq:
+        print("Loading model and tokenizer vllm awq...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            quantization="AWQ",
+            max_model_len=4096,
+        )
+    else:
+        print("Loading model and tokenizer vllm...")
+        model = vllm.LLM(
+            model=args.model_name_or_path,
+            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            max_model_len=4096,
+        )
+
+    test_data = test_data[:10]
     # reduce context length to max_context_length
     if args.max_context_length:
         for example in test_data:
             tokenized_context = tokenizer.encode(example["context"])
             if len(tokenized_context) > args.max_context_length:
-                example["context"] = tokenizer.decode(tokenized_context[:args.max_context_length])
-        if args.n_shot > 0:
-            for lang in data_languages:
-                for example in train_data_for_langs[lang]:
-                    tokenized_context = tokenizer.encode(example["context"])
-                    if len(tokenized_context) > args.max_context_length:
-                        example["context"] = tokenizer.decode(tokenized_context[:args.max_context_length])
+                example["context"] = tokenizer.decode(
+                    tokenized_context[:args.max_context_length])
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir, exist_ok=True)
 
     prompts = []
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
     for example in test_data:
         lang = example["lang"]
 
@@ -148,92 +124,67 @@ def main(args):
         else:
             prompt, p_template, q_template, a_template = encoding_templates_with_context[lang]
 
-        prompt += "\n\n"
-        
-        if args.n_shot > 0:
-            formatted_demo_examples = []
-            for train_example in train_data_for_langs[lang]:
-                if args.no_context:
-                    formatted_demo_examples.append(
-                        q_template + " " + train_example["question"] + "\n" + a_template + " " + train_example["answers"][0]["text"]
-                    )
-                else:
-                    formatted_demo_examples.append(
-                        p_template + " " + train_example["context"] + "\n" + q_template + " " + train_example["question"] + "\n" + a_template + " " + train_example["answers"][0]["text"]
-                    )
-            prompt += "\n\n".join(formatted_demo_examples) + "\n\n"
-        
+        messages = [{"role": "system", "content": prompt}]
+
         if args.no_context:
-            prompt += q_template + " " + format(example["question"]) + "\n"
+            prompt = q_template + " " + format(example["question"]) + "\n"
         else:
-            prompt += p_template + " " + format(example["context"]) + "\n" + q_template + " " + format(example["question"]) + "\n"
+            prompt = p_template + " " + \
+                format(example["context"]) + "\n" + q_template + \
+                " " + format(example["question"]) + "\n"
 
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
             if prompt[-1] in ["\n", " "]:
                 prompt += a_template
             else:
                 prompt += " " + a_template
+            messages.append({"role": "user", "content": prompt})
+            prompt = chat_formatting_function(messages, add_bos=False)
         else:
             prompt += a_template
-        if include_prompt:
-            prompts.append(prompt)
+            messages.append({"role": "user", "content": prompt})
+            prompt = "\n\n".join([x["content"] for x in messages])
 
-    if args.model_name_or_path:
-        if args.use_vllm:
-            sampling_params = vllm.SamplingParams(
-                temperature=0,
-                max_tokens=50,
-                stop=["\n"],
-            )
-            # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
-            generations = model.generate(prompts, sampling_params)
-            prompt_to_output = {
-                g.prompt: g.outputs[0].text for g in generations
-            }
-            outputs = [prompt_to_output[prompt].strip() if prompt in prompt_to_output else "" for prompt in prompts]
-        else:
-            new_line_token = tokenizer.encode("\n", add_special_tokens=False)[-1] # get the last token because the tokenizer may add space tokens at the start.
-            outputs = generate_completions(
-                model=model,
-                tokenizer=tokenizer,
-                prompts=prompts,
-                max_new_tokens=50,
-                batch_size=args.eval_batch_size,
-                stop_id_sequences=[[new_line_token]]
-            )
-            # remove unnecessary space
-            outputs = [output.strip() for output in outputs]
-    else:
-        instances = [{"id": example["id"], "prompt": prompt} for example, prompt in zip(test_data, prompts)]
-        results = query_openai_chat_model(
-            engine=args.openai_engine,
-            instances=instances,
-            output_path=os.path.join(args.save_dir, "tydiaqa_openai_results.jsonl"),
-            batch_size=args.eval_batch_size,
-        )
-        outputs = [result["output"].strip().split("\n")[0].strip() for result in results]
-    
+        prompts.append(prompt)
+
+    sampling_params = vllm.SamplingParams(
+        temperature=0,
+        max_tokens=2048,
+        stop=["<|im_end|>"],
+    )
+    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+    generations = model.generate(prompts, sampling_params)
+
+    prompt_to_output = {
+        g.prompt: g.outputs[0].text.strip() for g in generations
+    }
+    outputs = [prompt_to_output[prompt]
+               if prompt in prompt_to_output else "" for prompt in prompts]
+
     with open(os.path.join(args.save_dir, "tydiaqa_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
 
+    os.exit(1)
     print("Calculating F1, EM ...")
     metric = evaluate.load("squad")
-    
+
     eval_scores = {}
     for lang in data_languages:
-        lang_predictions = [{"id": example["id"], "prediction_text": output} for example, output in zip(test_data, outputs) if example["lang"] == lang]
-        lang_references = [{"id": example["id"], "answers": example["answers"]} for example in test_data if example["lang"] == lang]
-        eval_scores[lang] = metric.compute(predictions=lang_predictions, references=lang_references)
+        lang_predictions = [{"id": example["id"], "prediction_text": output}
+                            for example, output in zip(test_data, outputs) if example["lang"] == lang]
+        lang_references = [{"id": example["id"], "answers": example["answers"]}
+                           for example in test_data if example["lang"] == lang]
+        eval_scores[lang] = metric.compute(
+            predictions=lang_predictions, references=lang_references)
 
-    eval_scores["average"] = {metric: np.mean([scores[metric] for scores in eval_scores.values()]) for metric in ["f1", "exact_match"]}
+    eval_scores["average"] = {metric: np.mean(
+        [scores[metric] for scores in eval_scores.values()]) for metric in ["f1", "exact_match"]}
 
     print("Scores:")
     print(json.dumps(eval_scores, indent=4))
-    
+
     with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
         json.dump(eval_scores, fout, indent=4)
     print("Done!")
@@ -244,7 +195,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data_dir",
         type=str,
-        default="data/xorqa/"
+        default="data/eval/tydiqa/"
     )
     parser.add_argument(
         "--max_num_examples_per_lang",
@@ -252,12 +203,7 @@ if __name__ == "__main__":
         default=None,
         help="maximum number of examples per language to evaluate."
     )
-    parser.add_argument(
-        "--n_shot",
-        type=int,
-        default=1,
-        help="number of examples to use for few-shot evaluation."
-    )
+
     parser.add_argument(
         "--no_context",
         action="store_true",
@@ -266,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_context_length",
         type=int,
-        default=512,
+        default=3750,
         help="maximum number of tokens in the context passage."
     )
     parser.add_argument(
@@ -291,40 +237,27 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the slow tokenizer."
     )
-    
     parser.add_argument(
-        "--eval_batch_size",
-        type=int,
-        default=1,
-        help="batch size for evaluation."
-    )
-    parser.add_argument(
-        "--load_in_8bit",
+        "--use_chat_format",
         action="store_true",
-        help="load model in 8bit mode, which will reduce memory and speed up inference."
-    )
-    parser.add_argument(
-        "--gptq",
-        action="store_true",
-        help="If given, we're evaluating a 4-bit quantized GPTQ model."
-    )
-    parser.add_argument(
-        "--use_vllm",
-        action="store_true", 
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
-    )
-    parser.add_argument(
-        "--use_chat_format", 
-        action="store_true", 
         help="If given, we will use the chat format for the prompts."
     )
     parser.add_argument(
-        "--chat_formatting_function", 
-        type=str, 
-        default="eval.templates.create_prompt_with_tulu_chat_format", 
+        "--chat_formatting_function",
+        type=str,
+        default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`."
+    )
+    parser.add_argument(
+        "--lang", type=str, default="hindi", choices=["hindi", "english"]
+    )
+    parser.add_argument(
+        "--awq",
+        action="store_true",
+        help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
     # model_name_or_path and openai_engine cannot be both None or both not None.
-    assert (args.model_name_or_path is None) != (args.openai_engine is None), "Either model_name_or_path or openai_engine should be specified."
+    assert (args.model_name_or_path is None) != (
+        args.openai_engine is None), "Either model_name_or_path or openai_engine should be specified."
     main(args)
