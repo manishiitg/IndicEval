@@ -22,7 +22,6 @@ for model_name_or_path in "${model_names[@]}"; do
     if [ ! -f "$FILE" ]; then
         python3 -m eval.truthfulqa.run_eval \
             --lang hi \
-            --max_context_length 3750 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
@@ -53,7 +52,6 @@ for model_name_or_path in "${model_names[@]}"; do
     if [ ! -f "$FILE" ]; then
         python3 -m eval.truthfulqa.run_eval \
             --lang en \
-            --max_context_length 3750 \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
