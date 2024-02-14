@@ -20,7 +20,7 @@ exact_match = evaluate.load("exact_match")
 choices = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 def format_example(question, answers, label=None):
-    prompt = f"{question.strip()}\n"
+    prompt = f"Question: {question.strip()}\n Choices: \n"
     for choice, answer in zip(choices, answers):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
@@ -31,7 +31,7 @@ def format_example(question, answers, label=None):
 
 
 def gen_prompt(question, choices):
-    prompt = f"The following are multiple choice questions (with answers) about science.\n\n"
+    prompt = f"Select the best answer based on the question.\n\n"
 
     messages = [{"role": "system", "content": prompt}]
 
