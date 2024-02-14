@@ -20,7 +20,7 @@ exact_match = evaluate.load("exact_match")
 choices = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 def format_example(question, answers, label=None):
-    prompt = f"Question: {question.strip()}\n Choices: \n"
+    prompt = f"Question: {question.strip()}\nChoices: \n"
     for choice, answer in zip(choices, answers):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
