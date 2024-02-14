@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results
+FOLDER_BASE=/sky-notebook/eval-results/truthfulqa
 
 
 
