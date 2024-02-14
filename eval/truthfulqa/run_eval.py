@@ -68,8 +68,8 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data):
             mc1_targets_choices = row["mc1_targets_choices"]
             labels = row["mc1_targets_labels"]
         else:
-            mc1_targets_choices = row["mc1_targets_choices"]["choices"]
-            labels = row["mc1_targets_choices"]["labels"]
+            mc1_targets_choices = row["mc1_targets"]["choices"]
+            labels = row["mc1_targets"]["labels"]
 
         answerIdx = -1
         for ix in labels:
@@ -182,7 +182,7 @@ def main(args):
         if args.lang == "hi":
             mc1_targets_choices = example["mc1_targets_choices"]
         else:
-            mc1_targets_choices = example["mc1_targets_choices"]["choices"]
+            mc1_targets_choices = example["mc1_targets"]["choices"]
 
         messages = gen_prompt(question=question, choices=mc1_targets_choices)
 
