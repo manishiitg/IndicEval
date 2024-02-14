@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./common_vars.sh
+source ./scripts/indic_eval/common_vars.sh
 FOLDER_BASE=/sky-notebook/eval-results/boolq
 
 
@@ -19,6 +19,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
     if [ ! -f "$FILE" ]; then
         # zero-shot

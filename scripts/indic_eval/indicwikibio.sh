@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./common_vars.sh
+source ./scripts/indic_eval/common_vars.sh
 FOLDER_BASE=/sky-notebook/eval-results/wiki
 
 
@@ -17,6 +17,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
         # 1-shot
