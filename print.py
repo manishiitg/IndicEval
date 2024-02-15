@@ -62,6 +62,13 @@ def sort_data(data):
     ret_data = {}
     for lang, data in sorted_data.items():
         for task, model, metric, metric_value in data:
+            if lang not in ret_data:
+                ret_data[lang] = {}
+            if model not in ret_data[lang]:
+                ret_data[lang][model] = {}
+            if task not in ret_data[lang][model]:
+                ret_data[lang][model][task] = {}
+                
             ret_data[lang][model][task][metric] = metric_value
 
     return ret_data
