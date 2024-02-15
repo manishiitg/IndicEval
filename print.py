@@ -61,8 +61,8 @@ def sort_data(data):
                         grouped_data[model].append((task, sub_task, shot, model, metric_name, metric_value))
     
     # Sort the data for each model based on the metric
-    for model in grouped_data:
-        grouped_data[model].sort(key=lambda x: x[5], reverse=True)
+    for model, data_list in grouped_data.items():
+        data_list.sort(key=lambda x: x[5], reverse=True)
     
     # Create a new JSON structure with the sorted data
     sorted_json = {}
