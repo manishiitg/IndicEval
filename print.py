@@ -55,7 +55,6 @@ def sort_data(data):
                     sorted_data[lang].append((task, model, metric, metric_value))
                     break
                 
-    print(sorted_data)
     for lang, data in sorted_data.items():
         # Sort the list based on the metric
         data.sort(key=lambda x: x[3], reverse=True)            
