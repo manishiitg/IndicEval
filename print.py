@@ -107,7 +107,8 @@ def generate_markdown_table(data):
             for model, metric_value in tasks_dict.items():
                 if model not in model_scores:
                     model_scores[model] = []
-                
+
+                print("metric_value", metric_value)
                 model_scores[model].append(metric_value)
 
         avg_model_score = {}
