@@ -114,8 +114,12 @@ def json_to_markdown_table(sorted_data):
             # Calculate the average for each metric across all shots and models
             for model, metrics in all_metrics.items():
                 for metric_name, metric_values in metrics.items():
-                    average_value = sum(metric_values) / len(metric_values)
-                    markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
+                    # Ensure metric_values is a list of numbers before calculating the average
+                    if isinstance(metric_values, list) and all(isinstance(x, (int, float)) for x in metric_values):
+                        average_value = sum(metric_values) / len(metric_values)
+                        markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
+                    else:
+                        markdown_output += f"| {model} | {metric_name} | N/A (non-numeric data) |\n"
             
             # Add a newline after the table
             markdown_output += "\n"
