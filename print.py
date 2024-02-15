@@ -99,7 +99,10 @@ def generate_markdown_table(data):
                     break
         
         # Create a table header
-        
+
+        models = list(set(models))
+        tasks = list(set(tasks))
+
         taskStr = "| "
         dashStr = "| "
         for task in tasks:
