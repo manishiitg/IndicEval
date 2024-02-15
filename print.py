@@ -205,37 +205,24 @@ print(json.dumps(sorted_data, indent=4))
 
 def json_to_markdown_table(sorted_data):
     markdown_output = ""
-
-    # Iterate over tasks and sub-tasks
+    
+    # Create a table header
+    markdown_output += "| Task | Sub-Task | Model | Metric | Average Value |\n"
+    markdown_output += "| --- | --- | --- | --- | --- |\n"
+    
+    # Iterate over tasks, sub-tasks, and models
     for task, sub_tasks in sorted_data.items():
         for sub_task, shots in sub_tasks.items():
-            # Add a header for the task and sub-task
-            markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
-
-            # Create a table header
-            markdown_output += "| Model | Metric | Average Value |\n"
-            markdown_output += "| --- | --- | --- |\n"
-
-            # Collect metrics for all shots
-            all_metrics = {}
             for shot, models in shots.items():
                 for model, metrics in models.items():
                     for metric_name, metric_value in metrics.items():
-                        if model not in all_metrics:
-                            all_metrics[model] = {}
-                        if metric_name not in all_metrics[model]:
-                            all_metrics[model][metric_name] = []
-                        all_metrics[model][metric_name].append(metric_value)
-
-            # Calculate the average for each metric across all shots
-            for model, metrics in all_metrics.items():
-                for metric_name, metric_values in metrics.items():
-                    average_value = sum(metric_values) / len(metric_values)
-                    markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
-
-            # Add a newline after the table
-            markdown_output += "\n"
-
+                        # Assuming metric_value is a list of values, calculate the average
+                        if isinstance(metric_value, list) and len(metric_value) > 0:
+                            average_value = sum(metric_value) / len(metric_value)
+                        else:
+                            average_value = metric_value  # If metric_value is not a list, use it as is
+                        markdown_output += f"| {task} | {sub_task} | {model} | {metric_name} | {average_value:.4f} |\n"
+    
     return markdown_output
 
 
