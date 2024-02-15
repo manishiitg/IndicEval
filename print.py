@@ -58,7 +58,7 @@ def sort_data(data):
     print(sorted_data)
     for lang, data in sorted_data.items():
         # Sort the list based on the metric
-        sorted_data[lang] = data.sort(key=lambda x: x[3], reverse=True)            
+        data.sort(key=lambda x: x[3], reverse=True)            
 
     return sorted_data
 
