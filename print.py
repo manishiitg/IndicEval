@@ -53,7 +53,7 @@ def sort_data(data):
                     if lang not in sorted_data:
                         sorted_data[lang] = []
                     sorted_data[lang].append((task, model, metric, metric_value))
-                    break  # Break after the first metric is found
+                    continue
                 
         
     for lang, data in sorted_data.items():
