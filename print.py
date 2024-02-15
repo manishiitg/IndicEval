@@ -64,12 +64,12 @@ def sort_data(data):
         for task, model, metric, metric_value in data:
             if lang not in ret_data:
                 ret_data[lang] = {}
-            if model not in ret_data[lang]:
-                ret_data[lang][model] = {}
-            if task not in ret_data[lang][model]:
-                ret_data[lang][model][task] = {}
+            if task not in ret_data[lang]:
+                ret_data[lang][task] = {}
+            if model not in ret_data[lang][task]:
+                ret_data[lang][task][model] = {}
 
-            ret_data[lang][model][task][metric] = metric_value
+            ret_data[lang][task][model][metric] = metric_value
 
     return ret_data
 
