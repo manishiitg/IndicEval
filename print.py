@@ -87,12 +87,11 @@ def sort_data(data):
 sorted_data = sort_data(scores)
 print(json.dumps(sorted_data, indent=4))
 
-# Function to convert JSON to Markdown table grouped by task and sub-task
-def json_to_markdown_table(data):
+def json_to_markdown_table(sorted_data):
     markdown_output = ""
     
     # Iterate over tasks and sub-tasks
-    for task, sub_tasks in data.items():
+    for task, sub_tasks in sorted_data.items():
         for sub_task, shots in sub_tasks.items():
             # Add a header for the task and sub-task
             markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
@@ -101,7 +100,7 @@ def json_to_markdown_table(data):
             markdown_output += "| Model | Metric | Average Value |\n"
             markdown_output += "| --- | --- | --- |\n"
             
-            # Collect metrics for all shots
+            # Collect metrics for all shots and models
             all_metrics = {}
             for shot, models in shots.items():
                 for model, metrics in models.items():
@@ -112,7 +111,7 @@ def json_to_markdown_table(data):
                             all_metrics[model][metric_name] = []
                         all_metrics[model][metric_name].append(metric_value)
             
-            # Calculate the average for each metric across all shots
+            # Calculate the average for each metric across all shots and models
             for model, metrics in all_metrics.items():
                 for metric_name, metric_values in metrics.items():
                     average_value = sum(metric_values) / len(metric_values)
