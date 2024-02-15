@@ -43,7 +43,6 @@ for root, dirs, files in os.walk(directory):
             else:
                 print(file_path)
 
-# Function to sort the data
 def sort_data(data):
     # List to hold the sorted data
     sorted_data = []
@@ -54,17 +53,23 @@ def sort_data(data):
             for shot, models in shots.items():
                 for model, metrics in models.items():
                     # Check if the metric is available
+                    model_metrics = []
                     for metric_name, metric_value in metrics.items():
-                        # Add the data to the list
-                        sorted_data.append((task, sub_task, shot, model, metric_name, metric_value))
-                        break  # Break after the first metric is found
+                        # Add the metric to the list
+                        model_metrics.append((metric_name, metric_value))
+                    
+                    # Sort the metrics by name
+                    model_metrics.sort()
+                    
+                    # Add the data to the list
+                    sorted_data.append((task, sub_task, shot, model, model_metrics))
     
-    # Sort the list based on the metric
-    sorted_data.sort(key=lambda x: x[5], reverse=True)
+    # Sort the list based on the metrics
+    sorted_data.sort(key=lambda x: [(metric_name, metric_value) for metric_name, metric_value in x[4]], reverse=True)
     
     # Create a new JSON structure with the sorted data
     sorted_json = {}
-    for task, sub_task, shot, model, metric_name, metric_value in sorted_data:
+    for task, sub_task, shot, model, model_metrics in sorted_data:
         if task not in sorted_json:
             sorted_json[task] = {}
         if sub_task not in sorted_json[task]:
@@ -73,7 +78,8 @@ def sort_data(data):
             sorted_json[task][sub_task][shot] = {}
         if model not in sorted_json[task][sub_task][shot]:
             sorted_json[task][sub_task][shot][model] = {}
-        sorted_json[task][sub_task][shot][model][metric_name] = metric_value
+        for metric_name, metric_value in model_metrics:
+            sorted_json[task][sub_task][shot][model][metric_name] = metric_value
     
     return sorted_json
 

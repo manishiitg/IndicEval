@@ -7,7 +7,7 @@ FOLDER_BASE=/sky-notebook/eval-results/wiki
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     TASK_NAME=indicwikibio
-    NUM_SHOTS=-1short
+    NUM_SHOTS=0short
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
     FILE=$FOLDER/metrics.json
