@@ -105,8 +105,6 @@ def generate_markdown_table(data):
             for model, metric_value in task_dict.items():
                 if model not in model_scores:
                     model_scores[model] = []
-
-                print("metric_value", metric_value)
                 model_scores[model].append(metric_value)
 
         avg_model_score = {}
@@ -149,8 +147,6 @@ def generate_markdown_table(data):
     for lang in langs:
         for task, tasks_dict in lang_dict.items():
             for model, model_dict in tasks_dict.items():
-                if model not in task_model_score[lang][task]:
-                    task_model_score[lang][task][model] = {}
                 for metric, metric_value in model_dict.items():
                     if task not in dups:
                         dups[task] = True
