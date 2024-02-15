@@ -8,3 +8,4 @@ model_names=(
     # "manishiitg/open-aditi-hi-v2-dpo-awq-1.1"
     # "manishiitg/open-aditi-hi-v2"
 )
+FOLDER_BASE=/sky-notebook/eval-results

@@ -1,17 +1,15 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results/indicsentiment
-
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     TASK_NAME=indicsentiment
-    NUM_SHOTS=0short
+    LANG=hi
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
     FILE=$FOLDER/metrics.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    echo "evaluating $model_name base on $TASK_NAME $LANG ..."
 
     if echo "$model_name" | grep -qi "awq"; then
         awq_param="--awq"

@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=1, help="number of examples to use for few-shot evaluation.")
     parser.add_argument(
-        "--no_context", action="store_true", help="If given, we're evaluating a model without the gold context passage."
+        "--no_context", action="store_false", help="If given, we're evaluating a model without the gold context passage."
     )
     parser.add_argument(
         "--max_context_length", type=int, default=3750, help="maximum number of tokens in the context passage."

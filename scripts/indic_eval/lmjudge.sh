@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results/lmjudge
 
 TASK_NAME=lmjudge
 for model_name_or_path in "${model_names[@]}"; do

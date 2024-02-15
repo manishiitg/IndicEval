@@ -1,15 +1,14 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results/indiccopa
 
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     TASK_NAME=indiccopa
-    NUM_SHOTS=0short
+    LANG=hi
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
     FILE=$FOLDER/metrics.json
 
     if echo "$model_name" | grep -qi "awq"; then
@@ -32,8 +31,8 @@ for model_name_or_path in "${model_names[@]}"; do
 
     fi
 
-    NUM_SHOTS=5short
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${NUM_SHOTS}"
+    LANG=5short
+    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
     FILE=$FOLDER/metrics.json
 
     if echo "$model_name" | grep -qi "awq"; then
