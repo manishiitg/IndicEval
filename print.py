@@ -40,30 +40,25 @@ for root, dirs, files in os.walk(directory):
             else:
                 print(file_path)
 
-# Function to get the first metric key for each language
-def get_first_metric_key(lang_dict):
-    for metric_key in lang_dict.values():
-        return metric_key
-    return None
 
 # Sorting models based on the first metric for each language
 sorted_scores_by_lang = {}
 for task, task_dict in scores.items():
-    for lang, lang_dict in task_dict.items():
-        first_metric_key = get_first_metric_key(lang_dict)
-        if first_metric_key is None:
-            continue  # Skip languages without any metrics
-        
-        # Sort models by the first metric for each language
-        sorted_models = sorted(lang_dict.items(), key=lambda x: x[1][first_metric_key])
-        
-        # Store the sorted models for each language
-        if lang not in sorted_scores_by_lang:
-            sorted_scores_by_lang[lang] = {}
-        
-        for model, metrics in sorted_models:
-            if model not in sorted_scores_by_lang[lang]:
-                sorted_scores_by_lang[lang][model] = []
-            sorted_scores_by_lang[lang][model].append((task, metrics))
+    for model, model_dict in task_dict.items():
+        for lang, lang_dict in model_dict.items():
+            print(lang_dict)
+            os.exit(1)
+            
+            # Sort models by the first metric for each language
+            sorted_models = sorted(lang_dict.items(), key=lambda x: x[1][first_metric_key])
+            
+            # Store the sorted models for each language
+            if lang not in sorted_scores_by_lang:
+                sorted_scores_by_lang[lang] = {}
+            
+            for model, metrics in sorted_models:
+                if model not in sorted_scores_by_lang[lang]:
+                    sorted_scores_by_lang[lang][model] = []
+                sorted_scores_by_lang[lang][model].append((task, metrics))
 
 print(sorted_scores_by_lang)
