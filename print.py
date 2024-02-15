@@ -129,7 +129,7 @@ def generate_markdown_table(data):
             taskStr += task + " | "
             dashStr += "--- | "
 
-        markdown_output += f"| Model \n"
+        markdown_output += f"| Model {taskStr} \n"
         markdown_output += f"| --- {dashStr}\n"
 
         for model, avg in sorted_model_dict.items():
@@ -145,6 +145,7 @@ def generate_markdown_table(data):
 
     dups = {}
     for lang in langs:
+        lang_dict = data[lang]
         for task, tasks_dict in lang_dict.items():
             for model, model_dict in tasks_dict.items():
                 for metric, metric_value in model_dict.items():
