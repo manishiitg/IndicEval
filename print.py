@@ -33,7 +33,7 @@ for root, dirs, files in os.walk(directory):
                             scores[task][model] = {}
                         if lang not in scores[task][model]:
                             scores[task][model][lang] = {}
-                        
+
                         scores[task][model][lang] = metric
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
@@ -52,12 +52,13 @@ def sort_data(data):
                 for metric, metric_value in lang_dict.items():
                     if lang not in sorted_data:
                         sorted_data[lang] = []
-                    sorted_data[lang].append((task, model, metric, metric_value))
+                    sorted_data[lang].append(
+                        (task, model, metric, metric_value))
                     # break
-                
+
     for lang, data in sorted_data.items():
         # Sort the list based on the metric
-        data.sort(key=lambda x: x[3], reverse=True)            
+        data.sort(key=lambda x: x[3], reverse=True)
 
     ret_data = {}
     for lang, data in sorted_data.items():
@@ -73,7 +74,10 @@ def sort_data(data):
 
     return ret_data
 
-print(json.dumps(sort_data(scores), indent=4))
+
+data = sort_data(scores)
+print(json.dumps(data, indent=4))
+
 
 def generate_markdown_table(data):
     markdown_output = ""
@@ -97,9 +101,9 @@ def generate_markdown_table(data):
                 for metric, metric_value in model_dict.items():
                     task_model_score[lang][task][model] = metric_value
                     break
-        
+
         # Create a table header
-                
+
         model_scores = {}
         for task, task_dict in task_model_score[lang].items():
             for model, metric_value in task_dict.items():
@@ -114,12 +118,9 @@ def generate_markdown_table(data):
                 sum += s
             avg = sum / len(scores)
             avg_model_score[model] = avg
-        
-        sorted_model_dict = {k: v for k, v in sorted(avg_model_score.items(), key=lambda item: item[1], reverse=True)}
 
-
-
-
+        sorted_model_dict = {k: v for k, v in sorted(
+            avg_model_score.items(), key=lambda item: item[1], reverse=True)}
 
         tasks = list(set(tasks))
 
@@ -133,7 +134,7 @@ def generate_markdown_table(data):
         markdown_output += f"| --- {dashStr}\n"
 
         for model, avg in sorted_model_dict.items():
-            markdown_output += f"| {model} | " #{avg:.4f} |
+            markdown_output += f"| {model} | "  # {avg:.4f} |
             for task in tasks:
                 average_value = task_model_score[lang][task][model]
                 markdown_output += f" {average_value:.4f} |"
@@ -154,8 +155,6 @@ def generate_markdown_table(data):
                         if metric == "em_score":
                             metric = "accuracy"
                         markdown_output += f"Task: {task} Metric: {metric} \n"
-                        
-                    
 
     return markdown_output
 
@@ -165,3 +164,10 @@ markdown_output = generate_markdown_table(sort_data(scores))
 
 # Print the Markdown output
 print(markdown_output)
+
+with open("/sky-notebook/eval-results/output.json", 'w', encoding='utf-8') as file:
+    json.dump(data, file, indent=4)
+
+
+with open("/sky-notebook/eval-results/output.md", 'w', encoding='utf-8') as file:
+    file.write(markdown_output)
