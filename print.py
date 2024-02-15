@@ -45,8 +45,8 @@ for root, dirs, files in os.walk(directory):
 
 # Function to sort the data
 def sort_data(data):
-    # List to hold the sorted data
-    sorted_data = []
+    # Dictionary to hold the data grouped by model
+    grouped_data = {}
     
     # Iterate over tasks, sub-tasks, shots, and models
     for task, sub_tasks in data.items():
@@ -55,25 +55,28 @@ def sort_data(data):
                 for model, metrics in models.items():
                     # Check if the metric is available
                     for metric_name, metric_value in metrics.items():
-                        # Add the data to the list
-                        sorted_data.append((task, sub_task, shot, model, metric_name, metric_value))
-                        break  # Break after the first metric is found
+                        # Add the data to the dictionary
+                        if model not in grouped_data:
+                            grouped_data[model] = []
+                        grouped_data[model].append((task, sub_task, shot, model, metric_name, metric_value))
     
-    # Sort the list based on the metric
-    sorted_data.sort(key=lambda x: x[5], reverse=True)
+    # Sort the data for each model based on the metric
+    for model in grouped_data:
+        grouped_data[model].sort(key=lambda x: x[5], reverse=True)
     
     # Create a new JSON structure with the sorted data
     sorted_json = {}
-    for task, sub_task, shot, model, metric_name, metric_value in sorted_data:
-        if task not in sorted_json:
-            sorted_json[task] = {}
-        if sub_task not in sorted_json[task]:
-            sorted_json[task][sub_task] = {}
-        if shot not in sorted_json[task][sub_task]:
-            sorted_json[task][sub_task][shot] = {}
-        if model not in sorted_json[task][sub_task][shot]:
-            sorted_json[task][sub_task][shot][model] = {}
-        sorted_json[task][sub_task][shot][model][metric_name] = metric_value
+    for model, data_list in grouped_data.items():
+        for task, sub_task, shot, model, metric_name, metric_value in data_list:
+            if model not in sorted_json:
+                sorted_json[model] = {}
+            if task not in sorted_json[model]:
+                sorted_json[model][task] = {}
+            if sub_task not in sorted_json[model][task]:
+                sorted_json[model][task][sub_task] = {}
+            if shot not in sorted_json[model][task][sub_task]:
+                sorted_json[model][task][sub_task][shot] = {}
+            sorted_json[model][task][sub_task][shot][metric_name] = metric_value
     
     return sorted_json
 
