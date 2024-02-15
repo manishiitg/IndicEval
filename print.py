@@ -92,7 +92,7 @@ def generate_markdown_table(data):
                 task_model_score[lang][task] = {}
             for model, model_dict in tasks_dict.items():
                 models.append(model)
-                if model not in task_model_score[task]:
+                if model not in task_model_score[lang][task]:
                     task_model_score[lang][task][model] = {}
                 for metric, metric_value in model_dict.items():
                     task_model_score[lang][task][model] = metric_value
