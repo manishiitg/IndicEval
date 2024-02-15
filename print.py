@@ -60,6 +60,11 @@ def sort_data(data):
         # Sort the list based on the metric
         data.sort(key=lambda x: x[3], reverse=True)            
 
-    return sorted_data
+    ret_data = {}
+    for lang, data in sorted_data.items():
+        for task, model, metric, metric_value in data:
+            ret_data[lang][model][task][metric] = metric_value
+
+    return ret_data
 
 print(sort_data(scores))
