@@ -92,39 +92,21 @@ print(json.dumps(sorted_data, indent=4))
 # Function to convert JSON to Markdown table grouped by task and sub-task
 
 
-def json_to_markdown_table(data):
+def json_to_markdown_table(sorted_data):
     markdown_output = ""
-
-    # Iterate over tasks and sub-tasks
-    for task, sub_tasks in data.items():
-        for sub_task, shots in sub_tasks.items():
-            # Add a header for the task and sub-task
-            markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
-
-            # Create a table header
-            markdown_output += "| Model | Metric | Average Value |\n"
-            markdown_output += "| --- | --- | --- |\n"
-
-            # Collect metrics for all shots
-            all_metrics = {}
-            for shot, models in shots.items():
-                for model, metrics in models.items():
+    
+    # Create a table header
+    markdown_output += "| Model | Task | Sub-Task | Metric | Metric Value |\n"
+    markdown_output += "| --- | --- | --- | --- | --- |\n"
+    
+    # Iterate over models, tasks, sub-tasks, and shots
+    for model, tasks in sorted_data.items():
+        for task, sub_tasks in tasks.items():
+            for sub_task, shots in sub_tasks.items():
+                for shot, metrics in shots.items():
                     for metric_name, metric_value in metrics.items():
-                        if model not in all_metrics:
-                            all_metrics[model] = {}
-                        if metric_name not in all_metrics[model]:
-                            all_metrics[model][metric_name] = []
-                        all_metrics[model][metric_name].append(metric_value)
-
-            # Calculate the average for each metric across all shots
-            for model, metrics in all_metrics.items():
-                for metric_name, metric_values in metrics.items():
-                    average_value = sum(metric_values) / len(metric_values)
-                    markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
-
-            # Add a newline after the table
-            markdown_output += "\n"
-
+                        markdown_output += f"| {model} | {task} | {sub_task} | {metric_name} | {metric_value:.4f} |\n"
+    
     return markdown_output
 
 
@@ -155,74 +137,87 @@ save_markdown_to_file(markdown_output, directory + 'output.md')
 save_json_to_file(sorted_data, directory + 'sorted_data.json')
 
 
-def sort_data(data):
-    # List to hold the sorted data
-    sorted_data = []
+# def sort_data(data):
+#     # List to hold the sorted data
+#     sorted_data = []
 
-    # Iterate over tasks, sub-tasks, shots, and models
-    for task, sub_tasks in data.items():
-        for sub_task, shots in sub_tasks.items():
-            for shot, models in shots.items():
-                for model, metrics in models.items():
-                    # Check if the metric is available
-                    model_metrics = []
-                    for metric_name, metric_value in metrics.items():
-                        # Add the metric to the list
-                        model_metrics.append((metric_name, metric_value))
+#     # Iterate over tasks, sub-tasks, shots, and models
+#     for task, sub_tasks in data.items():
+#         for sub_task, shots in sub_tasks.items():
+#             for shot, models in shots.items():
+#                 for model, metrics in models.items():
+#                     # Check if the metric is available
+#                     model_metrics = []
+#                     for metric_name, metric_value in metrics.items():
+#                         # Add the metric to the list
+#                         model_metrics.append((metric_name, metric_value))
 
-                    # Sort the metrics by name
-                    model_metrics.sort()
+#                     # Sort the metrics by name
+#                     model_metrics.sort()
 
-                    # Add the data to the list
-                    sorted_data.append(
-                        (task, sub_task, shot, model, model_metrics))
+#                     # Add the data to the list
+#                     sorted_data.append(
+#                         (task, sub_task, shot, model, model_metrics))
 
-    # Sort the list based on the metrics
-    sorted_data.sort(key=lambda x: [(metric_name, metric_value)
-                     for metric_name, metric_value in x[4]], reverse=True)
+#     # Sort the list based on the metrics
+#     sorted_data.sort(key=lambda x: [(metric_name, metric_value)
+#                      for metric_name, metric_value in x[4]], reverse=True)
 
-    # Create a new JSON structure with the sorted data
-    sorted_json = {}
-    for task, sub_task, shot, model, model_metrics in sorted_data:
-        if task not in sorted_json:
-            sorted_json[task] = {}
-        if sub_task not in sorted_json[task]:
-            sorted_json[task][sub_task] = {}
-        if shot not in sorted_json[task][sub_task]:
-            sorted_json[task][sub_task][shot] = {}
-        if model not in sorted_json[task][sub_task][shot]:
-            sorted_json[task][sub_task][shot][model] = {}
-        for metric_name, metric_value in model_metrics:
-            sorted_json[task][sub_task][shot][model][metric_name] = metric_value
+#     # Create a new JSON structure with the sorted data
+#     sorted_json = {}
+#     for task, sub_task, shot, model, model_metrics in sorted_data:
+#         if task not in sorted_json:
+#             sorted_json[task] = {}
+#         if sub_task not in sorted_json[task]:
+#             sorted_json[task][sub_task] = {}
+#         if shot not in sorted_json[task][sub_task]:
+#             sorted_json[task][sub_task][shot] = {}
+#         if model not in sorted_json[task][sub_task][shot]:
+#             sorted_json[task][sub_task][shot][model] = {}
+#         for metric_name, metric_value in model_metrics:
+#             sorted_json[task][sub_task][shot][model][metric_name] = metric_value
 
-    return sorted_json
+#     return sorted_json
 
 
-# Sort the data
-sorted_data = sort_data(scores)
-print(json.dumps(sorted_data, indent=4))
+# # Sort the data
+# sorted_data = sort_data(scores)
+# print(json.dumps(sorted_data, indent=4))
 
 
 def json_to_markdown_table(sorted_data):
     markdown_output = ""
-    
-    # Create a table header
-    markdown_output += "| Task | Sub-Task | Model | Metric | Average Value |\n"
-    markdown_output += "| --- | --- | --- | --- | --- |\n"
-    
-    # Iterate over tasks, sub-tasks, and models
+
+    # Iterate over tasks and sub-tasks
     for task, sub_tasks in sorted_data.items():
         for sub_task, shots in sub_tasks.items():
+            # Add a header for the task and sub-task
+            markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
+
+            # Create a table header
+            markdown_output += "| Model | Metric | Average Value |\n"
+            markdown_output += "| --- | --- | --- |\n"
+
+            # Collect metrics for all shots
+            all_metrics = {}
             for shot, models in shots.items():
                 for model, metrics in models.items():
                     for metric_name, metric_value in metrics.items():
-                        # Assuming metric_value is a list of values, calculate the average
-                        if isinstance(metric_value, list) and len(metric_value) > 0:
-                            average_value = sum(metric_value) / len(metric_value)
-                        else:
-                            average_value = metric_value  # If metric_value is not a list, use it as is
-                        markdown_output += f"| {task} | {sub_task} | {model} | {metric_name} | {average_value:.4f} |\n"
-    
+                        if model not in all_metrics:
+                            all_metrics[model] = {}
+                        if metric_name not in all_metrics[model]:
+                            all_metrics[model][metric_name] = []
+                        all_metrics[model][metric_name].append(metric_value)
+
+            # Calculate the average for each metric across all shots
+            for model, metrics in all_metrics.items():
+                for metric_name, metric_values in metrics.items():
+                    average_value = sum(metric_values) / len(metric_values)
+                    markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
+
+            # Add a newline after the table
+            markdown_output += "\n"
+
     return markdown_output
 
 
