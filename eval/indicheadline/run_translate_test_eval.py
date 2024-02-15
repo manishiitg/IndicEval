@@ -44,12 +44,13 @@ def trim_context(context, max_context_length, tokenizer):
 
 
 def format_example(input, lang, headline=None):
-    lang = "English" # lang_map[lang]
+    lang = "English"  # lang_map[lang]
     user_prompt = f"{lang.capitalize()} article: {input}"
     assistant_prompt = f"\n{lang.capitalize()} headline:"
     if headline is not None:
         assistant_prompt += f" {headline}"
-    messages = [{"role":"user", "content":user_prompt + "\n" + assistant_prompt}]
+    messages = [
+        {"role": "user", "content": user_prompt + "\n" + assistant_prompt}]
     return messages
 
 
@@ -60,11 +61,13 @@ def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             messages += format_example(
-                input=trim_context(example["input"], max_context_length, tokenizer),
+                input=trim_context(
+                    example["input"], max_context_length, tokenizer),
                 lang=lang,
                 headline=example["target"],
             )
     return messages
+
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -83,6 +86,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     return outputs
+
 
 def main(args):
     random.seed(args.seed)
@@ -115,34 +119,38 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("ai4bharat/IndicHeadlineGeneration","hi")
-            
+    dataset = load_dataset("ai4bharat/IndicHeadlineGeneration", "hi")
+
     dataset = dataset.map(lambda x: {"input": x["input"].strip()})
     dataset = dataset.map(lambda x: {"target": x["target"].strip()})
-    dev_data = dataset["validation"].select(range(min(len(dataset["validation"]), args.n_instances)))
-    test_data = dataset["test"].select(range(min(len(dataset["test"]), args.n_instances)))
+    dev_data = dataset["validation"].select(
+        range(min(len(dataset["validation"]), args.n_instances)))
+    test_data = dataset["test"].select(
+        range(min(len(dataset["test"]), args.n_instances)))
 
     k = args.ntrain
     prompts = []
     for i, example in enumerate(test_data):
-        
+
         prompt_end = format_example(
             input=trim_context(example["input"], args.max_context_length, tokenizer), lang=args.lang
         )
-        train_prompt = gen_prompt(dev_data, args.lang, args.max_context_length, tokenizer, k)
+        train_prompt = gen_prompt(
+            dev_data, args.lang, args.max_context_length, tokenizer, k)
         prompt = train_prompt + prompt_end
-        
+
         if args.use_chat_format:
             prompt = chat_formatting_function(prompt)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
-        
-        prompts.append(prompt)
-        
 
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+        prompts.append(prompt)
+
+    outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
     if len(outputs) > 2:
         print(outputs[:2])
 
@@ -152,7 +160,7 @@ def main(args):
     import gc
 
     gc.collect()
-    
+
     print("Calculating Rouge and BLEURT ...")
     rouge = evaluate.load("rouge")
     bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
@@ -160,12 +168,13 @@ def main(args):
     predictions = [output for output in outputs]
     references = [example["target"] for example in test_data]
 
-    rouge_metrics = rouge.compute(predictions=predictions, references=references)
+    rouge_metrics = rouge.compute(
+        predictions=predictions, references=references)
     metrics = {
+        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
         "rouge1": rouge_metrics["rouge1"],
         "rouge2": rouge_metrics["rouge2"],
         "rougeL": rouge_metrics["rougeL"],
-        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
     }
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
@@ -177,12 +186,14 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=1, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=1,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "gu", "kn", "hi", "ml", "mr", "or", "pa", "ta", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicheadline/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/indicheadline/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
@@ -210,9 +221,9 @@ if __name__ == "__main__":
         default=1000,
         help="if specified, a maximum of n_instances will be used for the evaluation."
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -229,6 +240,6 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
-    
+
     args = parser.parse_args()
     main(args)

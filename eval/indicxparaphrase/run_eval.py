@@ -1,3 +1,5 @@
+import vllm
+from transformers import AutoTokenizer
 import argparse
 import os
 import random
@@ -14,9 +16,7 @@ from eval.utils import (
 )
 import evaluate
 exact_match = evaluate.load("exact_match")
-from transformers import AutoTokenizer
 
-import vllm
 
 choices = ["1", "2"]
 lang_map = {
@@ -34,12 +34,14 @@ lang_map = {
 
 
 def format_example(english, sentence1, sentence2, lang, label=None):
-    user_prompt = "{english}\nThis can be paraphrased in {lang} as".format(english=english, lang="English") #lang=lang_map[lang])
-    user_prompt += "\n1. {sentence1}\n2. {sentence2}".format(sentence1=sentence1, sentence2=sentence2)
+    user_prompt = "{english}\nThis can be paraphrased in {lang} as".format(
+        english=english, lang="English")  # lang=lang_map[lang])
+    user_prompt += "\n1. {sentence1}\n2. {sentence2}".format(
+        sentence1=sentence1, sentence2=sentence2)
     assistant_prompt = "Answer:"
     if label is not None:
         assistant_prompt += " {label}".format(label=label)
-    messages = [{"role":"user", "content":user_prompt + assistant_prompt}]
+    messages = [{"role": "user", "content": user_prompt + assistant_prompt}]
     return messages
 
 
@@ -78,10 +80,11 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
-    
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
+
     dataset = load_dataset("ai4bharat/IndicXParaphrase", "hi", "test")
-    
+
     dataset = dataset.map(lambda x: {"english": x["english"].strip()})
     dataset = dataset.map(lambda x: {"sentence1": x["sentence1"].strip()})
     dataset = dataset.map(lambda x: {"sentence2": x["sentence2"].strip()})
@@ -144,7 +147,7 @@ def main(args):
             "prediction": targets[idx]
         }
         predictions.append(row)
-        
+
         idx += 1
 
     if len(predictions) > 2:
@@ -157,17 +160,17 @@ def main(args):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {em_score}")
 
-    outputs = [output[0] if len(output) > 0  else "" for output in outputs]
-    targets = [target[0] if len(target) > 0  else ""  for target in targets]
+    outputs = [output[0] if len(output) > 0 else "" for output in outputs]
+    targets = [target[0] if len(target) > 0 else "" for target in targets]
     # directly measuring A with A instead of of full option match
 
     em_score_options = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+                                           ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match Only Options: {em_score_options}")
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
-            "em_score_options" : em_score_options,
+            "em_score": em_score_options,
             "exact_match": em_score,
         }, fout, indent=4)
 
@@ -179,7 +182,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["hi"]
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicxparaphrase/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/indicxparaphrase/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -192,8 +196,9 @@ if __name__ == "__main__":
         default=None,
         help="if specified, we will load the tokenizer from here.",
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--awq",
         action="store_true",

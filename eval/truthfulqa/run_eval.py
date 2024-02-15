@@ -121,7 +121,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data):
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
-            "em_score_options": em_score_options,
+            "em_score": em_score_options,
             "exact_match": em_score,
         }, fout, indent=4)
 

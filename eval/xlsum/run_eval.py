@@ -126,7 +126,7 @@ def main(args):
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
-    
+
     with open(os.path.join(args.save_dir, f"xlsum_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
             example["prediction_text"] = output
@@ -162,7 +162,7 @@ if __name__ == "__main__":
                         help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
-        "--lang", type=str, default="hindi", choices=["hindi","english"]
+        "--lang", type=str, default="hindi", choices=["hindi", "english"]
     )
     parser.add_argument("--save_dir", type=str,
                         default="/sky-notebook/eval-results/xlsum/llama-7B/")

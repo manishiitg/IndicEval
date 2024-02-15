@@ -38,12 +38,13 @@ def trim_context(context, max_context_length, tokenizer):
 
 
 def format_example(infobox, lang, summary=None):
-    lang = "English" #lang_map[lang].capitalize()
+    lang = "English"  # lang_map[lang].capitalize()
     user_prompt = f"{lang} infobox: {infobox}"
     assistant_prompt = f"\n{lang} summary:"
     if summary is not None:
         assistant_prompt += f" {summary}"
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    messages = [{"role": "user", "content": user_prompt}, {
+        "role": "assistant", "content": assistant_prompt}]
     return messages
 
 
@@ -55,11 +56,13 @@ def gen_prompt(dev_data, lang, max_context_length, tokenizer, k=-1):
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             messages += format_example(
-                trim_context(example["infobox"], max_context_length, tokenizer),
+                trim_context(example["infobox"],
+                             max_context_length, tokenizer),
                 lang=lang,
                 summary=example["summary"],
             )
     return messages
+
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -80,6 +83,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     if len(outputs) > 2:
         print(outputs[:2])
     return outputs
+
 
 def main(args):
     random.seed(args.seed)
@@ -109,11 +113,11 @@ def main(args):
             max_model_len=4096,
         )
 
-
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("Thanmay/indic-wikibio-hi")
     # for split in dataset.column_names:
@@ -126,7 +130,7 @@ def main(args):
     #     dataset[split] = dataset[split].remove_columns(remove_column_names)
     #     for itv2_column_name in itv2_column_names:
     #         dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
-            
+
     dataset = dataset.map(lambda x: {"infobox": x["infobox"].strip()})
     dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
     dev_data = dataset["validation"]
@@ -138,18 +142,20 @@ def main(args):
         prompt_end = format_example(
             trim_context(example["infobox"], args.max_context_length, tokenizer), lang=args.lang
         )
-        train_prompt = gen_prompt(dev_data, args.lang, args.max_context_length, tokenizer, k)
+        train_prompt = gen_prompt(
+            dev_data, args.lang, args.max_context_length, tokenizer, k)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt)[:-5]
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
-        
-        
+
         prompts.append(prompt)
 
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+    outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
 
     with open(os.path.join(args.save_dir, f"indicwikibio_{args.lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
@@ -170,12 +176,13 @@ def main(args):
     predictions = [output for output in outputs]
     references = [example["summary"] for example in test_data]
 
-    rouge_metrics = rouge.compute(predictions=predictions, references=references)
+    rouge_metrics = rouge.compute(
+        predictions=predictions, references=references)
     metrics = {
+        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
         "rouge1": rouge_metrics["rouge1"],
         "rouge2": rouge_metrics["rouge2"],
         "rougeL": rouge_metrics["rougeL"],
-        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
     }
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
@@ -187,12 +194,14 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=1, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=1,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "kn", "hi", "ml", "or", "pa", "ta", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicwikibio/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/indicwikibio/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
@@ -214,9 +223,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_context_length", type=int, default=3750, help="maximum number of tokens in the context passage."
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -228,7 +237,7 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
-    
+
     parser.add_argument(
         "--awq",
         action="store_true",

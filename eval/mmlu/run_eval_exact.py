@@ -17,7 +17,6 @@ exact_match = evaluate.load("exact_match")
 choices = ["1", "2", "3", "4"]
 
 
-
 def format_subject(subject):
     l = subject.split("_")
     s = ""
@@ -29,7 +28,7 @@ def format_subject(subject):
 def format_example(df, idx, include_answer=True):
     prompt = df.iloc[idx, 0]
     ch = df.iloc[idx, 2]
-    if isinstance(ch, str): # in hi data is string but in en its list
+    if isinstance(ch, str):  # in hi data is string but in en its list
         ch = ch.split('\n')
 
     answer = df.iloc[idx, -1]
@@ -92,7 +91,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                 prompt, truncation=False, add_special_tokens=False).input_ids
 
         prompts.append(prompt)
-        
+
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
@@ -109,7 +108,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
 
     def extract_answer(row):
 
-        if isinstance(row['choices'], str): # in hi data is string but in en its list
+        if isinstance(row['choices'], str):  # in hi data is string but in en its list
             choices = row['choices'].split('\n')
         else:
             choices = row["choices"]
@@ -138,7 +137,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             "prediction": targets[idx]
         }
         predictions.append(row)
-        
+
         idx += 1
 
     if len(predictions) > 2:
@@ -151,21 +150,22 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match: {subject} {em_score}")
 
-    outputs = [output[0] if len(output) > 0  else "" for output in outputs]
-    targets = [target[0] if len(target) > 0  else ""  for target in targets]
+    outputs = [output[0] if len(output) > 0 else "" for output in outputs]
+    targets = [target[0] if len(target) > 0 else "" for target in targets]
     # directly measuring A with A instead of of full option match
 
     em_score_options = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+                                           ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match Only Options: {subject} {em_score_options}")
 
     with open(os.path.join(args.save_dir, f"metrics-{subject}.json"), "w") as fout:
         json.dump({
-            "em_score_options" : em_score_options,
+            "em_score": em_score_options,
             "exact_match": em_score,
         }, fout, indent=4)
 
     return em_score
+
 
 def main(args):
 
@@ -182,7 +182,6 @@ def main(args):
         for row in ds:
             subjects.append(row["subject"])
         subjects = list(set(subjects))
-    
 
     if args.subjects:
         assert all(
@@ -197,7 +196,7 @@ def main(args):
         subcat: [] for subcat_lists in subcategories.values() for subcat in subcat_lists
     }
     cat_cors = {cat: [] for cat in categories}
-    
+
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
@@ -234,7 +233,7 @@ def main(args):
                 "cais/mmlu", subject, split="dev", trust_remote_code=True))[: args.ntrain]
             test_df = pd.DataFrame(load_dataset(
                 "cais/mmlu", subject, split="test", trust_remote_code=True))
-        
+
         if args.n_instances and args.n_instances < test_df.shape[0]:
             test_df = test_df.sample(args.n_instances, random_state=42)
 
@@ -258,7 +257,8 @@ def main(args):
         if len(subcat_cors[subcat]) > 0:
             try:
                 subcat_acc = np.mean(subcat_cors[subcat])
-                print("Average accuracy {:.3f} - {}".format(subcat_acc, subcat))
+                print(
+                    "Average accuracy {:.3f} - {}".format(subcat_acc, subcat))
             except:
                 idxs.append(subcat)
 
@@ -324,7 +324,7 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the slow tokenizer."
     )
-    
+
     parser.add_argument(
         "--subjects",
         nargs="*",
@@ -362,7 +362,7 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`."
     )
-    
+
     parser.add_argument(
         "--awq",
         action="store_true",
