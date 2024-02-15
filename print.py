@@ -104,7 +104,7 @@ def generate_markdown_table(data):
         count = 0
         model_scores = {}
         for task, task_dict in task_model_score[lang].items():
-            for model, metric_value in tasks_dict.items():
+            for model, metric_value in task_dict.items():
                 if model not in model_scores:
                     model_scores[model] = []
 
