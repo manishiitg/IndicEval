@@ -151,6 +151,8 @@ def generate_markdown_table(data):
                 for metric, metric_value in model_dict.items():
                     if task not in dups:
                         dups[task] = True
+                        if metric == "em_score":
+                            metric = "accuracy"
                         markdown_output += f"Task: {task} Metric: {metric} \n"
                         
                     
