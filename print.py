@@ -68,9 +68,9 @@ def sort_data(data):
                 ret_data[lang][model] = {}
             if task not in ret_data[lang][model]:
                 ret_data[lang][model][task] = {}
-                
+
             ret_data[lang][model][task][metric] = metric_value
 
     return ret_data
 
-print(sort_data(scores))
+print(json.dumps(sort_data(scores), indent=4))
