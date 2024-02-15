@@ -69,6 +69,7 @@ def gen_prompt(dev_data, src_lang, tgt_lang, k=-1):
             )
     return prompt
 
+
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
@@ -86,6 +87,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                if prompt in prompt_to_output else "" for prompt in prompts]
 
     return outputs
+
 
 def main(args):
     random.seed(args.seed)
@@ -118,7 +120,8 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset(args.dataset, f"{args.src_lang}-{args.tgt_lang}")
     dataset = dataset.map(
@@ -130,11 +133,11 @@ def main(args):
     test_data = dataset["gen"] if args.dataset == "ai4bharat/IN22-Gen" else dataset["conv"]
 
     prompts = []
+    k = args.ntrain
+    dev_data = test_data.filter(
+        lambda x: x[f"sentence_{args.src_lang}"] != example[f"sentence_{args.src_lang}"]
+    ).shuffle(args.seed)
     for i, example in enumerate(test_data):
-        dev_data = test_data.filter(
-            lambda x: x[f"sentence_{args.src_lang}"] != example[f"sentence_{args.src_lang}"]
-        ).shuffle(args.seed)
-        k = args.ntrain
         prompt_end = format_example(
             src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
         )
@@ -149,7 +152,8 @@ def main(args):
             else:
                 prompt += f" The {lang_map[args.tgt_lang]} translation is: "
 
-        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+        tokenized_prompt = tokenizer(
+            prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
         include_prompt = True
         while len(tokenized_prompt) > 4096:
@@ -168,11 +172,13 @@ def main(args):
                 else:
                     prompt += f" The {lang_map[args.tgt_lang]} translation is: "
 
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+            tokenized_prompt = tokenizer(
+                prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
 
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+    outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
 
     with open(os.path.join(args.save_dir, f"in22_{args.src_lang}_{args.tgt_lang}_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
@@ -192,7 +198,8 @@ def main(args):
     bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
 
     predictions = [output for output in outputs]
-    references = [[example[f"sentence_{args.tgt_lang}"]] for example in test_data]
+    references = [[example[f"sentence_{args.tgt_lang}"]]
+                  for example in test_data]
     if len(predictions) > 2:
         print(predictions[:2])
 
@@ -201,7 +208,8 @@ def main(args):
         "chrf": chrf.compute(predictions=predictions, references=references)["score"],
         "chrf2": chrf.compute(predictions=predictions, references=references, word_order=2)["score"],
         "bleurt": np.mean(
-            bleurt.score(candidates=predictions, references=[ref for sublist in references for ref in sublist])
+            bleurt.score(candidates=predictions, references=[
+                         ref for sublist in references for ref in sublist])
         ),
     }
     for k, v in metrics.items():
@@ -214,7 +222,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=5, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=5,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--dataset", type=str, default="ai4bharat/IN22-Gen", choices=["ai4bharat/IN22-Gen", "ai4bharat/IN22-Conv"]
@@ -231,7 +240,8 @@ if __name__ == "__main__":
         default="hin_Deva",
         choices=list(lang_map.keys()),
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/in22-gen/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/in22-gen/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
@@ -250,9 +260,9 @@ if __name__ == "__main__":
         default=None,
         help="if specified, we will load the tokenizer from here.",
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -269,6 +279,6 @@ if __name__ == "__main__":
         action="store_true",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
-    
+
     args = parser.parse_args()
     main(args)
