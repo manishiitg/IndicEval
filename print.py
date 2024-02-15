@@ -132,8 +132,8 @@ def generate_markdown_table(data):
             taskStr += task + " | "
             dashStr += "--- | "
 
-        markdown_output += f"| Model {taskStr}\n"
-        markdown_output += f"| --- {dashStr}\n"
+        markdown_output += f"| Model {taskStr} | Avg \n"
+        markdown_output += f"| --- | --- {dashStr}\n"
 
         for model, avg in sorted_model_dict.items():
             markdown_output += f"| {model} | {avg:.4f} |"
