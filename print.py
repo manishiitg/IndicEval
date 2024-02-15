@@ -185,64 +185,64 @@ save_json_to_file(sorted_data, directory + 'sorted_data.json')
 # print(json.dumps(sorted_data, indent=4))
 
 
-def json_to_markdown_table(sorted_data):
-    markdown_output = ""
+# def json_to_markdown_table(sorted_data):
+#     markdown_output = ""
 
-    # Iterate over tasks and sub-tasks
-    for task, sub_tasks in sorted_data.items():
-        for sub_task, shots in sub_tasks.items():
-            # Add a header for the task and sub-task
-            markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
+#     # Iterate over tasks and sub-tasks
+#     for task, sub_tasks in sorted_data.items():
+#         for sub_task, shots in sub_tasks.items():
+#             # Add a header for the task and sub-task
+#             markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
 
-            # Create a table header
-            markdown_output += "| Model | Metric | Average Value |\n"
-            markdown_output += "| --- | --- | --- |\n"
+#             # Create a table header
+#             markdown_output += "| Model | Metric | Average Value |\n"
+#             markdown_output += "| --- | --- | --- |\n"
 
-            # Collect metrics for all shots
-            all_metrics = {}
-            for shot, models in shots.items():
-                for model, metrics in models.items():
-                    for metric_name, metric_value in metrics.items():
-                        if model not in all_metrics:
-                            all_metrics[model] = {}
-                        if metric_name not in all_metrics[model]:
-                            all_metrics[model][metric_name] = []
-                        all_metrics[model][metric_name].append(metric_value)
+#             # Collect metrics for all shots
+#             all_metrics = {}
+#             for shot, models in shots.items():
+#                 for model, metrics in models.items():
+#                     for metric_name, metric_value in metrics.items():
+#                         if model not in all_metrics:
+#                             all_metrics[model] = {}
+#                         if metric_name not in all_metrics[model]:
+#                             all_metrics[model][metric_name] = []
+#                         all_metrics[model][metric_name].append(metric_value)
 
-            # Calculate the average for each metric across all shots
-            for model, metrics in all_metrics.items():
-                for metric_name, metric_values in metrics.items():
-                    average_value = sum(metric_values) / len(metric_values)
-                    markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
+#             # Calculate the average for each metric across all shots
+#             for model, metrics in all_metrics.items():
+#                 for metric_name, metric_values in metrics.items():
+#                     average_value = sum(metric_values) / len(metric_values)
+#                     markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
 
-            # Add a newline after the table
-            markdown_output += "\n"
+#             # Add a newline after the table
+#             markdown_output += "\n"
 
-    return markdown_output
-
-
-# Convert JSON to Markdown table grouped by task and sub-task
-markdown_output = json_to_markdown_table(sorted_data)
-
-# Print the Markdown output
-print(markdown_output)
-
-# Function to save Markdown output to a file
+#     return markdown_output
 
 
-def save_markdown_to_file(markdown_text, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        file.write(markdown_text)
+# # Convert JSON to Markdown table grouped by task and sub-task
+# markdown_output = json_to_markdown_table(sorted_data)
 
-# Function to save sorted JSON data to a file
+# # Print the Markdown output
+# print(markdown_output)
 
-
-def save_json_to_file(data, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, indent=4)
+# # Function to save Markdown output to a file
 
 
-# Save the Markdown output to a file
-save_markdown_to_file(markdown_output, directory + 'output-all.md')
-# Save the sorted JSON data to a file
-save_json_to_file(sorted_data, directory + 'sorted_data-all.json')
+# def save_markdown_to_file(markdown_text, filename):
+#     with open(filename, 'w', encoding='utf-8') as file:
+#         file.write(markdown_text)
+
+# # Function to save sorted JSON data to a file
+
+
+# def save_json_to_file(data, filename):
+#     with open(filename, 'w', encoding='utf-8') as file:
+#         json.dump(data, file, indent=4)
+
+
+# # Save the Markdown output to a file
+# save_markdown_to_file(markdown_output, directory + 'output-all.md')
+# # Save the sorted JSON data to a file
+# save_json_to_file(sorted_data, directory + 'sorted_data-all.json')
