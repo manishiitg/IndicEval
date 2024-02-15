@@ -75,7 +75,7 @@ def sort_data(data):
 
 print(json.dumps(sort_data(scores), indent=4))
 
-def generate_markdown_table(data, task_names):
+def generate_markdown_table(data):
     markdown_output = ""
 
     # Iterate over tasks and sub-tasks
