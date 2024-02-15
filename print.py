@@ -117,7 +117,7 @@ def generate_markdown_table(data):
             avg = sum / len(scores)
             avg_model_score[model] = avg
         
-        sorted_model_dict = {k: v for k, v in sorted(avg_model_score.items(), key=lambda item: item[1])}
+        sorted_model_dict = {k: v for k, v in sorted(avg_model_score.items(), key=lambda item: item[1], reverse=True)}
 
 
 
