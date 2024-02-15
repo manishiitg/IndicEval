@@ -15,16 +15,16 @@ for model_name_or_path in "${model_names[@]}"; do
     else
         awq_param=""
     fi
-    if [ ! -f "$FILE" ]; then
-        python3 -m eval.lm_judge.run_eval \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 1 \
-            --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            $awq_param
-    fi
+    
+    python3 -m eval.lm_judge.run_eval \
+        --save_dir $FOLDER \
+        --model_name_or_path $model_name_or_path \
+        --tokenizer_name_or_path $model_name_or_path \
+        --eval_batch_size 1 \
+        --use_chat_format \
+        --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+        $awq_param
+    
 done
 
 FILE=$FOLDER/lm_judge_predictions.json
