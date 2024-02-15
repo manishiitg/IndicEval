@@ -100,8 +100,6 @@ def generate_markdown_table(data):
         
         # Create a table header
                 
-        total = 0
-        count = 0
         model_scores = {}
         for task, task_dict in task_model_score[lang].items():
             for model, metric_value in task_dict.items():
@@ -133,7 +131,7 @@ def generate_markdown_table(data):
             taskStr += task + " | "
             dashStr += "--- | "
 
-        markdown_output += f"| Model {taskStr} | Avg \n"
+        markdown_output += f"| Model | Avg {taskStr} \n"
         markdown_output += f"| --- | --- {dashStr}\n"
 
         for model, avg in sorted_model_dict.items():
