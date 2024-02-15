@@ -97,27 +97,27 @@ def generate_markdown_table(data):
                     task_model_score[task][model] = metric_value
                     break
         
-    # Create a table header
-    
-    taskStr = "| "
-    dashStr = "| "
-    for task in tasks:
-        taskStr += task + " | "
-        dashStr += "--- | "
-
-    markdown_output += f"| Model {taskStr}\n"
-    markdown_output += f"| --- {dashStr}\n"
-
-    for model in models:
-        markdown_output += f"| {model} |"
+        # Create a table header
+        
+        taskStr = "| "
+        dashStr = "| "
         for task in tasks:
-            average_value = task_model_score[task][model]
-            markdown_output += f" {average_value:.4f} |"
+            taskStr += task + " | "
+            dashStr += "--- | "
 
+        markdown_output += f"| Model {taskStr}\n"
+        markdown_output += f"| --- {dashStr}\n"
+
+        for model in models:
+            markdown_output += f"| {model} |"
+            for task in tasks:
+                average_value = task_model_score[task][model]
+                markdown_output += f" {average_value:.4f} |"
+
+            markdown_output += "\n"
+
+        # Add a newline after the table
         markdown_output += "\n"
-
-    # Add a newline after the table
-    markdown_output += "\n"
 
     return markdown_output
 
