@@ -40,206 +40,30 @@ for root, dirs, files in os.walk(directory):
             else:
                 print(file_path)
 
-# Function to sort the data
+# Function to get the first metric key for each language
+def get_first_metric_key(lang_dict):
+    for metric_key in lang_dict.values():
+        return metric_key
+    return None
 
+# Sorting models based on the first metric for each language
+sorted_scores_by_lang = {}
+for task, task_dict in scores.items():
+    for lang, lang_dict in task_dict.items():
+        first_metric_key = get_first_metric_key(lang_dict)
+        if first_metric_key is None:
+            continue  # Skip languages without any metrics
+        
+        # Sort models by the first metric for each language
+        sorted_models = sorted(lang_dict.items(), key=lambda x: x[1][first_metric_key])
+        
+        # Store the sorted models for each language
+        if lang not in sorted_scores_by_lang:
+            sorted_scores_by_lang[lang] = {}
+        
+        for model, metrics in sorted_models:
+            if model not in sorted_scores_by_lang[lang]:
+                sorted_scores_by_lang[lang][model] = []
+            sorted_scores_by_lang[lang][model].append((task, metrics))
 
-def sort_data(data):
-    # Dictionary to hold the data grouped by model
-    grouped_data = {}
-
-    # Iterate over tasks, sub-tasks, shots, and models
-    for task, sub_tasks in data.items():
-        for sub_task, shots in sub_tasks.items():
-            for shot, models in shots.items():
-                for model, metrics in models.items():
-                    # Check if the metric is available
-                    for metric_name, metric_value in metrics.items():
-                        # Add the data to the dictionary
-                        if model not in grouped_data:
-                            grouped_data[model] = []
-                        grouped_data[model].append(
-                            (task, sub_task, shot, model, metric_name, metric_value))
-                        break
-
-    # Sort the data for each model based on the metric
-    for model, data_list in grouped_data.items():
-        data_list.sort(key=lambda x: x[5], reverse=True)
-
-    # Create a new JSON structure with the sorted data
-    sorted_json = {}
-    for model, data_list in grouped_data.items():
-        for task, sub_task, shot, model, metric_name, metric_value in data_list:
-            if model not in sorted_json:
-                sorted_json[model] = {}
-            if task not in sorted_json[model]:
-                sorted_json[model][task] = {}
-            if sub_task not in sorted_json[model][task]:
-                sorted_json[model][task][sub_task] = {}
-            if shot not in sorted_json[model][task][sub_task]:
-                sorted_json[model][task][sub_task][shot] = {}
-            sorted_json[model][task][sub_task][shot][metric_name] = metric_value
-
-    return sorted_json
-
-
-# Sort the data
-sorted_data = sort_data(scores)
-print(json.dumps(sorted_data, indent=4))
-
-# Function to convert JSON to Markdown table grouped by task and sub-task
-
-
-def json_to_markdown_table(sorted_data):
-    markdown_output = ""
-    
-    # Create a table header
-    markdown_output += "| Model | Task | Sub-Task | Metric | Metric Value |\n"
-    markdown_output += "| --- | --- | --- | --- | --- |\n"
-    
-    # Iterate over models, tasks, sub-tasks, and shots
-    for model, tasks in sorted_data.items():
-        for task, sub_tasks in tasks.items():
-            for sub_task, shots in sub_tasks.items():
-                for shot, metrics in shots.items():
-                    for metric_name, metric_value in metrics.items():
-                        markdown_output += f"| {model} | {task} | {sub_task} | {metric_name} | {metric_value:.4f} |\n"
-    
-    return markdown_output
-
-
-# Convert JSON to Markdown table grouped by task and sub-task
-markdown_output = json_to_markdown_table(sorted_data)
-
-# Print the Markdown output
-print(markdown_output)
-
-# Function to save Markdown output to a file
-
-
-def save_markdown_to_file(markdown_text, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        file.write(markdown_text)
-
-# Function to save sorted JSON data to a file
-
-
-def save_json_to_file(data, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, indent=4)
-
-
-# Save the Markdown output to a file
-save_markdown_to_file(markdown_output, directory + 'output.md')
-# Save the sorted JSON data to a file
-save_json_to_file(sorted_data, directory + 'sorted_data.json')
-
-
-# def sort_data(data):
-#     # List to hold the sorted data
-#     sorted_data = []
-
-#     # Iterate over tasks, sub-tasks, shots, and models
-#     for task, sub_tasks in data.items():
-#         for sub_task, shots in sub_tasks.items():
-#             for shot, models in shots.items():
-#                 for model, metrics in models.items():
-#                     # Check if the metric is available
-#                     model_metrics = []
-#                     for metric_name, metric_value in metrics.items():
-#                         # Add the metric to the list
-#                         model_metrics.append((metric_name, metric_value))
-
-#                     # Sort the metrics by name
-#                     model_metrics.sort()
-
-#                     # Add the data to the list
-#                     sorted_data.append(
-#                         (task, sub_task, shot, model, model_metrics))
-
-#     # Sort the list based on the metrics
-#     sorted_data.sort(key=lambda x: [(metric_name, metric_value)
-#                      for metric_name, metric_value in x[4]], reverse=True)
-
-#     # Create a new JSON structure with the sorted data
-#     sorted_json = {}
-#     for task, sub_task, shot, model, model_metrics in sorted_data:
-#         if task not in sorted_json:
-#             sorted_json[task] = {}
-#         if sub_task not in sorted_json[task]:
-#             sorted_json[task][sub_task] = {}
-#         if shot not in sorted_json[task][sub_task]:
-#             sorted_json[task][sub_task][shot] = {}
-#         if model not in sorted_json[task][sub_task][shot]:
-#             sorted_json[task][sub_task][shot][model] = {}
-#         for metric_name, metric_value in model_metrics:
-#             sorted_json[task][sub_task][shot][model][metric_name] = metric_value
-
-#     return sorted_json
-
-
-# # Sort the data
-# sorted_data = sort_data(scores)
-# print(json.dumps(sorted_data, indent=4))
-
-
-# def json_to_markdown_table(sorted_data):
-#     markdown_output = ""
-
-#     # Iterate over tasks and sub-tasks
-#     for task, sub_tasks in sorted_data.items():
-#         for sub_task, shots in sub_tasks.items():
-#             # Add a header for the task and sub-task
-#             markdown_output += f"## {task.capitalize()} - {sub_task.capitalize()}\n\n"
-
-#             # Create a table header
-#             markdown_output += "| Model | Metric | Average Value |\n"
-#             markdown_output += "| --- | --- | --- |\n"
-
-#             # Collect metrics for all shots
-#             all_metrics = {}
-#             for shot, models in shots.items():
-#                 for model, metrics in models.items():
-#                     for metric_name, metric_value in metrics.items():
-#                         if model not in all_metrics:
-#                             all_metrics[model] = {}
-#                         if metric_name not in all_metrics[model]:
-#                             all_metrics[model][metric_name] = []
-#                         all_metrics[model][metric_name].append(metric_value)
-
-#             # Calculate the average for each metric across all shots
-#             for model, metrics in all_metrics.items():
-#                 for metric_name, metric_values in metrics.items():
-#                     average_value = sum(metric_values) / len(metric_values)
-#                     markdown_output += f"| {model} | {metric_name} | {average_value:.4f} |\n"
-
-#             # Add a newline after the table
-#             markdown_output += "\n"
-
-#     return markdown_output
-
-
-# # Convert JSON to Markdown table grouped by task and sub-task
-# markdown_output = json_to_markdown_table(sorted_data)
-
-# # Print the Markdown output
-# print(markdown_output)
-
-# # Function to save Markdown output to a file
-
-
-# def save_markdown_to_file(markdown_text, filename):
-#     with open(filename, 'w', encoding='utf-8') as file:
-#         file.write(markdown_text)
-
-# # Function to save sorted JSON data to a file
-
-
-# def save_json_to_file(data, filename):
-#     with open(filename, 'w', encoding='utf-8') as file:
-#         json.dump(data, file, indent=4)
-
-
-# # Save the Markdown output to a file
-# save_markdown_to_file(markdown_output, directory + 'output-all.md')
-# # Save the sorted JSON data to a file
-# save_json_to_file(sorted_data, directory + 'sorted_data-all.json')
+print(sorted_scores_by_lang)
