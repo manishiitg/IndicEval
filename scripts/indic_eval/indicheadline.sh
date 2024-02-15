@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source ./scripts/indic_eval/common_vars.sh
-FOLDER_BASE=/sky-notebook/eval-results/headline
+FOLDER_BASE=/sky-notebook/eval-results
 
 
 for model_name_or_path in "${model_names[@]}"; do
