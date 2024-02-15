@@ -99,6 +99,29 @@ def generate_markdown_table(data):
                     break
         
         # Create a table header
+                
+        total = 0
+        count = 0
+        model_scores = {}
+        for task, task_dict in task_model_score[lang].items():
+            for model, metric_value in tasks_dict.items():
+                if model not in model_scores:
+                    model_scores[model] = []
+                
+                model_scores[model].append(metric_value)
+
+        avg_model_score = {}
+        for model, scores in model_scores.items():
+            sum = 0
+            for s in scores:
+                sum += s
+            avg = sum / len(scores)
+            avg_model_score[model] = avg
+        
+        sorted_model_dict = {k: v for k, v in sorted(avg_model_score.items(), key=lambda item: item[1])}
+
+
+
 
         models = list(set(models))
         tasks = list(set(tasks))
@@ -112,8 +135,8 @@ def generate_markdown_table(data):
         markdown_output += f"| Model {taskStr}\n"
         markdown_output += f"| --- {dashStr}\n"
 
-        for model in models:
-            markdown_output += f"| {model} |"
+        for model, avg in sorted_model_dict.items():
+            markdown_output += f"| {model} | {avg:.4f} |"
             for task in tasks:
                 average_value = task_model_score[lang][task][model]
                 markdown_output += f" {average_value:.4f} |"
