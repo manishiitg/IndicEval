@@ -56,20 +56,6 @@ def format_example(src_text, src_lang, tgt_lang, tgt_text=None):
     return prompt
 
 
-def gen_prompt(dev_data, src_lang, tgt_lang, k=-1):
-    prompt = f"Translate the following sentence(s) from {lang_map[src_lang]} into {lang_map[tgt_lang]}.\n\n"
-    if k > 0:
-        exemplars = dev_data.select(range(k))
-        for example in exemplars:
-            prompt += format_example(
-                src_text=example[f"sentence_{src_lang}"],
-                src_lang=src_lang,
-                tgt_lang=tgt_lang,
-                tgt_text=example[f"sentence_{tgt_lang}"],
-            )
-    return prompt
-
-
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
@@ -134,48 +120,22 @@ def main(args):
 
     prompts = []
     k = args.ntrain
-    dev_data = test_data.filter(
-        lambda x: x[f"sentence_{args.src_lang}"] != example[f"sentence_{args.src_lang}"]
-    ).shuffle(args.seed)
     for i, example in enumerate(test_data):
-        prompt_end = format_example(
-            src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
-        )
-        train_prompt = gen_prompt(dev_data, args.src_lang, args.tgt_lang, k)
-        prompt = train_prompt + prompt_end
+
+        messages = [
+            {"role": "system", "content": f"Translate the following sentence(s) from {lang_map[args.src_lang]} into {lang_map[args.tgt_lang]}.\n\n"}]
 
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = format_example(
+                src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
+            )
             if prompt[-1] in ["\n", " "]:
                 prompt += f"The {lang_map[args.tgt_lang]} translation is: "
             else:
                 prompt += f" The {lang_map[args.tgt_lang]} translation is: "
+            prompt = chat_formatting_function(messages, add_bos=False)
 
-        tokenized_prompt = tokenizer(
-            prompt, truncation=False, add_special_tokens=False).input_ids
-        # make sure every prompt is less than 2048 tokens
-        include_prompt = True
-        while len(tokenized_prompt) > 4096:
-            k -= 1
-            if k < 0:
-                include_prompt = False
-                break
-            train_prompt = gen_prompt(dev_data, k)
-            prompt = train_prompt + prompt_end
-
-            if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += f"The {lang_map[args.tgt_lang]} translation is: "
-                else:
-                    prompt += f" The {lang_map[args.tgt_lang]} translation is: "
-
-            tokenized_prompt = tokenizer(
-                prompt, truncation=False, add_special_tokens=False).input_ids
-        if include_prompt:
-            prompts.append(prompt)
+        prompts.append(prompt)
 
     outputs = eval_hf_model(args, model, tokenizer,
                             prompts, test_data, args.eval_batch_size)
