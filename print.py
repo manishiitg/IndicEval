@@ -79,22 +79,23 @@ def generate_markdown_table(data):
     markdown_output = ""
 
     # Iterate over tasks and sub-tasks
+    task_model_score = {}
     for lang, lang_dict in data.items():
         markdown_output += f"## Language {lang.capitalize()}\n\n"
 
         tasks = []
         models = []
-        task_model_score = {}
+        task_model_score[lang] = {}
         for task, tasks_dict in lang_dict.items():
             tasks.append(task)
-            if task not in task_model_score:
-                task_model_score[task] = {}
+            if task not in task_model_score[lang]:
+                task_model_score[lang][task] = {}
             for model, model_dict in tasks_dict.items():
                 models.append(model)
                 if model not in task_model_score[task]:
-                    task_model_score[task][model] = {}
+                    task_model_score[lang][task][model] = {}
                 for metric, metric_value in model_dict.items():
-                    task_model_score[task][model] = metric_value
+                    task_model_score[lang][task][model] = metric_value
                     break
         
         # Create a table header
@@ -111,7 +112,7 @@ def generate_markdown_table(data):
         for model in models:
             markdown_output += f"| {model} |"
             for task in tasks:
-                average_value = task_model_score[task][model]
+                average_value = task_model_score[lang][task][model]
                 markdown_output += f" {average_value:.4f} |"
 
             markdown_output += "\n"
