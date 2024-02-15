@@ -86,14 +86,12 @@ def generate_markdown_table(data):
         markdown_output += f"## Language {lang.capitalize()}\n\n"
 
         tasks = []
-        models = []
         task_model_score[lang] = {}
         for task, tasks_dict in lang_dict.items():
             tasks.append(task)
             if task not in task_model_score[lang]:
                 task_model_score[lang][task] = {}
             for model, model_dict in tasks_dict.items():
-                models.append(model)
                 if model not in task_model_score[lang][task]:
                     task_model_score[lang][task][model] = {}
                 for metric, metric_value in model_dict.items():
@@ -124,7 +122,7 @@ def generate_markdown_table(data):
 
 
 
-        models = list(set(models))
+
         tasks = list(set(tasks))
 
         taskStr = "| "
@@ -133,11 +131,11 @@ def generate_markdown_table(data):
             taskStr += task + " | "
             dashStr += "--- | "
 
-        markdown_output += f"| Model | Avg {taskStr} \n"
-        markdown_output += f"| --- | --- {dashStr}\n"
+        markdown_output += f"| Model \n"
+        markdown_output += f"| --- {dashStr}\n"
 
         for model, avg in sorted_model_dict.items():
-            markdown_output += f"| {model} | {avg:.4f} |"
+            markdown_output += f"| {model} | " #{avg:.4f} |
             for task in tasks:
                 average_value = task_model_score[lang][task][model]
                 markdown_output += f" {average_value:.4f} |"
@@ -146,6 +144,19 @@ def generate_markdown_table(data):
 
         # Add a newline after the table
         markdown_output += "\n"
+
+    dups = {}
+    for lang in langs:
+        for task, tasks_dict in lang_dict.items():
+            for model, model_dict in tasks_dict.items():
+                if model not in task_model_score[lang][task]:
+                    task_model_score[lang][task][model] = {}
+                for metric, metric_value in model_dict.items():
+                    if task not in dups:
+                        dups[task] = True
+                    else:
+                        markdown_output += f"Task: {task} Metric {metric} \n"
+                    
 
     return markdown_output
 
