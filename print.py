@@ -140,8 +140,11 @@ def generate_markdown_table(data):
         for model, avg in sorted_model_dict.items():
             markdown_output += f"| {model} | "  # {avg:.4f} |
             for task in tasks:
-                average_value = task_model_score[lang][task][model]
-                markdown_output += f" {average_value:.4f} |"
+                if model not in task_model_score[lang][task]:
+                    markdown_output += f" - |"
+                else:
+                    average_value = task_model_score[lang][task][model]
+                    markdown_output += f" {average_value:.4f} |"
 
             markdown_output += "\n"
 
