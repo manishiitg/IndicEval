@@ -12,7 +12,6 @@ for root, dirs, files in os.walk(directory):
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
 
-            print(file_path)
             if file == "metrics.json":
                 splits = file_path.replace(directory, "").split('/')
                 task = splits[0]
@@ -38,7 +37,7 @@ for root, dirs, files in os.walk(directory):
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
-                print(file_path)
+                print("skip: ",file_path)
 
 
 # Function to sort the data
@@ -119,6 +118,9 @@ def generate_markdown_table(data):
         for model, scores in model_scores.items():
             sum = 0
             for s in scores:
+                if s > 1:
+                    # bluert/chf
+                    s = s / 100
                 sum += s
             avg = sum / len(scores)
             avg_model_score[model] = avg

@@ -43,7 +43,7 @@ done
 # -------------------------------------------------------------
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=arc-challenge-exact
+    TASK_NAME=arc-challenge
     LANG=en
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
     FILE=$FOLDER/metrics.json
@@ -77,7 +77,7 @@ done
 # -------------------------------------------------------------
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=indic-arc-easy-exact
+    TASK_NAME=indic-arc-easy
     LANG=hi
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
     FILE=$FOLDER/metrics.json
@@ -112,7 +112,7 @@ done
 # -------------------------------------------------------------
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=indic-arc-challenge-exact
+    TASK_NAME=indic-arc-challenge
 
     LANG=hi
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"

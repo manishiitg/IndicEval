@@ -8,7 +8,7 @@ source ./scripts/indic_eval/common_vars.sh
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=boolq-hi-exact
+    TASK_NAME=boolq-hi
     LANG=hi
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
@@ -41,7 +41,7 @@ done
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=boolq-exact
+    TASK_NAME=boolq
     LANG=en
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"

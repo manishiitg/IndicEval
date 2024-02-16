@@ -8,7 +8,7 @@ source ./scripts/indic_eval/common_vars.sh
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=mmlu_hi_translated_exact
+    TASK_NAME=mmlu_hi
     LANG=hi
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
