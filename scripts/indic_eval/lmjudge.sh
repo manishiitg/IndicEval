@@ -15,6 +15,8 @@ for model_name_or_path in "${model_names[@]}"; do
     else
         awq_param=""
     fi
+
+    echo "$awq_param"
     
     python3 -m eval.lm_judge.run_eval \
         --save_dir $FOLDER \
