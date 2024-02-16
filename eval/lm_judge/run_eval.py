@@ -44,6 +44,7 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
+    print(args)
     if args.awq:
         print("Loading model and tokenizer vllm awq...")
         model = vllm.LLM(
@@ -176,7 +177,7 @@ if __name__ == "__main__":
     
     parser.add_argument(
         "--awq",
-        action="store_false",
+        action="store_true",
         help="Load model as awq"
     )
     parser.add_argument(
