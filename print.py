@@ -52,6 +52,7 @@ def sort_data(data):
                 for metric, metric_value in lang_dict.items():
                     if lang not in sorted_data:
                         sorted_data[lang] = []
+                    print("metric", metric, metric_value)
                     sorted_data[lang].append(
                         (task, model, metric, metric_value))
                     # break
