@@ -202,7 +202,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--awq",
         action="store_true",
-        help="If given, we will use the vllm library, which will likely increase the inference throughput."
+        help="Load model as awq"
     )
     parser.add_argument(
         "--use_chat_format",
