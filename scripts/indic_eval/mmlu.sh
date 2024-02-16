@@ -51,6 +51,12 @@ for model_name_or_path in "${model_names[@]}"; do
     FILE=$FOLDER/metrics.json
     echo "evaluating $model_name base on $TASK_NAME $LANG ..."
 
+    if echo "$model_name" | grep -qi "awq"; then
+        awq_param="--awq"
+    else
+        awq_param=""
+    fi
+
     if [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.mmlu.run_eval_exact \
@@ -62,7 +68,7 @@ for model_name_or_path in "${model_names[@]}"; do
             --eval_batch_size 4 \
             --use_chat_format \
             --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-            --awq
+            $awq_param
     
     else
         cat "$FILE"
