@@ -53,6 +53,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
@@ -88,6 +89,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
@@ -124,6 +126,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param="--awq"
     else
         awq_param=""
+    fi
 
     if [ ! -f "$FILE" ]; then
         # zero-shot
