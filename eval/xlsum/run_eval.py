@@ -206,7 +206,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--awq",
-        action="store_store",
+        action="store_false",
         help="Load model as awq"
     )
     args = parser.parse_args()
