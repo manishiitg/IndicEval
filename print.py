@@ -90,7 +90,7 @@ def generate_markdown_table(data):
     langs = ["hi", "en"]
     for lang in langs:
         lang_dict = data[lang]
-        markdown_output += f"## Language {lang.capitalize()}\n\n"
+        markdown_output += f"#### Language {lang.capitalize()}\n\n"
 
         tasks = []
         task_model_score[lang] = {}
