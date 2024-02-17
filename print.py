@@ -163,7 +163,7 @@ def generate_markdown_table(data):
                         dups[task] = True
                         if metric == "em_score":
                             metric = "accuracy"
-                        markdown_output += f"Task: {task} Metric: {metric} \n"
+                        markdown_output += f"Task: {task} Metric: {metric} \n\n"
 
     return markdown_output
 
