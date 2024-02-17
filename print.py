@@ -5,7 +5,8 @@ directory = "/sky-notebook/eval-results/"
 
 scores = {}
 
-skip_model = ["open-aditi-hi-v2-dpo-awq"]
+skip_model = ["open-aditi-hi-v2-dpo-awq", "open-aditi-hi-v2-awq",
+              "open-aditi-hi-v1-awq", "OpenHermes-2.5-Mistral-7B-AWQ"]
 
 for root, dirs, files in os.walk(directory):
     for file in files:
@@ -37,7 +38,7 @@ for root, dirs, files in os.walk(directory):
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
-                print("skip: ",file_path)
+                print("skip: ", file_path)
 
 
 # Function to sort the data
@@ -51,7 +52,7 @@ def sort_data(data):
                 for metric, metric_value in lang_dict.items():
                     if lang not in sorted_data:
                         sorted_data[lang] = []
-                    
+
                     if isinstance(metric_value, dict):
                         print("metric", metric, metric_value)
                         continue
