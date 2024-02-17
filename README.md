@@ -24,26 +24,47 @@
 | Airavata |  0.1165 | 0.3586 | 0.4393 | 0.1630 | 0.0277 | 0.0437 | 0.2534 |
 
 Task: flores Metric: chrf 
+
 Task: implicit_hate Metric: chrf 
+
 Task: indicsentiment Metric: accuracy 
+
 Task: boolq-hi Metric: accuracy 
+
 Task: indicxparaphrase Metric: accuracy 
+
 Task: truthfulqa-hi Metric: accuracy 
+
 Task: indic-arc-easy Metric: accuracy 
+
 Task: indicwikibio Metric: bleurt 
+
 Task: xlsum-hi Metric: bleurt 
+
 Task: indicheadline Metric: bleurt 
+
 Task: indic-arc-challenge Metric: accuracy 
+
 Task: mmlu_hi Metric: average_acc 
+
 Task: indicqa Metric: accuracy 
+
 Task: hellaswag-indic Metric: accuracy 
+
 Task: arc-easy-exact Metric: accuracy 
+
 Task: hellaswag Metric: accuracy 
+
 Task: arc-challenge Metric: accuracy 
+
 Task: mmlu Metric: average_acc 
+
 Task: boolq Metric: accuracy 
+
 Task: xlsum Metric: bleurt 
+
 Task: truthfulqa Metric: accuracy 
+
 
 
 =========
