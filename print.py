@@ -5,8 +5,7 @@ directory = "/sky-notebook/eval-results/"
 
 scores = {}
 
-skip_model = ["open-aditi-hi-v2-dpo-awq", "open-aditi-hi-v2-awq",
-              "open-aditi-hi-v1-awq", "OpenHermes-2.5-Mistral-7B-AWQ"]
+skip_model = ["open-aditi-hi-v2-dpo-awq"]
 
 for root, dirs, files in os.walk(directory):
     for file in files:
