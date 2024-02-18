@@ -6,6 +6,8 @@ import json
 from datasets import load_dataset
 from eval.utils import (
     dynamic_import_function,
+    load_hf_lm_and_tokenizer,
+    generate_completions
 )
 from huggingface_hub import HfApi
 from transformers import AutoTokenizer
@@ -14,58 +16,70 @@ from datasets import Dataset
 from datetime import date
 import torch
 
-### in this we simply save prompts outputs to a huggingface repo
-### i using gemini pro (Free) as LM judge to rate the ouputs
+# in this we simply save prompts outputs to a huggingface repo
+# i using gemini pro (Free) as LM judge to rate the ouputs
 # https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
 
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
-    sampling_params = vllm.SamplingParams(
-        temperature=0,
-        max_tokens=512,
-        stop=["<|im_end|>"],
-    )
-    # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
-    generations = model.generate(prompts, sampling_params)
+    if args.use_vllm:
+        sampling_params = vllm.SamplingParams(
+            temperature=0,
+            max_tokens=512,
+            stop=["<|im_end|>"],
+        )
+        # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
+        generations = model.generate(prompts, sampling_params)
 
-    prompt_to_output = {
-        g.prompt: g.outputs[0].text.strip() for g in generations
-    }
-    outputs = [prompt_to_output[prompt]
-               if prompt in prompt_to_output else "" for prompt in prompts]
+        prompt_to_output = {
+            g.prompt: g.outputs[0].text.strip() for g in generations
+        }
+        outputs = [prompt_to_output[prompt]
+                if prompt in prompt_to_output else "" for prompt in prompts]
+    else:
+        generations = []
+        progress = tqdm.tqdm(total=len(prompts), desc="Generating Completions")
 
     return outputs
 
 
 def main(args):
     random.seed(args.seed)
-
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-
     print(args)
-    if args.awq:
-        print("Loading model and tokenizer vllm awq...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            quantization="AWQ",
-            max_model_len=4096,
-            dtype="float16",
-        )
+    if args.use_vllm:
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+                dtype="float16",
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
     else:
-        print("Loading model and tokenizer vllm...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            max_model_len=4096,
+        print("Loading model and tokenizer...")
+        model, tokenizer = load_hf_lm_and_tokenizer(
+            model_name_or_path=args.model_name_or_path,
+            tokenizer_name_or_path=args.tokenizer_name_or_path,
+            load_in_8bit=args.load_in_8bit,
+            device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
+            gptq_model=args.gptq,
         )
 
     if not os.path.exists(args.save_dir):
@@ -75,6 +89,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/human_eval")
+    dataset = dataset.select(range(5))
     test_data = dataset["train"]
 
     existing_data = []
@@ -90,7 +105,11 @@ def main(args):
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
-        prompt = chat_formatting_function(messages)
+        if args.use_chat_format:
+            prompt = chat_formatting_function(messages)
+        else:
+            prompt = "\n\n".join([x["content"] for x in messages])
+
         exists = False
         for p in existing_data:
             if p["prompt"] == prompt:
@@ -98,8 +117,14 @@ def main(args):
         if not exists:
             prompts.append(prompt)
 
-    outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
+    if args.use_vllm:
+        outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
+    else:
+        outputs = generate_completions(model=model, tokenizer=tokenizer, prompts=prompts, batch_size=args.eval_batch_size, stop_id_sequences=None)
 
+    print(outputs)
+    os.exit(1)
     final_data = []
     with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
         for example, output, simple_prompt, prompt in zip(test_data, outputs, simple_prompts, prompts):
@@ -113,10 +138,8 @@ def main(args):
             row["judgement"] = ""
             row["rating"] = float(-1)
             final_data.append(row)
-            
+
         json.dump(final_data, fout, indent=4)
-
-
 
     api = HfApi()
     if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
@@ -161,8 +184,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--eval_batch_size", type=int,
                         default=1, help="batch size for evaluation.")
-    
-    
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -174,12 +196,19 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
-    
+
     parser.add_argument(
         "--awq",
         action="store_true",
         help="Load model as awq"
     )
+    parser.add_argument(
+        "--use_vllm",
+        action="store_true",
+        help="Use vllm"
+    )
+    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--push_output",
         type=str,

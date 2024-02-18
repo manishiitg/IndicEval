@@ -54,9 +54,9 @@ def generate_completions(
         batch_input_ids = tokenized_prompts.input_ids
         attention_mask = tokenized_prompts.attention_mask
 
-        # if model.device.type == "cuda":
-        batch_input_ids = batch_input_ids.cuda()
-        attention_mask = attention_mask.cuda()
+        if model.device.type == "cuda":
+            batch_input_ids = batch_input_ids.cuda()
+            attention_mask = attention_mask.cuda()
 
         try:
             batch_outputs = model.generate(
@@ -106,11 +106,11 @@ def generate_completions(
 
         generations += batch_generations
 
-        # for prompt, generation in zip(batch_prompts, batch_generations):
-        #     print("========")
-        #     print(prompt)
-        #     print("--------")
-        #     print(generation)
+        for prompt, generation in zip(batch_prompts, batch_generations):
+            print("========")
+            print(prompt)
+            print("--------")
+            print(generation)
 
         if not disable_tqdm:
             progress.update(len(batch_prompts) // num_return_sequences)
