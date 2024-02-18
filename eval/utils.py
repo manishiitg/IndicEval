@@ -16,7 +16,7 @@ class KeyWordsCriteria(StoppingCriteria):
         for i in range(input_ids.shape[0]):
             sequence_should_be_stopped = False
             for stop_sequence in self.stop_sequences:
-                if input_ids[i][-len(stop_sequence) :].tolist() == stop_sequence:
+                if input_ids[i][-len(stop_sequence):].tolist() == stop_sequence:
                     sequence_should_be_stopped = True
                     break
             sequences_should_be_stopped.append(sequence_should_be_stopped)
@@ -40,7 +40,7 @@ def generate_completions(
 
     num_return_sequences = generation_kwargs.get("num_return_sequences", 1)
     for i in range(0, len(prompts), batch_size):
-        batch_prompts = prompts[i : i + batch_size]
+        batch_prompts = prompts[i: i + batch_size]
         tokenized_prompts = tokenizer(
             batch_prompts,
             padding="longest",
@@ -71,26 +71,29 @@ def generate_completions(
                     for token_idx in range(batch_input_ids.shape[1], batch_outputs.shape[1]):
                         if any(
                             batch_outputs[
-                                output_idx, token_idx : token_idx + len(stop_sequence)
+                                output_idx, token_idx: token_idx + len(stop_sequence)
                             ].tolist()
                             == stop_sequence
                             for stop_sequence in stop_id_sequences
                         ):
-                            batch_outputs[output_idx, token_idx:] = tokenizer.pad_token_id
+                            batch_outputs[output_idx,
+                                          token_idx:] = tokenizer.pad_token_id
                             break
 
             # remove the prompt from the output
             # we need to re-encode the prompt because we need to make sure the special tokens are treated the same way as in the outputs.
             # we changed our previous way of truncating the output token ids dicrectly because some tokenizer (e.g., llama) won't add space token before the first token.
             # space is important for some tasks (e.g., code completion).
-            batch_outputs = tokenizer.batch_decode(batch_outputs, skip_special_tokens=True)
-            batch_prompts = tokenizer.batch_decode(batch_input_ids, skip_special_tokens=True)
+            batch_outputs = tokenizer.batch_decode(
+                batch_outputs, skip_special_tokens=True)
+            batch_prompts = tokenizer.batch_decode(
+                batch_input_ids, skip_special_tokens=True)
             # duplicate the prompts to match the number of return sequences
             batch_prompts = [
                 prompt for prompt in batch_prompts for _ in range(num_return_sequences)
             ]
             batch_generations = [
-                output[len(prompt) :] for prompt, output in zip(batch_prompts, batch_outputs)
+                output[len(prompt):] for prompt, output in zip(batch_prompts, batch_outputs)
             ]
         except Exception as e:
             print("Error when generating completions for batch:")
@@ -98,7 +101,8 @@ def generate_completions(
             print("Error message:")
             print(e)
             print("Use empty string as the completion.")
-            batch_generations = [""] * len(batch_prompts) * num_return_sequences
+            batch_generations = [""] * \
+                len(batch_prompts) * num_return_sequences
 
         generations += batch_generations
 
@@ -133,7 +137,7 @@ def get_next_word_predictions(
         progress = tqdm.tqdm(total=len(prompts), desc="Getting Predictions")
 
     for i in range(0, len(prompts), batch_size):
-        batch_prompts = prompts[i : i + batch_size]
+        batch_prompts = prompts[i: i + batch_size]
         tokenized_prompts = tokenizer(
             batch_prompts,
             padding="longest",
@@ -156,10 +160,13 @@ def get_next_word_predictions(
         batch_prediction_indices = torch.argmax(batch_probs, dim=-1)
         if return_token_predictions:
             if candidate_token_ids is not None:
-                candidate_tokens = tokenizer.convert_ids_to_tokens(candidate_token_ids)
-                batch_predictions = [candidate_tokens[idx] for idx in batch_prediction_indices]
+                candidate_tokens = tokenizer.convert_ids_to_tokens(
+                    candidate_token_ids)
+                batch_predictions = [candidate_tokens[idx]
+                                     for idx in batch_prediction_indices]
             else:
-                batch_predictions = tokenizer.convert_ids_to_tokens(batch_prediction_indices)
+                batch_predictions = tokenizer.convert_ids_to_tokens(
+                    batch_prediction_indices)
             predictions += batch_predictions
         else:
             predictions += batch_prediction_indices.tolist()
@@ -174,7 +181,6 @@ def get_next_word_predictions(
     return predictions, probs
 
 
-
 def load_hf_lm_and_tokenizer(
     model_name_or_path,
     tokenizer_name_or_path=None,
@@ -186,18 +192,20 @@ def load_hf_lm_and_tokenizer(
     use_fast_tokenizer=True,
     padding_side="left",
     awq_model=False,
-    is_aya_model = False,
+    is_aya_model=False,
 ):
     from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM, AutoModelForSeq2SeqLM
 
     if is_aya_model:
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path)
-    if awq_model:
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name_or_path, device_map=device_map, load_in_8bit=True)
+    elif awq_model:
         from awq import AutoAWQForCausalLM
 
-        model = AutoAWQForCausalLM.from_quantized(model_name_or_path, fuse_layers=True)
+        model = AutoAWQForCausalLM.from_quantized(
+            model_name_or_path, fuse_layers=True)
         # model = model_wrapper.model
-        
+
     elif gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
@@ -222,6 +230,7 @@ def load_hf_lm_and_tokenizer(
                 model = model.cuda()
         if convert_to_half:
             model = model.half()
+            
     model.eval()
 
     if not tokenizer_name_or_path:
