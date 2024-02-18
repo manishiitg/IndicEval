@@ -90,8 +90,9 @@ def main(args):
             args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/human_eval")
-    dataset = dataset.select(range(5))
     test_data = dataset["train"]
+    test_data = test_data.select(range(5))
+
 
     existing_data = []
     api = HfApi()
