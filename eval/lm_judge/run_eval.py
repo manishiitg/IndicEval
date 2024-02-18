@@ -184,9 +184,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_context_length", type=int, default=3750, help="maximum number of tokens in the context passage."
     )
-    parser.add_argument("--eval_batch_size", type=int,
-                        default=1, help="batch size for evaluation.")
-
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
