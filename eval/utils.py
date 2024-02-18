@@ -58,6 +58,7 @@ def generate_completions(
             if True:
                 batch_outputs = model.generate(
                     input_ids=batch_input_ids,
+                    max_new_tokens=1024,
                     # attention_mask=attention_mask,
                     # stopping_criteria=[KeyWordsCriteria(stop_id_sequences)]
                     # if stop_id_sequences
