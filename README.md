@@ -79,4 +79,17 @@ Supports
 - eval on spot instance using skypilot with resume support
 
 
-sky spot launch -n en-hi-spot eval.yaml
+===========
+
+To run this via skypilot https://github.com/skypilot-org/skypilot use
+
+
+`sky spot launch -n en-hi-spot eval.yaml`
+
+=========== 
+To run this on machine having GPU look at eval.yaml
+
+
+
+add your model name in scripts/indic_eval/commaon_vars.sh to evalulate and run scripts/indic_eval/run_suite.sh
+
