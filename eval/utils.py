@@ -188,8 +188,10 @@ def load_hf_lm_and_tokenizer(
     awq_model=False,
     is_aya_model = False,
 ):
-    from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM
+    from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM, AutoModelForSeq2SeqLM
 
+    if is_aya_model:
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path)
     if awq_model:
         from awq import AutoAWQForCausalLM
 
