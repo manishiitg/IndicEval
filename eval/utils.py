@@ -67,7 +67,7 @@ def generate_completions(
                 batch_outputs = tokenizer.batch_decode(
                     batch_outputs, skip_special_tokens=True)
                 
-                print(batch_outputs)
+                print("batch_outputs", batch_outputs)
             else:    
                 batch_outputs = model.generate(
                     input_ids=batch_input_ids,
