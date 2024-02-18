@@ -55,46 +55,60 @@ def generate_completions(
             attention_mask = attention_mask.cuda()
 
         try:
-            batch_outputs = model.generate(
-                input_ids=batch_input_ids,
-                attention_mask=attention_mask,
-                stopping_criteria=[KeyWordsCriteria(stop_id_sequences)]
-                if stop_id_sequences
-                else None,
-                **generation_kwargs,
-            )
+            if True:
+                batch_outputs = model.generate(
+                    input_ids=batch_input_ids,
+                    # attention_mask=attention_mask,
+                    # stopping_criteria=[KeyWordsCriteria(stop_id_sequences)]
+                    # if stop_id_sequences
+                    # else None,
+                    # **generation_kwargs,
+                )
+                batch_outputs = tokenizer.batch_decode(
+                    batch_outputs, skip_special_tokens=True)
+                
+                print(batch_outputs)
+            else:    
+                batch_outputs = model.generate(
+                    input_ids=batch_input_ids,
+                    attention_mask=attention_mask,
+                    stopping_criteria=[KeyWordsCriteria(stop_id_sequences)]
+                    if stop_id_sequences
+                    else None,
+                    **generation_kwargs,
+                )
 
-            # the stopping criteria is applied at batch level, so if other examples are not stopped, the entire batch will continue to generate.
-            # so some outputs still have the stop sequence, which we need to remove.
-            if stop_id_sequences:
-                for output_idx in range(batch_outputs.shape[0]):
-                    for token_idx in range(batch_input_ids.shape[1], batch_outputs.shape[1]):
-                        if any(
-                            batch_outputs[
-                                output_idx, token_idx: token_idx + len(stop_sequence)
-                            ].tolist()
-                            == stop_sequence
-                            for stop_sequence in stop_id_sequences
-                        ):
-                            batch_outputs[output_idx,
-                                          token_idx:] = tokenizer.pad_token_id
-                            break
+                # the stopping criteria is applied at batch level, so if other examples are not stopped, the entire batch will continue to generate.
+                # so some outputs still have the stop sequence, which we need to remove.
+                if stop_id_sequences:
+                    for output_idx in range(batch_outputs.shape[0]):
+                        for token_idx in range(batch_input_ids.shape[1], batch_outputs.shape[1]):
+                            if any(
+                                batch_outputs[
+                                    output_idx, token_idx: token_idx + len(stop_sequence)
+                                ].tolist()
+                                == stop_sequence
+                                for stop_sequence in stop_id_sequences
+                            ):
+                                batch_outputs[output_idx,
+                                            token_idx:] = tokenizer.pad_token_id
+                                break
 
-            # remove the prompt from the output
-            # we need to re-encode the prompt because we need to make sure the special tokens are treated the same way as in the outputs.
-            # we changed our previous way of truncating the output token ids dicrectly because some tokenizer (e.g., llama) won't add space token before the first token.
-            # space is important for some tasks (e.g., code completion).
-            batch_outputs = tokenizer.batch_decode(
-                batch_outputs, skip_special_tokens=True)
-            batch_prompts = tokenizer.batch_decode(
-                batch_input_ids, skip_special_tokens=True)
-            # duplicate the prompts to match the number of return sequences
-            batch_prompts = [
-                prompt for prompt in batch_prompts for _ in range(num_return_sequences)
-            ]
-            batch_generations = [
-                output[len(prompt):] for prompt, output in zip(batch_prompts, batch_outputs)
-            ]
+                # remove the prompt from the output
+                # we need to re-encode the prompt because we need to make sure the special tokens are treated the same way as in the outputs.
+                # we changed our previous way of truncating the output token ids dicrectly because some tokenizer (e.g., llama) won't add space token before the first token.
+                # space is important for some tasks (e.g., code completion).
+                batch_outputs = tokenizer.batch_decode(
+                    batch_outputs, skip_special_tokens=True)
+                batch_prompts = tokenizer.batch_decode(
+                    batch_input_ids, skip_special_tokens=True)
+                # duplicate the prompts to match the number of return sequences
+                batch_prompts = [
+                    prompt for prompt in batch_prompts for _ in range(num_return_sequences)
+                ]
+                batch_generations = [
+                    output[len(prompt):] for prompt, output in zip(batch_prompts, batch_outputs)
+                ]
         except Exception as e:
             print("Error when generating completions for batch:")
             print(batch_prompts)
