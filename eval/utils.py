@@ -198,7 +198,7 @@ def load_hf_lm_and_tokenizer(
 
     if is_aya_model:
         model = AutoModelForSeq2SeqLM.from_pretrained(
-            model_name_or_path, device_map=device_map, load_in_8bit=True)
+            model_name_or_path, device_map=device_map, load_in_8bit=load_in_8bit)
     elif awq_model:
         from awq import AutoAWQForCausalLM
 
@@ -230,7 +230,7 @@ def load_hf_lm_and_tokenizer(
                 model = model.cuda()
         if convert_to_half:
             model = model.half()
-            
+
     model.eval()
 
     if not tokenizer_name_or_path:
