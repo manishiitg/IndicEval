@@ -186,6 +186,7 @@ def load_hf_lm_and_tokenizer(
     use_fast_tokenizer=True,
     padding_side="left",
     awq_model=False,
+    is_aya_model = False,
 ):
     from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM
 
