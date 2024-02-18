@@ -54,6 +54,18 @@ def generate_completions(
             batch_input_ids = batch_input_ids.cuda()
             attention_mask = attention_mask.cuda()
 
+
+        tur_inputs = tokenizer.encode("आपका क्या नाम है", return_tensors="pt")
+        tur_outputs = model.generate(tur_inputs, max_new_tokens=128)
+        print(tokenizer.decode(tur_outputs[0]))
+        # Aya is a multi-lingual language model
+
+        # Q: Why are there so many languages in India?
+        hin_inputs = tokenizer.encode("भारत में इतनी सारी भाषाएँ क्यों हैं?", return_tensors="pt")
+        hin_outputs = model.generate(hin_inputs, max_new_tokens=128)
+        print(tokenizer.decode(hin_outputs[0]))
+        os.exit(1)
+
         try:
             if True:
                 batch_outputs = model.generate(
