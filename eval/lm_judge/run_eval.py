@@ -215,6 +215,11 @@ if __name__ == "__main__":
         default="manishiitg/llm_judge",
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
+    parser.add_argument(
+        "--load_in_8bit",
+        action="store_true",
+        help="load model in 8bit mode, which will reduce memory and speed up inference.",
+    )
     args = parser.parse_args()
     args.eval_batch_size = args.eval_batch_size * torch.cuda.device_count()
     main(args)
