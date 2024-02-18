@@ -36,7 +36,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
             g.prompt: g.outputs[0].text.strip() for g in generations
         }
         outputs = [prompt_to_output[prompt]
-                if prompt in prompt_to_output else "" for prompt in prompts]
+                   if prompt in prompt_to_output else "" for prompt in prompts]
     else:
         generations = []
         progress = tqdm.tqdm(total=len(prompts), desc="Generating Completions")
@@ -85,8 +85,9 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(
-        args.chat_formatting_function) if args.use_chat_format else None
+    if args.use_chat_format:
+        chat_formatting_function = dynamic_import_function(
+            args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/human_eval")
     dataset = dataset.select(range(5))
@@ -119,9 +120,10 @@ def main(args):
 
     if args.use_vllm:
         outputs = eval_hf_model(args, model, tokenizer,
-                            prompts, test_data, args.eval_batch_size)
+                                prompts, test_data, args.eval_batch_size)
     else:
-        outputs = generate_completions(model=model, tokenizer=tokenizer, prompts=prompts, batch_size=args.eval_batch_size, stop_id_sequences=None)
+        outputs = generate_completions(model=model, tokenizer=tokenizer, prompts=prompts,
+                                       batch_size=args.eval_batch_size, stop_id_sequences=None)
 
     print(outputs)
     os.exit(1)
@@ -207,7 +209,8 @@ if __name__ == "__main__":
         action="store_true",
         help="Use vllm"
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
 
     parser.add_argument(
         "--push_output",
