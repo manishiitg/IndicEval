@@ -47,7 +47,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 def main(args):
     random.seed(args.seed)
     print(args)
-    args.is_aya = True
     if args.use_vllm:
         tokenizer = AutoTokenizer.from_pretrained(
             args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
@@ -81,7 +80,7 @@ def main(args):
             load_in_8bit=args.load_in_8bit,
             device_map="balanced_low_0" if torch.cuda.device_count() > 1 else "auto",
             gptq_model=False,
-            is_aya_model=args.is_aya,
+            is_aya_model=args.aya,
         )
 
     if not os.path.exists(args.save_dir):
@@ -102,7 +101,10 @@ def main(args):
         ds = load_dataset(args.push_output, split="train")
         for row in ds:
             if row["model_name"] == args.model_name_or_path:
-                existing_data.append(row)
+                    existing_data.append(row)
+
+    if args.aya:
+        args.use_chat_format = False
 
     prompts = []
     simple_prompts = []
@@ -224,7 +226,7 @@ if __name__ == "__main__":
         help="load model in 8bit mode, which will reduce memory and speed up inference.",
     )
     parser.add_argument(
-        "--is_aya",
+        "--aya",
         action="store_true",
         help="load model in 8bit mode, which will reduce memory and speed up inference.",
     )

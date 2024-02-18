@@ -15,6 +15,12 @@ for model_name_or_path in "${model_names[@]}"; do
     else
         awq_param=""
     fi
+
+    if echo "$model_name" | grep -qi "aya"; then
+        aya="--aya"
+    else
+        aya=""
+    fi
     
     python3 -m eval.lm_judge.run_eval \
         --save_dir $FOLDER \
@@ -23,7 +29,8 @@ for model_name_or_path in "${model_names[@]}"; do
         --eval_batch_size 1 \
         --use_chat_format \
         --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
-        $awq_param
+        $awq_param \
+        $aya
     
 done
 
