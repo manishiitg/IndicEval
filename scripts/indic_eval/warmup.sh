@@ -24,7 +24,7 @@ for model_name_or_path in "${model_names[@]}"; do
         template_format = "eval.templates.create_prompt_with_llama2_chat_format"
     fi
     
-    python3 -m eval.load \
+    python3 -m eval.warmup \
         --save_dir $FOLDER \
         --model_name_or_path $model_name_or_path \
         --tokenizer_name_or_path $model_name_or_path \
