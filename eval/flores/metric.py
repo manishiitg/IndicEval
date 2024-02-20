@@ -2,7 +2,6 @@ import argparse
 import os
 import random
 from sklearn import metrics
-import torch
 import numpy as np
 import pandas as pd
 import time
@@ -11,14 +10,38 @@ from tqdm import tqdm
 import time
 import evaluate
 from datasets import load_dataset
-from eval.utils import (
-    dynamic_import_function,
-)
 from bleurt import score
-from transformers import AutoTokenizer
-import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
+
+lang_map = {
+    "asm_Beng": "Assamese",
+    "kas_Arab": "Kashmiri",
+    "pan_Guru": "Punjabi",
+    "ben_Beng": "Bengali",
+    "kas_Deva": "Kashmiri",
+    "san_Deva": "Sanskrit",
+    "brx_Deva": "Bodo",
+    "mai_Deva": "Maithili",
+    "sat_Olck": "Santali",
+    "doi_Deva": "Dogri",
+    "mal_Mlym": "Malayalam",
+    "snd_Arab": "Sindhi",
+    "eng_Latn": "English",
+    "mar_Deva": "Marathi",
+    "snd_Deva": "Sindhi",
+    "gom_Deva": "Konkani",
+    "mni_Beng": "Manipuri",
+    "tam_Taml": "Tamil",
+    "guj_Gujr": "Gujarati",
+    "mni_Mtei": "Manipuri",
+    "tel_Telu": "Telugu",
+    "hin_Deva": "Hindi",
+    "npi_Deva": "Nepali",
+    "urd_Arab": "Urdu",
+    "kan_Knda": "Kannada",
+    "ory_Orya": "Odia",
+}
 
 
 def main(args):
