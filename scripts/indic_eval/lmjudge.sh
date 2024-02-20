@@ -16,12 +16,12 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param=""
     fi
 
-    template_format = "eval.templates.create_prompt_with_chatml_format"
+    template_format="eval.templates.create_prompt_with_chatml_format"
     if echo "$model_name" | grep -qi "Airavata"; then
-        template_format = "eval.templates.create_prompt_with_tulu_chat_format"
+        template_format="eval.templates.create_prompt_with_tulu_chat_format"
     fi
     if echo "$model_name" | grep -qi "OpenHathi-7B-Hi-v0.1-Base"; then
-        template_format = "eval.templates.create_prompt_with_llama2_chat_format"
+        template_format="eval.templates.create_prompt_with_llama2_chat_format"
     fi
     
     python3 -m eval.lm_judge.run_eval \
