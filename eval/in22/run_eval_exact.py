@@ -145,39 +145,39 @@ def main(args):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
 
-    # flush all the GPU memory
-    del model
-    torch.cuda.empty_cache()
-    import gc
+    # # flush all the GPU memory
+    # del model
+    # torch.cuda.empty_cache()
+    # import gc
 
-    gc.collect()
+    # gc.collect()
 
-    print("Calculating bleu, chrf, chrf++, bleurt ...")
-    sacrebleu = evaluate.load("sacrebleu")
-    chrf = evaluate.load("chrf")
-    bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
+    # print("Calculating bleu, chrf, chrf++, bleurt ...")
+    # sacrebleu = evaluate.load("sacrebleu")
+    # chrf = evaluate.load("chrf")
+    # bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
 
-    predictions = [output for output in outputs]
-    references = [[example[f"sentence_{args.tgt_lang}"]]
-                  for example in test_data]
-    if len(predictions) > 2:
-        print(predictions[:2])
+    # predictions = [output for output in outputs]
+    # references = [[example[f"sentence_{args.tgt_lang}"]]
+    #               for example in test_data]
+    # if len(predictions) > 2:
+    #     print(predictions[:2])
 
-    metrics = {
-        "bleu": sacrebleu.compute(predictions=predictions, references=references)["score"],
-        "chrf": chrf.compute(predictions=predictions, references=references)["score"],
-        "chrf2": chrf.compute(predictions=predictions, references=references, word_order=2)["score"],
-        "bleurt": np.mean(
-            bleurt.score(candidates=predictions, references=[
-                         ref for sublist in references for ref in sublist])
-        ),
-    }
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
+    # metrics = {
+    #     "bleu": sacrebleu.compute(predictions=predictions, references=references)["score"],
+    #     "chrf": chrf.compute(predictions=predictions, references=references)["score"],
+    #     "chrf2": chrf.compute(predictions=predictions, references=references, word_order=2)["score"],
+    #     "bleurt": np.mean(
+    #         bleurt.score(candidates=predictions, references=[
+    #                      ref for sublist in references for ref in sublist])
+    #     ),
+    # }
+    # for k, v in metrics.items():
+    #     print(f"{k}: {v:.4f}")
 
-    # save results
-    with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-        json.dump(metrics, fout, indent=4)
+    # # save results
+    # with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
+    #     json.dump(metrics, fout, indent=4)
 
 
 if __name__ == "__main__":

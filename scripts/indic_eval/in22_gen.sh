@@ -42,6 +42,17 @@ for model_name_or_path in "${model_names[@]}"; do
             --use_chat_format \
             --chat_formatting_function $template_format \
             $awq_param
+
+        python3 -m eval.in22.metric \
+            --dataset "ai4bharat/IN22-Gen" \
+            --src_lang eng_Latn --tgt_lang hin_Deva \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 8 \
+            --use_chat_format \
+            --chat_formatting_function $template_format \
+            $awq_param
     else
         cat "$FILE"
     fi

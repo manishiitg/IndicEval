@@ -163,33 +163,33 @@ def main(args):
             fout.write(json.dumps(example) + "\n")
 
     # flush all the GPU memory
-    del model
-    torch.cuda.empty_cache()
-    import gc
+    # del model
+    # torch.cuda.empty_cache()
+    # import gc
 
-    gc.collect()
+    # gc.collect()
 
-    print("Calculating Rouge and BLEURT ...")
-    rouge = evaluate.load("rouge")
-    bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
+    # print("Calculating Rouge and BLEURT ...")
+    # rouge = evaluate.load("rouge")
+    # bleurt = score.BleurtScorer(args.bleurt_model_name_or_path)
 
-    predictions = [output for output in outputs]
-    references = [example["summary"] for example in test_data]
+    # predictions = [output for output in outputs]
+    # references = [example["summary"] for example in test_data]
 
-    rouge_metrics = rouge.compute(
-        predictions=predictions, references=references)
-    metrics = {
-        "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
-        "rouge1": rouge_metrics["rouge1"],
-        "rouge2": rouge_metrics["rouge2"],
-        "rougeL": rouge_metrics["rougeL"],
-    }
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
+    # rouge_metrics = rouge.compute(
+    #     predictions=predictions, references=references)
+    # metrics = {
+    #     "bleurt": np.mean(bleurt.score(candidates=predictions, references=references)),
+    #     "rouge1": rouge_metrics["rouge1"],
+    #     "rouge2": rouge_metrics["rouge2"],
+    #     "rougeL": rouge_metrics["rougeL"],
+    # }
+    # for k, v in metrics.items():
+    #     print(f"{k}: {v:.4f}")
 
-    # save results
-    with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
-        json.dump(metrics, fout, indent=4)
+    # # save results
+    # with open(os.path.join(args.save_dir, "metrics.json"), "w") as fout:
+    #     json.dump(metrics, fout, indent=4)
 
 
 if __name__ == "__main__":
