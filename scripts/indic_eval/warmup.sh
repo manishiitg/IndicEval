@@ -23,7 +23,6 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
     
     python3 -m eval.warmup \
-        --save_dir $FOLDER \
         --model_name_or_path $model_name_or_path \
         --tokenizer_name_or_path $model_name_or_path \
         --use_chat_format \

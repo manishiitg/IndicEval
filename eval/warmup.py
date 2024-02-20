@@ -38,17 +38,6 @@ if __name__ == "__main__":
                         help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
-        "--lang", type=str, default="hindi", choices=["hindi", "english"]
-    )
-    parser.add_argument("--save_dir", type=str,
-                        default="/sky-notebook/eval-results/xlsum/llama-7B/")
-    parser.add_argument(
-        "--bleurt_model_name_or_path",
-        type=str,
-        default="./BLEURT-20",
-        help="bleurt model to load for evaluation.",
-    )
-    parser.add_argument(
         "--model_name_or_path",
         type=str,
         default=None,
