@@ -74,6 +74,16 @@ for model_name_or_path in "${model_names[@]}"; do
             --use_chat_format \
             --chat_formatting_function $template_format \
             $awq_param
+
+        python3 -m eval.xlsum.metric \
+            --lang english \
+            --max_context_length 3750 \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --use_chat_format \
+            --chat_formatting_function $template_format \
+            $awq_param
     else
         cat "$FILE"
     fi
