@@ -30,8 +30,6 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
 
     if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
-
-    if [ ! -f "$FILE" ]; then
         python3 -m eval.hellaswag.run_eval_exact \
             --ntrain 0 \
             --save_dir $FOLDER \
