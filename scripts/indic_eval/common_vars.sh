@@ -10,6 +10,6 @@ model_names=(
     "manishiitg/open-aditi-hi-v2"
     # "manishiitg/open-aditi-hi-v1"
     "ai4bharat/Airavata"
-    "sarvamai/OpenHathi-7B-Hi-v0.1-Base"
+    # "sarvamai/OpenHathi-7B-Hi-v0.1-Base"
 )
 FOLDER_BASE=/sky-notebook/eval-results
