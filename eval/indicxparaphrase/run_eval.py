@@ -105,6 +105,9 @@ def main(args):
 
         prompts.append(prompt)
 
+    if len(prompts) > 2:
+        print("prompts", prompts[:2])
+
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
