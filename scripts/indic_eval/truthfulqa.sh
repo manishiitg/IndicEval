@@ -59,14 +59,26 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param=""
     fi
 
-    if [ ! -f "$FILE" ]; then
+
+    check_file_existence=true
+    template_format="eval.templates.create_prompt_with_chatml_format"
+    if echo "$model_name" | grep -qi "Airavata"; then
+        template_format="eval.templates.create_prompt_with_tulu_chat_format"
+        check_file_existence=false
+    fi
+    if echo "$model_name" | grep -qi "OpenHathi-7B-Hi-v0.1-Base"; then
+        template_format="eval.templates.create_prompt_with_llama2_chat_format"
+        check_file_existence=false
+    fi
+
+    if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
         python3 -m eval.truthfulqa.run_eval \
             --lang hi \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
             --tokenizer_name_or_path $model_name_or_path \
             --use_chat_format \
-            --chat_formatting_function eval.templates.create_prompt_with_chatml_format \
+            --chat_formatting_function $template_format \
             $awq_param
     else
         cat "$FILE"
