@@ -1,4 +1,4 @@
-bash scripts/indic_eval/warmup.sh &
+# bash scripts/indic_eval/warmup.sh &
 bash scripts/indic_eval/lmjudge.sh
 bash scripts/prepare_eval_data.sh
 bash scripts/indic_eval/indicxparaphrase.sh
