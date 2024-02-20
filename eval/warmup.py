@@ -1,35 +1,15 @@
 import argparse
 import random
-import torch
-import time
-from transformers import AutoTokenizer
-from bleurt import score
-import vllm
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
 
 def main(args):
     random.seed(args.seed)
-    tokenizer = AutoTokenizer.from_pretrained(
+    AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-
-    if args.awq:
-        print("Loading model and tokenizer vllm awq...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            quantization="AWQ",
-            max_model_len=4096,
-        )
-    else:
-        print("Loading model and tokenizer vllm...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            max_model_len=4096,
-        )
+    AutoModelForCausalLM.from_pretrained(
+        args.model_name_or_path, device_map="cpu"
+    )
 
 
 if __name__ == "__main__":
