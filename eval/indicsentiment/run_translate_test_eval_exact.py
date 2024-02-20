@@ -61,9 +61,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
 
-    print("prompts", prompts)
-    print("prompt_to_output", prompt_to_output)
-
     def extract_answer(row):
         row["answer_text"] = choice_map[row["LABEL"]]
         return row
