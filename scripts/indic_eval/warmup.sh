@@ -6,9 +6,7 @@ TASK_NAME=lmjudge
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     
-    FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
-    FILE=$FOLDER/lm_judge_predictions.json
-    echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
+    echo "warming up $model_name base"
 
     if echo "$model_name" | grep -qi "awq"; then
         awq_param="--awq"
@@ -28,7 +26,6 @@ for model_name_or_path in "${model_names[@]}"; do
         --save_dir $FOLDER \
         --model_name_or_path $model_name_or_path \
         --tokenizer_name_or_path $model_name_or_path \
-        --eval_batch_size 1 \
         --use_chat_format \
         --chat_formatting_function $template_format \
         $awq_param
