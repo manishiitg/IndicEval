@@ -200,7 +200,7 @@ def main(args):
     predictions = [output for output in outputs]
     references = [[example[f"sentence_{args.tgt_lang}"]] for example in test_data]
 
-    metrics = {
+    metrics = { 
         "bleu": sacrebleu.compute(predictions=predictions, references=references)["score"],
         "chrf": chrf.compute(predictions=predictions, references=references)["score"],
         "chrf2": chrf.compute(predictions=predictions, references=references, word_order=2)["score"],

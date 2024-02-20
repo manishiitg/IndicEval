@@ -39,6 +39,16 @@ for model_name_or_path in "${model_names[@]}"; do
             --use_chat_format \
             --chat_formatting_function $template_format \
             $awq_param
+
+        python3 -m eval.flores.metric \
+            --ntrain 0 \
+            --save_dir $FOLDER \
+            --model_name_or_path $model_name_or_path \
+            --tokenizer_name_or_path $model_name_or_path \
+            --eval_batch_size 8 \
+            --use_chat_format \
+            --chat_formatting_function $template_format \
+            $awq_param
     else
         cat "$FILE"
     fi
