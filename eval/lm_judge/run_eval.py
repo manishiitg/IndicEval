@@ -14,8 +14,8 @@ from datasets import Dataset
 from datetime import date
 import torch
 
-### in this we simply save prompts outputs to a huggingface repo
-### i using gemini pro (Free) as LM judge to rate the ouputs
+# in this we simply save prompts outputs to a huggingface repo
+# i using gemini pro (Free) as LM judge to rate the ouputs
 # https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
 
 
@@ -40,33 +40,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
 def main(args):
     random.seed(args.seed)
-
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-
-    print(args)
-    if args.awq:
-        print("Loading model and tokenizer vllm awq...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            quantization="AWQ",
-            max_model_len=4096,
-            dtype="float16",
-        )
-    else:
-        print("Loading model and tokenizer vllm...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            max_model_len=4096,
-        )
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -98,35 +71,60 @@ def main(args):
         if not exists:
             prompts.append(prompt)
 
-    outputs = eval_hf_model(args, model, tokenizer,prompts, test_data, args.eval_batch_size)
+    if len(prompts) > 0:
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    final_data = []
-    with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
-        for example, output, simple_prompt, prompt in zip(test_data, outputs, simple_prompts, prompts):
-            row = {}
-            row["prompt"] = prompt
-            row["response"] = output
-            row["date"] = date.today().strftime("%m/%d/%Y")
-            row["model_name"] = args.model_name_or_path
-            row["simple_prompt"] = simple_prompt
-            row["judgement_pending"] = True
-            row["judgement"] = ""
-            row["rating"] = float(-1)
-            final_data.append(row)
-            
-        json.dump(final_data, fout, indent=4)
+        if args.awq:
+            print("Loading model and tokenizer vllm awq...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                quantization="AWQ",
+                max_model_len=4096,
+                dtype="float16",
+            )
+        else:
+            print("Loading model and tokenizer vllm...")
+            model = vllm.LLM(
+                model=args.model_name_or_path,
+                tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                # max_num_batched_tokens=4096,
+                max_model_len=4096,
+            )
+        outputs = eval_hf_model(args, model, tokenizer,
+                                prompts, test_data, args.eval_batch_size)
 
+        final_data = []
+        with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
+            for example, output, simple_prompt, prompt in zip(test_data, outputs, simple_prompts, prompts):
+                row = {}
+                row["prompt"] = prompt
+                row["response"] = output
+                row["date"] = date.today().strftime("%m/%d/%Y")
+                row["model_name"] = args.model_name_or_path
+                row["simple_prompt"] = simple_prompt
+                row["judgement_pending"] = True
+                row["judgement"] = ""
+                row["rating"] = float(-1)
+                final_data.append(row)
 
+            json.dump(final_data, fout, indent=4)
 
-    api = HfApi()
-    if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
-        ds = load_dataset(args.push_output, split="train")
-        for row in ds:
-            # if row["model_name"] != args.model_name_or_path:
-            final_data.append(row)
+        api = HfApi()
+        if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
+            ds = load_dataset(args.push_output, split="train")
+            for row in ds:
+                # if row["model_name"] != args.model_name_or_path:
+                final_data.append(row)
 
-    dataset = process_and_update_dataset(final_data)
-    dataset.push_to_hub(args.push_output, private=False)
+        dataset = process_and_update_dataset(final_data)
+        dataset.push_to_hub(args.push_output, private=False)
 
 
 def process_and_update_dataset(new_data):
@@ -161,8 +159,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--eval_batch_size", type=int,
                         default=1, help="batch size for evaluation.")
-    
-    
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -174,7 +171,7 @@ if __name__ == "__main__":
         default="eval.templates.create_prompt_with_tulu_chat_format",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
-    
+
     parser.add_argument(
         "--awq",
         action="store_true",
