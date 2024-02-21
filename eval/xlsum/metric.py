@@ -25,9 +25,6 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(
-        args.chat_formatting_function) if args.use_chat_format else None
-
     dataset = load_dataset("csebuetnlp/xlsum", args.lang)
 
     dataset = dataset.map(lambda x: {"summary": x["summary"].strip()})
