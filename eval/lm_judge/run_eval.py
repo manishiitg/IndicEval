@@ -50,13 +50,13 @@ def main(args):
     dataset = load_dataset("manishiitg/human_eval")
     test_data = dataset["train"]
 
-    existing_data = []
+    existing_data = {}
     api = HfApi()
     if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
         ds = load_dataset(args.push_output, split="train")
         for row in ds:
             if row["model_name"] == args.model_name_or_path:
-                existing_data.append(row)
+                existing_data[row["prompt"]] = True
 
     prompts = []
     simple_prompts = []
@@ -65,9 +65,9 @@ def main(args):
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
         prompt = chat_formatting_function(messages)
         exists = False
-        for p in existing_data:
-            if p["prompt"] == prompt:
-                exists = True
+        if prompt in existing_data:
+            exists = True
+            
         if not exists:
             prompts.append(prompt)
 
@@ -120,8 +120,8 @@ def main(args):
         if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
             ds = load_dataset(args.push_output, split="train")
             for row in ds:
-                # if row["model_name"] != args.model_name_or_path:
-                final_data.append(row)
+                if row["model_name"] != args.model_name_or_path:
+                    final_data.append(row)
 
         dataset = process_and_update_dataset(final_data)
         dataset.push_to_hub(args.push_output, private=False)
