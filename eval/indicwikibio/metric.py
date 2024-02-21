@@ -40,7 +40,7 @@ def main(args):
 
     # Assuming args.save_dir and args.src_lang, args.tgt_lang are defined
     file_path = os.path.join(
-        args.save_dir, f"indicwikibio_{args.src_lang}_{args.tgt_lang}_predictions.jsonl")
+        args.save_dir, f"indicwikibio_predictions.jsonl")
 
     # Open the file for reading
     with open(file_path, "r") as fin:
