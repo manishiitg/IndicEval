@@ -154,7 +154,7 @@ def main(args):
     if len(outputs) > 2:
         print(outputs[:2])
 
-    with open(os.path.join(args.save_dir, f"headline_{args.src_lang}_{args.tgt_lang}_predictions.jsonl"), "w") as fout:
+    with open(os.path.join(args.save_dir, f"headline_predictions.jsonl"), "w") as fout:
         for example, output in zip(test_data, outputs):
             example["prediction_text"] = output
             fout.write(json.dumps(example) + "\n")
