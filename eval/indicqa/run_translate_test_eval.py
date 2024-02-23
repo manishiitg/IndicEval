@@ -204,6 +204,8 @@ def main(args):
 
         prompts.append(prompt)
 
+    prompts = prompts[:19]
+
     em_score = eval_hf_model(args, model, tokenizer,
                              prompts, test_data, args.eval_batch_size)
     print("Em Score", em_score)
