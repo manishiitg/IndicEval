@@ -90,6 +90,8 @@ def main(args):
         quantization="AWQ",
         max_model_len=4096,
         dtype="float16",
+        gpu_memory_utilization=.8
+
     )
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
@@ -121,7 +123,7 @@ def main(args):
             pending_data.append(row)
         else:
             completed_data.append(row)
-        
+
         if len(pending_data) > 10:
             break
 
@@ -144,7 +146,7 @@ def main(args):
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
-    # dataset.push_to_hub("manishiitg/llm_judge", private=False)
+    # dataset.push_to_hub("manishiitg/llm_judge-v2", private=False)
     os.exit(1)
 
 
