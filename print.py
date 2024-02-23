@@ -5,7 +5,8 @@ directory = "/sky-notebook/eval-results/"
 
 scores = {}
 
-skip_model = ["open-aditi-hi-v2-dpo-awq","open-aditi-chat-hi-1.8-awq","OpenHathi-7B-Hi-v0.1-Base"]
+skip_model = ["open-aditi-hi-v2-dpo-awq",
+              "open-aditi-chat-hi-1.8-awq", "OpenHathi-7B-Hi-v0.1-Base"]
 
 for root, dirs, files in os.walk(directory):
     for file in files:
@@ -19,7 +20,7 @@ for root, dirs, files in os.walk(directory):
                 lang = splits[2]
                 file = splits[3]
 
-                if model in skip_model:
+                if model in skip_model or "awq-" in model:
                     continue
 
                 with open(file_path, 'r') as json_file:
