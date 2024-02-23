@@ -119,9 +119,11 @@ def main(args):
             )
             prompts.append(text)
             pending_data.append(row)
-            break
         else:
             completed_data.append(row)
+        
+        if len(pending_data) > 10:
+            break
 
     print(prompts)
     outputs = eval_hf_model(args, model, tokenizer, prompts)
