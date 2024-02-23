@@ -136,7 +136,7 @@ def main(args):
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
-
+    args.no_context = False
     k = args.ntrain
     sample_data = test_data.select(range(k*3))
     prompts = []
