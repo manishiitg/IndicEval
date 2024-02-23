@@ -77,7 +77,7 @@ def eval_hf_model(args, model, tokenizer, prompts):
 
 def main(args):
 
-    model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
+    model_name_or_path = "Qwen/Qwen1.5-72B-Chat"
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
     print("Loading model and tokenizer vllm awq...")
@@ -87,7 +87,7 @@ def main(args):
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
-        quantization="AWQ",
+        # quantization="AWQ",
         max_model_len=4096,
         dtype="float16",
         gpu_memory_utilization=.8
