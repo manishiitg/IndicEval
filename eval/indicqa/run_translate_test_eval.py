@@ -198,6 +198,8 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
+        print("prompt", prompt)
+        os.exit(1)
         prompts.append(prompt)
 
     em_score = eval_hf_model(args, model, tokenizer,

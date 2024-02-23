@@ -165,8 +165,6 @@ def main(args):
         messages = [{"role": "user", "content": prompt}]
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer)
-            print("prompt", prompt)
-            os.exit(1)
         else:
             prompt = "\n\n".join([x["content"] for x in messages])
 
