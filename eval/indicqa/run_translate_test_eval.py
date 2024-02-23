@@ -28,7 +28,8 @@ templates = {
     "no_context": (
         "Answer the following question. If you don't know the answer reply 'unanswerable'",
         "Question:",
-        "Answer:"),
+        "Answer:"
+    ),
 }
 
 
@@ -141,7 +142,6 @@ def main(args):
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
-    test_data = test_data.select(range(10))
     args.no_context = False
     k = args.ntrain
     sample_data = test_data.select(range(k*3))

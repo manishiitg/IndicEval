@@ -5,7 +5,7 @@ source ./scripts/indic_eval/common_vars.sh
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=implicit_hate
+    TASK_NAME=in22
     LANG=hi
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
