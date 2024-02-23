@@ -64,7 +64,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         row["answer_text"] = answerStr
         return row
 
-    print("prompts", prompts)
     # Apply the function to each row of the DataFrame
     test_data = test_data.map(extract_answer)
 
@@ -82,6 +81,12 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         predictions.append(row)
 
         idx += 1
+
+    if len(prompts) > 2:
+        print(prompts[:2])
+
+    if len(predictions) > 2:
+        print(predictions[:2])
 
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
@@ -149,7 +154,6 @@ def main(args):
             p_template = ""
         else:
             prompt, p_template, q_template, a_template = templates["with_context"]
-            
 
         train_prompt = [{"role": "system", "content": prompt}]
         # if k > 0:
@@ -174,7 +178,6 @@ def main(args):
         #         train_prompt.extend(
         #             [{"role":"user", "content":user_prompt + "\n" + assistant_prompt},]
         #         )
-        print("args.no_context", args.no_context)
         if args.no_context:
             user_prompt = q_template + " " + format(example["question"]) + "\n"
         else:
@@ -199,8 +202,6 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
-        print("prompt", prompt)
-        os.exit(1)
         prompts.append(prompt)
 
     em_score = eval_hf_model(args, model, tokenizer,
