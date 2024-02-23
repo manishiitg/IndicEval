@@ -108,7 +108,16 @@ def main(args):
             prompt = get_lm_judge_rating_prompt(
                 question=instruction, answer=answer)
 
-            prompts.append(prompt)
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
+            text = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+            prompts.append(text)
             pending_data.append(row)
             break
         else:
