@@ -76,7 +76,6 @@ def eval_hf_model(args, model, tokenizer, prompts):
 
 
 def main(args):
-    random.seed(args.seed)
 
     args.model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
     tokenizer = AutoTokenizer.from_pretrained(
