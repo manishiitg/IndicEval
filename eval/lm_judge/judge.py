@@ -95,7 +95,6 @@ def main(args):
     )
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
-    ds = ds.select(range(100))
 
     final_data = []
     for row in ds:
@@ -128,13 +127,8 @@ def main(args):
     outputs = eval_hf_model(args, model, tokenizer, prompts)
 
     for idx, text in enumerate(outputs):
-        print("input row")
-        print(pending_data[idx])
-        print("text")
-        print(text)
         try:
             rating = get_rating(text)
-            print("got rating", rating)
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
