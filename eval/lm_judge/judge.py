@@ -124,14 +124,13 @@ def main(args):
         else:
             completed_data.append(row)
 
-        if len(pending_data) > 10:
-            break
-
-    print(prompts)
     outputs = eval_hf_model(args, model, tokenizer, prompts)
-    print(outputs)
 
     for idx, text in enumerate(outputs):
+        print("input row")
+        print(row)
+        print("text")
+        print(text)
         try:
             rating = get_rating(text)
             pending_data[idx]["judgement"] = text
@@ -146,8 +145,7 @@ def main(args):
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
-    # dataset.push_to_hub("manishiitg/llm_judge-v2", private=False)
-    os.exit(1)
+    dataset.push_to_hub("manishiitg/llm_judge-v2", private=False)
 
 
 def process_and_update_dataset(new_data):
