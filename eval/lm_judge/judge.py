@@ -77,14 +77,13 @@ def eval_hf_model(args, model, tokenizer, prompts):
 
 def main(args):
 
-    args.model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
+    model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
     print("Loading model and tokenizer vllm awq...")
     model = vllm.LLM(
-        model=args.model_name_or_path,
-        tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+        model=model_name_or_path,
+        tokenizer=model_name_or_path,
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
