@@ -47,7 +47,7 @@ def gen_prompt(dev_data, k):
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
         temperature=0,
-        max_tokens=512,
+        max_tokens=1024,
         stop=["<|im_end|>"],
     )
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
