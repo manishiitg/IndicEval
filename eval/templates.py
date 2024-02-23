@@ -15,7 +15,15 @@ def contains_hindi(s):
 debug_print = False
 
 
-def create_prompt_by_template(messages, tokenizer):
+def create_prompt_by_template(messages, tokenizer, args):
+    if "google/gemma" in args.tokenizer_name_or_path:
+        if "system" == messages[0]["role"]:
+            system = messages[0]["content"]
+            del messages[0]
+            instruction = messages[0]["content"]
+            instruction = system + "\n\n" + instruction
+            messages[0]["content"] = instruction
+
     prompt = tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True)
     return prompt
