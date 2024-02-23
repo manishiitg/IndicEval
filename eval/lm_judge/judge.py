@@ -129,7 +129,7 @@ def main(args):
 
     for idx, text in enumerate(outputs):
         print("input row")
-        print(row)
+        print(pending_data[idx])
         print("text")
         print(text)
         try:
