@@ -136,7 +136,6 @@ def main(args):
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
-            print("text, rating", text, rating)
         except ValueError:
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = -1
