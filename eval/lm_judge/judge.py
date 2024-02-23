@@ -95,6 +95,7 @@ def main(args):
     )
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
+    ds = ds.select(range(100))
 
     final_data = []
     for row in ds:
