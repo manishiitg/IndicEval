@@ -89,7 +89,7 @@ def main(args):
 
         if args.use_chat_format:
             # Remove last 5 characters, which is the EOS token (' </s>').
-            prompt = chat_formatting_function(prompt)[:-5]
+            prompt = chat_formatting_function(prompt, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 

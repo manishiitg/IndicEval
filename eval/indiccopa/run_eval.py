@@ -84,7 +84,7 @@ def main(args):
 
         if args.use_chat_format:
             messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = chat_formatting_function(messages, tokenizer, args)
             # if prompt[-1] in ["\n", " "]:
                 #     prompt += "The answer is: "
                 # else:
@@ -103,7 +103,7 @@ def main(args):
 
             if args.use_chat_format:
                 messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
+                prompt = chat_formatting_function(messages, tokenizer, args)
                 if prompt[-1] in ["\n", " "]:
                     prompt += "The answer is: "
                 else:

@@ -185,7 +185,7 @@ def main(args):
         messages = gen_prompt(question=question, choices=mc1_targets_choices)
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in messages])
 

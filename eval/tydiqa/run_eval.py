@@ -139,7 +139,7 @@ def main(args):
             else:
                 prompt += " " + a_template
             messages.append({"role": "user", "content": prompt})
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt += a_template
             messages.append({"role": "user", "content": prompt})

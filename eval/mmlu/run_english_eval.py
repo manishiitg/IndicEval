@@ -57,7 +57,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
@@ -73,7 +73,7 @@ def eval_hf_model(args, subject, model, tokenizer, dev_df, test_df, batch_size=1
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
-                prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+                prompt = chat_formatting_function(prompt, tokenizer, args)
             else:
                 prompt = "\n\n".join([x["content"] for x in prompt])
                     
