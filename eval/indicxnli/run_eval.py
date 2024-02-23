@@ -18,13 +18,17 @@ from eval.utils import (
 
 choices = ["true", "unknown", "false"]
 
+
 def format_example(premise, hypothesis, label=None):
-    user_prompt = "Premise: {premise}\nHypothesis: {hypothesis}".format(premise=premise, hypothesis=hypothesis)
+    user_prompt = "Premise: {premise}\nHypothesis: {hypothesis}".format(
+        premise=premise, hypothesis=hypothesis)
     assistant_prompt = "Answer:"
     if label is not None:
         assistant_prompt += " {label}".format(label=label)
-    messages = [{"role":"user", "content":user_prompt}, {"role":"assistant", "content":assistant_prompt}]
+    messages = [{"role": "user", "content": user_prompt}, {
+        "role": "assistant", "content": assistant_prompt}]
     return messages
+
 
 def gen_prompt(dev_data, k=-1):
     prompt = f"Answer whether the hypothesis is more likely to be true (entailment), false (contradiction), or unknown (neutral) based on the given premise."
@@ -33,8 +37,10 @@ def gen_prompt(dev_data, k=-1):
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             label = choices[example["label"]]
-            messages += format_example(premise=example["premise"], hypothesis=example["hypothesis"], label=label)
+            messages += format_example(
+                premise=example["premise"], hypothesis=example["hypothesis"], label=label)
     return messages
+
 
 def main(args):
     random.seed(args.seed)
@@ -52,7 +58,8 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("Thanmay/indic-xnli")
     for split in dataset.column_names:
@@ -64,7 +71,8 @@ def main(args):
         remove_column_names = [x[8:] for x in itv2_column_names]
         dataset[split] = dataset[split].remove_columns(remove_column_names)
         for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+            dataset[split] = dataset[split].rename_column(
+                itv2_column_name, itv2_column_name[8:])
 
     dataset = dataset.map(lambda x: {"premise": x["premise"].strip()})
     dataset = dataset.map(lambda x: {"hypothesis": x["hypothesis"].strip()})
@@ -74,16 +82,19 @@ def main(args):
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
-        prompt_end = format_example(premise=example["premise"], hypothesis=example["hypothesis"])
+        prompt_end = format_example(
+            premise=example["premise"], hypothesis=example["hypothesis"])
         train_prompt = gen_prompt(dev_data, k)
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+            # Remove last 5 characters, which is the EOS token (' </s>').
+            prompt = chat_formatting_function(prompt)[:-5]
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
-        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+        tokenized_prompt = tokenizer(
+            prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
         include_prompt = True
         while len(tokenized_prompt) > 4096:
@@ -95,18 +106,20 @@ def main(args):
             prompt = train_prompt + prompt_end
 
             if args.use_chat_format:
-                prompt = chat_formatting_function(prompt)[:-5] # Remove last 5 characters, which is the EOS token (' </s>').
+                prompt = chat_formatting_function(prompt, tokenizer, args)
             else:
                 prompt = "\n\n".join([x["content"] for x in prompt])
 
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+            tokenized_prompt = tokenizer(
+                prompt, truncation=False, add_special_tokens=False).input_ids
         if include_prompt:
             prompts.append(prompt)
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
     # TODO: should raise a warning if this returns more than one token
-    answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
+    answer_choice_ids = [tokenizer.encode(
+        answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
     pred_indices, all_probs = get_next_word_predictions(
         model,
         tokenizer,
@@ -140,7 +153,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "gu", "hi", "kn", "ml", "mr", "or", "pa", "te"]
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/indicxnli/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/indicxnli/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -153,9 +167,9 @@ if __name__ == "__main__":
         default=None,
         help="if specified, we will load the tokenizer from here.",
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -164,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
     args = parser.parse_args()

@@ -90,6 +90,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     return outputs
 
+
 def main(args):
     random.seed(args.seed)
 
@@ -118,13 +119,14 @@ def main(args):
             max_model_len=4096,
         )
 
-
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("facebook/flores", f"{args.src_lang}-{args.tgt_lang}")
+    dataset = load_dataset(
+        "facebook/flores", f"{args.src_lang}-{args.tgt_lang}")
     dataset = dataset.map(
         lambda x: {
             f"sentence_{args.src_lang}": x[f"sentence_{args.src_lang}"].strip(),
@@ -143,38 +145,21 @@ def main(args):
         train_prompt = gen_prompt(dev_data, args.src_lang, args.tgt_lang, k)
         prompt = train_prompt + prompt_end
 
+        messages = [{"role": "user", "content": prompt}]
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
-            if prompt[-1] in ["\n", " "]:
-                prompt += f"The {lang_map[args.tgt_lang]} translation is: "
-            else:
-                prompt += f" The {lang_map[args.tgt_lang]} translation is: "
+            prompt = chat_formatting_function(messages, tokenizer, args)
+        else:
+            prompt = "\n\n".join([x["content"] for x in messages])
+            
+        if prompt[-1] in ["\n", " "]:
+            prompt += f"The {lang_map[args.tgt_lang]} translation is: "
+        else:
+            prompt += f" The {lang_map[args.tgt_lang]} translation is: "
 
-        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        # make sure every prompt is less than 2048 tokens
-        include_prompt = True
-        while len(tokenized_prompt) > 4096:
-            k -= 1
-            if k < 0:
-                include_prompt = False
-                break
-            train_prompt = gen_prompt(dev_data, k)
-            prompt = train_prompt + prompt_end
+        prompts.append(prompt)
 
-            if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += f"The {lang_map[args.tgt_lang]} translation is: "
-                else:
-                    prompt += f" The {lang_map[args.tgt_lang]} translation is: "
-
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        if include_prompt:
-            prompts.append(prompt)
-
-    outputs = eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)
+    outputs = eval_hf_model(args, model, tokenizer,
+                            prompts, test_data, args.eval_batch_size)
 
     # debug
     if len(outputs) > 2:
@@ -200,7 +185,7 @@ def main(args):
     # predictions = [output for output in outputs]
     # references = [[example[f"sentence_{args.tgt_lang}"]] for example in test_data]
 
-    # metrics = { 
+    # metrics = {
     #     "bleu": sacrebleu.compute(predictions=predictions, references=references)["score"],
     #     "chrf": chrf.compute(predictions=predictions, references=references)["score"],
     #     "chrf2": chrf.compute(predictions=predictions, references=references, word_order=2)["score"],
@@ -218,7 +203,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=5, help="number of examples to use for few-shot evaluation.")
+    parser.add_argument("--ntrain", type=int, default=5,
+                        help="number of examples to use for few-shot evaluation.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--src_lang",
@@ -232,7 +218,8 @@ if __name__ == "__main__":
         default="hin_Deva",
         choices=list(lang_map.keys()),
     )
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/flores/llama-7B/")
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/flores/llama-7B/")
     parser.add_argument(
         "--bleurt_model_name_or_path",
         type=str,
@@ -251,9 +238,9 @@ if __name__ == "__main__":
         default=None,
         help="if specified, we will load the tokenizer from here.",
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -262,7 +249,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
     parser.add_argument(
@@ -270,6 +257,6 @@ if __name__ == "__main__":
         action="store_true",
         help="Load model as awq"
     )
-    
+
     args = parser.parse_args()
     main(args)

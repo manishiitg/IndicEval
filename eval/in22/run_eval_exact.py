@@ -125,15 +125,18 @@ def main(args):
         messages = [
             {"role": "system", "content": f"Translate the following sentence(s) from {lang_map[args.src_lang]} into {lang_map[args.tgt_lang]}.\n\n"}]
 
+        prompt = format_example(
+            src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
+        )
+        if prompt[-1] in ["\n", " "]:
+            prompt += f"The {lang_map[args.tgt_lang]} translation is: "
+        else:
+            prompt += f" The {lang_map[args.tgt_lang]} translation is: "
+
         if args.use_chat_format:
-            prompt = format_example(
-                src_text=example[f"sentence_{args.src_lang}"], src_lang=args.src_lang, tgt_lang=args.tgt_lang
-            )
-            if prompt[-1] in ["\n", " "]:
-                prompt += f"The {lang_map[args.tgt_lang]} translation is: "
-            else:
-                prompt += f" The {lang_map[args.tgt_lang]} translation is: "
-            prompt = chat_formatting_function(messages, add_bos=False)
+            prompt = chat_formatting_function(messages, tokenizer, args)
+        else:
+            prompt = "\n\n".join([x["content"] for x in messages])
 
         prompts.append(prompt)
 
@@ -231,7 +234,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
     parser.add_argument(

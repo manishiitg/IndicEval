@@ -5,7 +5,7 @@ source ./scripts/indic_eval/common_vars.sh
 
 for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
-    TASK_NAME=implicit_hate
+    TASK_NAME=in22
     LANG=hi
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}/${LANG}"
@@ -20,7 +20,7 @@ for model_name_or_path in "${model_names[@]}"; do
 
 
     check_file_existence=true
-    template_format="eval.templates.create_prompt_with_chatml_format"
+    template_format="eval.templates.create_prompt_by_template"
     if echo "$model_name" | grep -qi "Airavata"; then
         template_format="eval.templates.create_prompt_with_tulu_chat_format"
     fi

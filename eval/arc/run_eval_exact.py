@@ -32,15 +32,16 @@ def format_example(question, answers, label=None):
     return prompt
 
 
-def gen_prompt(dev_data, k=-1):
+def gen_prompt(dev_data, k):
     prompt = f"The following are multiple choice questions (with answers) about science.\n\n"
-    if k > 0:
-        exemplars = dev_data.select(range(k))
-        for example in exemplars:
-            prompt += format_example(
-                question=example["question"], answers=example["choices"]["text"], label=example["answerKey"]
-            )
+    # if k > 0:
+    #     exemplars = dev_data.select(range(k))
+    #     for example in exemplars:
+    #         prompt += format_example(
+    #             question=example["question"], answers=example["choices"]["text"], label=example["answerKey"]
+    #         )
     return prompt
+
 
 @torch.no_grad()
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
@@ -84,7 +85,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
             "prediction": targets[idx]
         }
         predictions.append(row)
-        
+
         idx += 1
 
     # debug
@@ -98,21 +99,22 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
                                    ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match : {em_score}")
 
-    outputs = [output[0] if len(output) > 0  else "" for output in outputs]
-    targets = [target[0] if len(target) > 0  else ""  for target in targets]
+    outputs = [output[0] if len(output) > 0 else "" for output in outputs]
+    targets = [target[0] if len(target) > 0 else "" for target in targets]
     # directly measuring A with A instead of of full option match
 
     em_score_options = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
+                                           ignore_case=True, ignore_punctuation=True)["exact_match"]
     print(f"Exact match Only Options: {em_score_options}")
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
-            "em_score" : em_score_options,
+            "em_score": em_score_options,
             "exact_match": em_score,
         }, fout, indent=4)
 
     return em_score
+
 
 def main(args):
     random.seed(args.seed)
@@ -120,7 +122,6 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    
     if args.awq:
         print("Loading model and tokenizer vllm awq...")
         model = vllm.LLM(
@@ -146,51 +147,43 @@ def main(args):
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
+    chat_formatting_function = dynamic_import_function(
+        args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset(args.dataset, f"ARC-{args.subset.capitalize()}")
     dev_data = dataset["validation"]
     test_data = dataset["test"]
 
     prompts = []
+    k = args.ntrain
     for i, example in enumerate(test_data):
-        k = args.ntrain
-        prompt_end = format_example(question=example["question"], answers=example["choices"]["text"], label=None)
+        prompt_end = format_example(
+            question=example["question"], answers=example["choices"]["text"], label=None)
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
         prompt = train_prompt + prompt_end
 
+        messages = [{"role": "user", "content": prompt}]
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
-            prompt = chat_formatting_function(messages, add_bos=False)
-            
-        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        # make sure every prompt is less than 2048 tokens
-        include_prompt = True
-        while len(tokenized_prompt) > 4096:
-            k -= 1
-            if k < 0:
-                include_prompt = False
-                break
-            train_prompt = gen_prompt(dev_data, k)
-            prompt = train_prompt + prompt_end
+            prompt = chat_formatting_function(messages, tokenizer, args)
+        else:
+            prompt = "\n\n".join([x["content"] for x in messages])
 
-            if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        if include_prompt:
-            prompts.append(prompt)
-        
-    eval_hf_model(args, model, tokenizer, prompts, test_data, args.eval_batch_size)    
+        prompts.append(prompt)
+
+    eval_hf_model(args, model, tokenizer, prompts,
+                  test_data, args.eval_batch_size)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--dataset", type=str, default="easy", choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
-    parser.add_argument("--subset", type=str, default="easy", choices=["easy", "challenge"])
-    parser.add_argument("--save_dir", type=str, default="/sky-notebook/eval-results/mmlu/llama-7B/")
+    parser.add_argument("--dataset", type=str, default="easy",
+                        choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
+    parser.add_argument("--subset", type=str, default="easy",
+                        choices=["easy", "challenge"])
+    parser.add_argument("--save_dir", type=str,
+                        default="/sky-notebook/eval-results/mmlu/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -208,9 +201,9 @@ if __name__ == "__main__":
         type=int,
         help="if specified, a maximum of n_instances per subject will be used for the evaluation.",
     )
-    parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
-    
-    
+    parser.add_argument("--eval_batch_size", type=int,
+                        default=1, help="batch size for evaluation.")
+
     parser.add_argument(
         "--use_chat_format",
         action="store_true",
@@ -219,10 +212,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
-    
+
     parser.add_argument(
         "--awq",
         action="store_true",

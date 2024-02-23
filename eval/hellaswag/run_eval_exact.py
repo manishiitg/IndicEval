@@ -158,28 +158,14 @@ def main(args):
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
         prompt = train_prompt + prompt_end
 
+        messages = [{"role": "user", "content": prompt}]
         if args.use_chat_format:
-            messages = [{"role": "user", "content": prompt}]
             prompt = chat_formatting_function(messages, add_bos=False)
+        else:
+            prompt = "\n\n".join([x["content"] for x in messages])
 
-        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        # make sure every prompt is less than 2048 tokens
-        include_prompt = True
-        while len(tokenized_prompt) > 4096:
-            k -= 1
-            if k < 0:
-                include_prompt = False
-                break
-            train_prompt = gen_prompt(dev_data, k)
-            prompt = train_prompt + prompt_end
-
-            if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
-        if include_prompt:
-            prompts.append(prompt)
+        
+        prompts.append(prompt)
 
 
 
@@ -216,7 +202,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
     parser.add_argument(

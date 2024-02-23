@@ -63,11 +63,16 @@ def main(args):
     for i, example in enumerate(test_data):
         messages = json.loads(example["messages"])
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
-        prompt = chat_formatting_function(messages)
+
+        if args.use_chat_format:
+            prompt = chat_formatting_function(messages, tokenizer, args)
+        else:
+            prompt = "\n\n".join([x["content"] for x in prompt])
+
         exists = False
         if prompt in existing_data:
             exists = True
-            
+
         if not exists:
             prompts.append(prompt)
 
@@ -168,7 +173,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chat_formatting_function",
         type=str,
-        default="eval.templates.create_prompt_with_tulu_chat_format",
+        default="eval.templates.create_prompt_by_template",
         help="The function to use to create the chat format. This function will be dynamically imported. Please see examples in `eval/templates.py`.",
     )
 

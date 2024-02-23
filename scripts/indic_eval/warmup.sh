@@ -14,7 +14,7 @@ for model_name_or_path in "${model_names[@]}"; do
         awq_param=""
     fi
 
-    template_format="eval.templates.create_prompt_with_chatml_format"
+    template_format="eval.templates.create_prompt_by_template"
     if echo "$model_name" | grep -qi "Airavata"; then
         template_format="eval.templates.create_prompt_with_tulu_chat_format"
     fi
