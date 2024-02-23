@@ -204,7 +204,8 @@ for row in final_data:
 
         scores[model_name][lang].append(float(row["rating"]))
 
-markdown_output = f"| Model | Language | Score | \n"
+markdown_output = f"LM Judge \n"
+markdown_output += f"| Model | Language | Score | \n"
 for model_name in scores:
     for lang in scores[model_name]:
         ratings = scores[model_name][lang]
