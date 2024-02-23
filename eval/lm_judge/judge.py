@@ -31,7 +31,7 @@ Begin your evaluation by providing a short explanation. Be as objective as possi
 [The End of Assistant's Answer]
 
 After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: 
-<explanation_for_rating>
+Explanation: <explanation_for_rating>
 
 Overall Rating: <overall_rating>
 """
@@ -134,6 +134,7 @@ def main(args):
         print(text)
         try:
             rating = get_rating(text)
+            print("got rating", rating)
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
