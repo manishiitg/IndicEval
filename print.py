@@ -1,5 +1,7 @@
+import unicodedata
 import os
 import json
+from datasets import load_dataset
 
 directory = "/sky-notebook/eval-results/"
 
@@ -169,8 +171,55 @@ def generate_markdown_table(data):
     return markdown_output
 
 
+ds = load_dataset("manishiitg/llm_judge", split="train")
+
+
+def is_hindi(char):
+    try:
+        return unicodedata.name(char).startswith('DEVANAGARI')
+    except ValueError:
+        return False
+
+
+def contains_hindi(s):
+    return any(is_hindi(char) for char in s)
+
+
+final_data = []
+for row in ds:
+    final_data.append(row)
+
+scores = {}
+for row in final_data:
+    if not row["judgement_pending"] and row["rating"] != -1:
+        model_name = row["model_name"]
+        lang = "en"
+        if contains_hindi(row["simple_prompt"]):
+            lang = "hi"
+
+        if model_name not in scores:
+            scores[model_name] = {}
+        if lang not in scores[model_name]:
+            scores[model_name][lang] = []
+
+        scores[model_name][lang].append(float(row["rating"]))
+
+markdown_output = f"| Model | Language | Score | \n"
+for model_name in scores:
+    for lang in scores[model_name]:
+        ratings = scores[model_name][lang]
+        sum = 0
+        for r in ratings:
+            sum += r
+        avg = sum / len(ratings)
+        markdown_output += f"| {model_name} | {lang} | {avg:.4f} | \n"
+        print("model name score", model_name,
+              "lang", lang, "avg", avg, len(ratings))
+
+
 # Convert JSON to Markdown table grouped by task and sub-task
-markdown_output = generate_markdown_table(sort_data(scores))
+markdown_output = markdown_output + "\n\n" + \
+    generate_markdown_table(sort_data(scores))
 
 # Print the Markdown output
 print(markdown_output)
