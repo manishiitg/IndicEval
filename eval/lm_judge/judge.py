@@ -96,42 +96,44 @@ def main(args):
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
 
-    existing_data = []
     final_data = []
     for row in ds:
         final_data.append(row)
 
-    idx = 0
     prompts = []
+    completed_data = []
+    pending_data = []
     for row in tqdm(final_data):
         if row["judgement_pending"] or True:
             instruction = row["simple_prompt"]
             answer = row["response"]
-
-            exists = False
-            existing_rating = float(-1)
-            existing_text = ""
-
-            idx += 1
-            # try:
             prompt = get_lm_judge_rating_prompt(
                 question=instruction, answer=answer)
-            #     row["judgement"] = text
-            #     row["rating"] = float(rating)
-            #     row["judgement_pending"] = False
-
-            # except Exception as e:
-            #     # print("exception", e)
-            #     row["judgement"] = ""
-            #     row["rating"] = float(-1)
-            #     row["judgement_pending"] = False
 
             prompts.append(prompt)
+            pending_data.append(row)
             break
+        else:
+            completed_data.append(row)
 
     print(prompts)
     outputs = eval_hf_model(args, model, tokenizer, prompts)
     print(outputs)
+
+    for idx, text in enumerate(outputs):
+        try:
+            rating = get_rating(text)
+            pending_data[idx]["judgement"] = text
+            pending_data[idx]["rating"] = float(rating)
+            pending_data[idx]["judgement_pending"] = False
+        except ValueError:
+            pending_data[idx]["judgement"] = text
+            pending_data[idx]["rating"] = -1
+            pending_data[idx]["judgement_pending"] = False
+
+    final_data = pending_data + completed_data
+    dataset = process_and_update_dataset(final_data)
+    dataset.push_to_hub("manishiitg/llm_judge", private=False)
     os.exit(1)
 
 
