@@ -149,6 +149,7 @@ def main(args):
             p_template = ""
         else:
             prompt, p_template, q_template, a_template = templates["with_context"]
+            
 
         train_prompt = [{"role": "system", "content": prompt}]
         # if k > 0:
@@ -173,7 +174,7 @@ def main(args):
         #         train_prompt.extend(
         #             [{"role":"user", "content":user_prompt + "\n" + assistant_prompt},]
         #         )
-
+        print("args.no_context", args.no_context)
         if args.no_context:
             user_prompt = q_template + " " + format(example["question"]) + "\n"
         else:
