@@ -142,6 +142,7 @@ def main(args):
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
+    test_data = test_data.select(range(10))
     args.no_context = False
     k = args.ntrain
     sample_data = test_data.select(range(k*3))
@@ -205,6 +206,8 @@ def main(args):
 
         prompts.append(prompt)
 
+    print(prompts)
+    os.exit(1)
     em_score = eval_hf_model(args, model, tokenizer,
                              prompts, test_data, args.eval_batch_size)
     print("Em Score", em_score)

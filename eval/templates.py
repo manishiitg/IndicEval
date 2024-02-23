@@ -29,7 +29,7 @@ def create_prompt_by_template(messages, tokenizer, args):
     return prompt
 
 
-def create_prompt_with_chatml_format(messages):
+def create_prompt_with_chatml_format(messages, tokenizer, args):
     global debug_print
     formatted_text = ""
     has_system = False
@@ -80,7 +80,7 @@ def create_prompt_with_chatml_format(messages):
     return formatted_text
 
 
-def create_prompt_with_tulu_chat_format(messages):
+def create_prompt_with_tulu_chat_format(messages, tokenizer, args):
     bos = "<s>"
     eos = "</s>"
     add_bos = True
@@ -104,7 +104,7 @@ def create_prompt_with_tulu_chat_format(messages):
     return formatted_text
 
 
-def create_prompt_with_llama2_chat_format(messages):
+def create_prompt_with_llama2_chat_format(messages, tokenizer, args):
     bos = "<s>"
     eos = "</s>"
     add_bos = True
