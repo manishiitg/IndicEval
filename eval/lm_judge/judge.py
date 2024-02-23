@@ -133,10 +133,12 @@ def main(args):
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
+            print("text, rating", text, rating)
         except ValueError:
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = -1
             pending_data[idx]["judgement_pending"] = False
+            print("text failed", text, -1)
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
