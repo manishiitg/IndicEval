@@ -133,7 +133,7 @@ def main(args):
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
-    dataset.push_to_hub("manishiitg/llm_judge", private=False)
+    # dataset.push_to_hub("manishiitg/llm_judge", private=False)
     os.exit(1)
 
 
