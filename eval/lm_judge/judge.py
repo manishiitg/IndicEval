@@ -154,5 +154,4 @@ if __name__ == "__main__":
         help="If given, we will use the vllm library, which will likely increase the inference throughput."
     )
     args = parser.parse_args()
-    args.eval_batch_size = args.eval_batch_size * torch.cuda.device_count()
     main(args)
