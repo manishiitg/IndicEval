@@ -99,7 +99,7 @@ def main(args):
         prompt = train_prompt + prompt_end
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(prompt, tokenizer)
+            prompt = chat_formatting_function(prompt, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 

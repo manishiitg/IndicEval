@@ -65,7 +65,7 @@ def main(args):
         simple_prompts.append("\n\n".join([x["content"] for x in messages]))
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(messages, tokenizer)
+            prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 

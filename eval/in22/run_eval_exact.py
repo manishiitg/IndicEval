@@ -134,7 +134,7 @@ def main(args):
             prompt += f" The {lang_map[args.tgt_lang]} translation is: "
 
         if args.use_chat_format:
-            prompt = chat_formatting_function(messages, tokenizer)
+            prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in messages])
 
