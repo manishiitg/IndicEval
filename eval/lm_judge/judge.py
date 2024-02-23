@@ -77,6 +77,19 @@ def eval_hf_model(args, model, tokenizer, prompts):
 
 def main(args):
 
+    ds = load_dataset("manishiitg/llm_judge", split="train")
+    final_data = []
+    for row in ds:
+        final_data.append(row)
+
+    count = 0
+    for row in tqdm(final_data):
+        if row["judgement_pending"]:
+            count = count + 1
+
+    if count == 0:
+        return
+
     model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
@@ -94,17 +107,11 @@ def main(args):
 
     )
 
-    ds = load_dataset("manishiitg/llm_judge", split="train")
-
-    final_data = []
-    for row in ds:
-        final_data.append(row)
-
     prompts = []
     completed_data = []
     pending_data = []
     for row in tqdm(final_data):
-        if row["judgement_pending"] or True:
+        if row["judgement_pending"]:
             instruction = row["simple_prompt"]
             answer = row["response"]
             prompt = get_lm_judge_rating_prompt(

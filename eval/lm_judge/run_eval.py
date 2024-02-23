@@ -58,6 +58,8 @@ def main(args):
             if row["model_name"] == args.model_name_or_path:
                 existing_data[row["prompt"]] = True
 
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
     prompts = []
     simple_prompts = []
     for i, example in enumerate(test_data):
@@ -77,9 +79,6 @@ def main(args):
             prompts.append(prompt)
 
     if len(prompts) > 0:
-        tokenizer = AutoTokenizer.from_pretrained(
-            args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
-
         if args.awq:
             print("Loading model and tokenizer vllm awq...")
             model = vllm.LLM(

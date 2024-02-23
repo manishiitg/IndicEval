@@ -3,7 +3,6 @@
 source ./scripts/indic_eval/common_vars.sh
 
 TASK_NAME=lmjudge
-python3 -m eval.lm_judge.judge
 
 
 
@@ -38,3 +37,5 @@ for model_name_or_path in "${model_names[@]}"; do
         $awq_param
     
 done
+
+python3 -m eval.lm_judge.judge
