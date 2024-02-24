@@ -91,6 +91,7 @@ def main(args):
         return
 
     model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
+    model_name_or_path = "abacusai/Smaug-72B-v0.1"
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
     print("Loading model and tokenizer vllm awq...")
