@@ -25,14 +25,16 @@ As an impartial evaluator, please assess the quality of the AI assistant's respo
 {question}
 [AI Assistant's Response]
 {answer}
-After providing your explanation, please rate the response on a scale of 1 to 10 for each of the following evaluation factors:
+Please rate the response on a scale of 1 to 10 for each of the following evaluation factors:
+
 Helpfulness: The degree to which the response addresses the user's question or need.
 Relevance: The extent to which the response is related to the user's question or topic.
 Accuracy: The correctness of the information provided in the response.
 Depth: The level of detail and comprehensiveness of the response.
 Creativity: The originality and novelty of the response.
 Level of Detail: The amount of information provided in the response.
-Please follow this format for your evaluation:
+
+Only respond in json format as follows:
 {
   "helpfulness": {
     "explanation" : "<explanation>",
@@ -188,7 +190,6 @@ def main(args):
             text = json.dumps(ratings, indent=4)
             print(text)
 
-
             sum = 0
             total = 0
 
@@ -204,12 +205,12 @@ def main(args):
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
             pending_data[idx]["rated_by"] = judge_model
-        except ValueError:
+        except ValueError as e:
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = -1
             pending_data[idx]["judgement_pending"] = False
             pending_data[idx]["rated_by"] = judge_model
-            print("text failed", text, -1)
+            print("text failed", text, -1, e)
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
