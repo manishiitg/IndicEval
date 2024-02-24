@@ -191,8 +191,7 @@ def main(args):
                     simple_prompts.append("\n\n".join(
                         [x["content"] for x in messages]))
 
-            new_outputs = eval_hf_model(args, model, tokenizer,
-                                        new_prompts, test_data, args.eval_batch_size)
+            new_outputs = eval_hf_model(args, model, tokenizer, new_prompts)
 
             for pix in new_prompts:
                 row = {}
