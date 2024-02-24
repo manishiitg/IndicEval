@@ -39,6 +39,8 @@ Level of Detail: The amount of information provided in the response.
 
 Provide a brief explanation for your rating for every factor.
 
+If an evaluation criteria is not valid for a question, add the rating as -1
+
 Only respond in json format as follows:
 {
   "helpfulness": {
