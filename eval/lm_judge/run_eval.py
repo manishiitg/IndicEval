@@ -99,7 +99,7 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         simple_prompts.append("\n\n".join(
-            [f"{x["role"]} : {x["content"]}" for x in messages]))
+            [f"{x['role']} : {x['content']}" for x in messages]))
         prompts.append(prompt)
         processed_row.append(example)
         idx += 1
