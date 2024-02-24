@@ -194,6 +194,7 @@ def main(args):
         try:
             ratings = json.loads(text)
             text = json.dumps(ratings, indent=4)
+            print(text)
             rating = ratings["overall_rating"]["rating"]
 
             # sum = 0
