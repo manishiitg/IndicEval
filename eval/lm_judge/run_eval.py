@@ -68,7 +68,10 @@ def main(args):
     default_system_en = "You are a helpful assistant."
     default_system_hi = "आप एक सहायक सहायक हैं."
 
-    for idx, example in enumerate(test_data):
+    processed_row = []
+    idx = 0
+
+    for i, example in enumerate(test_data):
 
         lang = example["lang"]
         system = default_system_en
@@ -104,6 +107,8 @@ def main(args):
             simple_prompts.append("\n\n".join(
                 [x["content"] for x in messages]))
             prompts.append(prompt)
+            processed_row.append(example)
+            idx += 1
 
     if len(prompts) > 0:
         if args.awq:
