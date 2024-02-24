@@ -74,6 +74,8 @@ def main(args):
     for i, example in enumerate(test_data):
 
         lang = example["lang"]
+        if lang == "hi":  # temp
+            continue
         system = default_system_en
         if lang == "hi":
             system = default_system_hi
@@ -178,6 +180,7 @@ def main(args):
 
                     print("-=====")
                     print(messages)
+                    print(row["mt_question"])
                     print("-=====")
 
                     if args.use_chat_format:
@@ -193,7 +196,7 @@ def main(args):
 
             new_outputs = eval_hf_model(args, model, tokenizer, new_prompts)
 
-            for pix in new_prompts:
+            for pix, _ in enumerate(new_prompts):
                 row = {}
                 row["prompt"] = new_prompts[pix]
                 row["response"] = new_outputs[pix]
