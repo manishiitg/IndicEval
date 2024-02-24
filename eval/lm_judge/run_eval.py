@@ -86,7 +86,7 @@ def main(args):
                 "question": 0,
                 "answer": idx,
             }
-            prompt = example["mt_question"][mt_idx[i]["question"]]
+            prompt = example["mt_question"][mt_idx[idx]["question"]]
             messages = [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt}
