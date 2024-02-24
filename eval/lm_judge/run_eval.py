@@ -199,6 +199,7 @@ def main(args):
                     idx += 1
 
             new_outputs = eval_hf_model(args, model, tokenizer, new_prompts)
+            mt_idx = new_mt_idx
 
             for pix, _ in enumerate(new_prompts):
                 row = {}
