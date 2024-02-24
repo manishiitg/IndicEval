@@ -79,9 +79,6 @@ def main(args):
             system = default_system_hi
 
         if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
-            if example["type"] != "gpt4-multi-turn-hi":
-                continue
-
             mt_idx[idx] = {
                 "question": 0,
                 "answer": idx,
