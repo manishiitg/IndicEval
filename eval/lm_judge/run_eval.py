@@ -201,7 +201,7 @@ def main(args):
             outputs = eval_hf_model(args, model, tokenizer, new_prompts)
             new_outputs = {}
 
-            for pix in enumerate(new_prompts):
+            for pix, _ in enumerate(new_prompts):
                 row = {}
                 row["prompt"] = new_prompts[pix]
                 row["response"] = new_outputs[pix]
