@@ -177,7 +177,7 @@ def main(args):
                         {"role": "assistant", "content": next_ques})
                     processed_row[row_idx]["messages"] = messages
 
-                    print(messages)
+                    # print(messages)
                     if args.use_chat_format:
                         prompt = chat_formatting_function(
                             messages, tokenizer, args)
