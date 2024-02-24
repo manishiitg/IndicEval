@@ -74,8 +74,6 @@ def main(args):
     for i, example in enumerate(test_data):
 
         lang = example["lang"]
-        if lang == "hi":  # temp
-            continue
         system = default_system_en
         if lang == "hi":
             system = default_system_hi
