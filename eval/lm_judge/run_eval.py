@@ -79,7 +79,13 @@ def main(args):
             system = default_system_hi
 
         if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
-            mt_idx[idx] = 0
+            if example["type"] != "gpt4-multi-turn-hi":
+                continue
+
+            mt_idx[i] = {
+                "question": 0,
+                "answer": idx,
+            }
             prompt = example["mt_question"][mt_idx[idx]]
             messages = [
                 {"role": "system", "content": system},
@@ -96,16 +102,11 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
 
-        exists = False
-        # if prompt in existing_data: # temp
-        #     exists = True
-
-        if not exists:
-            simple_prompts.append("\n\n".join(
-                [x["content"] for x in messages]))
-            prompts.append(prompt)
-            processed_row.append(example)
-            idx += 1
+        simple_prompts.append("\n\n".join(
+            [x["content"] for x in messages]))
+        prompts.append(prompt)
+        processed_row.append(example)
+        idx += 1
 
     if len(prompts) > 0:
         if args.awq:
@@ -153,9 +154,11 @@ def main(args):
             new_prompts = []
             simple_prompts = []
             org_row = []
+            new_mt_idx = {}
+            idx = 0
             for row_idx, mt_ix in mt_idx.items():
                 row = processed_row[row_idx]
-                answer = new_outputs[row_idx]
+                answer = new_outputs[row_idx]["answer"]
 
                 lang = row["lang"]
                 system = default_system_en
@@ -163,9 +166,13 @@ def main(args):
                     system = default_system_hi
 
                 print("row_idx, mt_ix", row_idx, mt_ix)
-                next_ques_idx = mt_ix + 1
+                next_ques_idx = mt_ix["question"] + 1
                 if next_ques_idx < len(row["mt_question"]):
                     mt_idx[row_idx] = next_ques_idx
+                    new_mt_idx[row_idx] = {
+                        "question": next_ques_idx,
+                        "answer": idx,
+                    }
                     next_ques = row["mt_question"][next_ques_idx]
 
                     messages = row["messages"]
@@ -189,10 +196,12 @@ def main(args):
                     new_prompts.append(prompt)
                     simple_prompts.append("\n\n".join(
                         [x["content"] for x in messages]))
+                    idx += 1
 
-            new_outputs = eval_hf_model(args, model, tokenizer, new_prompts)
+            outputs = eval_hf_model(args, model, tokenizer, new_prompts)
+            new_outputs = {}
 
-            for pix, _ in enumerate(new_prompts):
+            for pix in enumerate(new_prompts):
                 row = {}
                 row["prompt"] = new_prompts[pix]
                 row["response"] = new_outputs[pix]
