@@ -23,11 +23,11 @@ prompt = """
 As an impartial evaluator, please assess the quality of the AI assistant's response to the user's question below. 
 Your evaluation should take into account several factors, including helpfulness, relevance, accuracy, depth, creativity, and level of detail. 
 
-
 [Question]
 {question}
 [AI Assistant's Response]
 {answer}
+
 Please rate the response on a scale of 1 to 10 for each of the following evaluation factors:
 
 Helpfulness: The degree to which the response addresses the user's question or need.
@@ -167,17 +167,38 @@ def main(args):
     prompts = []
     completed_data = []
     pending_data = []
+
+    mt_idx = {}
+
+    default_system_en = "You are a helpful assistant."
+    default_system_hi = "आप एक सहायक सहायक हैं."
+
+    idx = 0
     for row in tqdm(final_data):
         if row["judgement_pending"]:
             instruction = row["simple_prompt"]
             answer = row["response"]
+            lang = row["lang"]
             prompt = get_lm_judge_rating_prompt(
                 question=instruction, answer=answer)
 
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
+            system = default_system_en
+            if lang == "hi":
+                system = default_system_hi
+
+            if row["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in row["type"]:
+                mt_idx[idx] = 0
+                prompt = row["mt_question"][mt_idx[idx]]
+                messages = [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ]
+            else:
+                messages = [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ]
+
             text = tokenizer.apply_chat_template(
                 messages,
                 tokenize=False,
@@ -185,10 +206,16 @@ def main(args):
             )
             prompts.append(text)
             pending_data.append(row)
+            idx += 1
         else:
             completed_data.append(row)
 
+        
+
     outputs = eval_hf_model(args, model, tokenizer, prompts)
+
+    for row_idx, mt_idx in mt_idx.items():
+        row = 
 
     for idx, text in enumerate(outputs):
         try:

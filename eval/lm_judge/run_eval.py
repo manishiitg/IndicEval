@@ -62,20 +62,46 @@ def main(args):
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
     prompts = []
     simple_prompts = []
-    for i, example in enumerate(test_data):
-        messages = json.loads(example["messages"])        
+
+    mt_idx = {}
+
+    default_system_en = "You are a helpful assistant."
+    default_system_hi = "आप एक सहायक सहायक हैं."
+
+    for idx, example in enumerate(test_data):
+
+        lang = example["lang"]
+        system = default_system_en
+        if lang == "hi":
+            system = default_system_hi
+
+        if row["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in row["type"]:
+            if len(mt_idx) > 2: #temp
+                continue
+            mt_idx[idx] = 0
+            prompt = row["mt_question"][mt_idx[idx]]
+            messages = [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt}
+            ]
+            row["messages"] = messages
+
+        else:
+            messages = json.loads(example["messages"])
 
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
+            continue  # temp
 
         exists = False
-        # if prompt in existing_data:
+        # if prompt in existing_data: # temp
         #     exists = True
 
         if not exists:
-            simple_prompts.append("\n\n".join([x["content"] for x in messages]))
+            simple_prompts.append("\n\n".join(
+                [x["content"] for x in messages]))
             prompts.append(prompt)
 
     if len(prompts) > 0:
@@ -112,7 +138,6 @@ def main(args):
                 row["response"] = output
                 row["type"] = example["type"]
                 row["lang"] = example["lang"]
-                # row["date"] = date.today().strftime("%m/%d/%Y")
                 row["model_name"] = args.model_name_or_path
                 row["simple_prompt"] = simple_prompt
                 row["judgement_pending"] = True
@@ -120,7 +145,67 @@ def main(args):
                 row["rating"] = float(-1)
                 final_data.append(row)
 
-            json.dump(final_data, fout, indent=4)
+        new_outputs = outputs
+        while True:
+            print("eval mt turns")
+            new_prompts = []
+            simple_prompts = []
+            org_row = []
+            for row_idx, mt_ix in mt_idx.items():
+                row = test_data[row_idx]
+                answer = new_outputs[row_idx]
+
+                lang = row["lang"]
+                system = default_system_en
+                if lang == "hi":
+                    system = default_system_hi
+
+                next_ques_idx = mt_ix + 1
+                if next_ques_idx < len(row["mt_question"]):
+                    mt_idx[row_idx] = next_ques_idx
+                    next_ques = row["mt_question"][next_ques_idx]
+
+                    messages = row["messages"]
+                    messages.append({"role": "assistant", "content": answer})
+                    messages.append(
+                        {"role": "assistant", "content": next_ques})
+                    row["messages"] = messages
+
+                    print("-=====")
+                    print(messages)
+                    print("-=====")
+
+                    if args.use_chat_format:
+                        prompt = chat_formatting_function(
+                            messages, tokenizer, args)
+                    else:
+                        prompt = "\n\n".join([x["content"] for x in prompt])
+
+                    org_row.append(row)
+                    new_prompts.append(prompt)
+                    simple_prompts.append("\n\n".join(
+                        [x["content"] for x in messages]))
+
+            new_outputs = eval_hf_model(args, model, tokenizer,
+                                        new_prompts, test_data, args.eval_batch_size)
+
+            for pix in new_prompts:
+                row = {}
+                row["prompt"] = new_prompts[pix]
+                row["response"] = new_outputs[pix]
+                row["type"] = org_row[pix]["type"]
+                row["lang"] = org_row[pix]["lang"]
+                row["model_name"] = args.model_name_or_path
+                row["simple_prompt"] = simple_prompts[pix]
+                row["judgement_pending"] = True
+                row["judgement"] = ""
+                row["rating"] = float(-1)
+                final_data.append(row)
+
+            if len(new_prompts) == 0:
+                break
+
+        json.dump(final_data, fout, indent=4)
 
         # api = HfApi()
         # if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
