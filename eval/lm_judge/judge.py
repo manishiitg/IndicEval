@@ -37,7 +37,7 @@ Depth: The level of detail and comprehensiveness of the response.
 Creativity: The originality and novelty of the response.
 Level of Detail: The amount of information provided in the response.
 
-Calculate an overall rating based on above factors and also provide an explanation for the overall rating.
+Calculate an overall rating based on above factors and also provide an detailed explanation for the overall rating.
 
 Only respond in json format as follows:
 {
