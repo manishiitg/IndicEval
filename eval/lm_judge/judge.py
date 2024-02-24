@@ -37,36 +37,10 @@ Depth: The level of detail and comprehensiveness of the response.
 Creativity: The originality and novelty of the response.
 Level of Detail: The amount of information provided in the response.
 
-Provide a brief explanation for your rating for every factor.
-
-If an evaluation criteria is not valid for a question, add the rating as -1
+Provide a explanation for your rating for every factor and then provide an overall rating.
 
 Only respond in json format as follows:
 {
-  "helpfulness": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
-  "relevance": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
-  "accuracy": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
-  "depth": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
-  "creativity": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
-  "level_of_detail": {
-    "explanation" : "<explanation>",
-    "rating" : "<rating>",
-  },
   "overall_rating": {
     "explanation" : "<explanation>",
     "rating" : "<rating>",
@@ -74,6 +48,31 @@ Only respond in json format as follows:
 }
 Response format should be parsable by json.loads
 """
+# If an evaluation criteria is not valid for a question, add the rating as -1
+# "helpfulness": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
+#   "relevance": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
+#   "accuracy": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
+#   "depth": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
+#   "creativity": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
+#   "level_of_detail": {
+#     "explanation" : "<explanation>",
+#     "rating" : "<rating>",
+#   },
 
 # prompt = """
 # Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below.
@@ -135,6 +134,7 @@ def eval_hf_model(args, model, tokenizer, prompts):
 def main(args):
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
+    ds = ds.select(range(20))
     final_data = []
     for row in ds:
         final_data.append(row)
