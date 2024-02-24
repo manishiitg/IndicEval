@@ -158,7 +158,7 @@ def main(args):
             idx = 0
             for row_idx, mt_ix in mt_idx.items():
                 row = processed_row[row_idx]
-                answer = new_outputs[mt_ix[["answer"]]]
+                answer = new_outputs[mt_ix["answer"]]
 
                 lang = row["lang"]
                 system = default_system_en
