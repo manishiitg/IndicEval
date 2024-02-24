@@ -208,7 +208,7 @@ def generateLMJudge():
             scores[model_name][lang].append(float(row["rating"]))
 
     markdown_output = f"LM Judge \n"
-    markdown_output += f"| Model | Language | Score | \n"
+    markdown_output += f"| Model | Language | Score | No# Questions | \n"
     for model_name in scores:
         for lang in scores[model_name]:
             ratings = scores[model_name][lang]
@@ -216,7 +216,7 @@ def generateLMJudge():
             for r in ratings:
                 sum += r
             avg = sum / len(ratings)
-            markdown_output += f"| {model_name} | {lang} | {avg:.4f} | \n"
+            markdown_output += f"| {model_name} | {lang} | {avg:.4f} |  {len(ratings)} |\n"
             print("model name score", model_name,
                   "lang", lang, "avg", avg, len(ratings))
 
