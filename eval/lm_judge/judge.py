@@ -66,9 +66,9 @@ Please follow this format for your evaluation:
 """
 
 # prompt = """
-# Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. 
-# Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. 
-# Begin your evaluation by providing a short explanation. Be as objective as possible. 
+# Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below.
+# Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response.
+# Begin your evaluation by providing a short explanation. Be as objective as possible.
 
 # [Question]
 # {question}
@@ -77,7 +77,7 @@ Please follow this format for your evaluation:
 # {answer}
 # [The End of Assistant's Answer]
 
-# After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: 
+# After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format:
 # Explanation: <explanation_for_rating>
 
 # Overall Rating: <overall_rating>
@@ -139,13 +139,13 @@ def main(args):
     if count == 0:
         return
 
-    ludge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
-    tokenizer = AutoTokenizer.from_pretrained(ludge_model)
+    judge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
+    tokenizer = AutoTokenizer.from_pretrained(judge_model)
 
     print("Loading model and tokenizer vllm awq...")
     model = vllm.LLM(
-        model=ludge_model,
-        tokenizer=ludge_model,
+        model=judge_model,
+        tokenizer=judge_model,
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
@@ -182,21 +182,33 @@ def main(args):
 
     outputs = eval_hf_model(args, model, tokenizer, prompts)
 
-    print(outputs)
-    os.exit(1)
-
     for idx, text in enumerate(outputs):
         try:
-            rating = get_rating(text)
+            ratings = json.loads(text)
+            text = json.dumps(ratings, indent=4)
+            print(text)
+
+
+            sum = 0
+            total = 0
+
+            for key, value in ratings.items():
+                # explanation = value["explanation"]
+                rating = value["rating"]
+                sum += float(rating)
+                total += 1
+
+            rating = sum / total
+            # rating = get_rating(text)
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
-            pending_data[idx]["rated_by"] = ludge_model
+            pending_data[idx]["rated_by"] = judge_model
         except ValueError:
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = -1
             pending_data[idx]["judgement_pending"] = False
-            pending_data[idx]["rated_by"] = ludge_model
+            pending_data[idx]["rated_by"] = judge_model
             print("text failed", text, -1)
 
     final_data = pending_data + completed_data
