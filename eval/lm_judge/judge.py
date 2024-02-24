@@ -18,23 +18,70 @@ import re
 
 # in this we simply save prompts outputs to a huggingface repo
 # https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
-prompt = """
-Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. 
-Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. 
-Begin your evaluation by providing a short explanation. Be as objective as possible. 
 
+prompt = """
+As an impartial evaluator, please assess the quality of the AI assistant's response to the user's question below. Your evaluation should take into account several factors, including helpfulness, relevance, accuracy, depth, creativity, and level of detail. Begin your evaluation with a brief explanation that is as objective as possible.
 [Question]
 {question}
-
-[The Start of Assistant's Answer]
+[AI Assistant's Response]
 {answer}
-[The End of Assistant's Answer]
-
-After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: 
-Explanation: <explanation_for_rating>
-
-Overall Rating: <overall_rating>
+After providing your explanation, please rate the response on a scale of 1 to 10 for each of the following evaluation factors:
+Helpfulness: The degree to which the response addresses the user's question or need.
+Relevance: The extent to which the response is related to the user's question or topic.
+Accuracy: The correctness of the information provided in the response.
+Depth: The level of detail and comprehensiveness of the response.
+Creativity: The originality and novelty of the response.
+Level of Detail: The amount of information provided in the response.
+Please follow this format for your evaluation:
+{
+  "helpfulness": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "relevance": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "accuracy": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "depth": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "creativity": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "level_of_detail": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+  "overall_rating": {
+    "explanation" : "<explanation>",
+    "rating" : "<rating>",
+  },
+}
 """
+
+# prompt = """
+# Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. 
+# Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. 
+# Begin your evaluation by providing a short explanation. Be as objective as possible. 
+
+# [Question]
+# {question}
+
+# [The Start of Assistant's Answer]
+# {answer}
+# [The End of Assistant's Answer]
+
+# After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: 
+# Explanation: <explanation_for_rating>
+
+# Overall Rating: <overall_rating>
+# """
 
 rating_pattern = r'Overall Rating: (\d+(?:\.\d+)?)'
 
@@ -78,12 +125,14 @@ def eval_hf_model(args, model, tokenizer, prompts):
 def main(args):
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
+    ds = ds.select(range(10))
     final_data = []
     for row in ds:
         final_data.append(row)
 
     count = 0
     for row in tqdm(final_data):
+        row["judgement_pending"] = True
         if row["judgement_pending"]:
             count = count + 1
 
@@ -133,6 +182,9 @@ def main(args):
             completed_data.append(row)
 
     outputs = eval_hf_model(args, model, tokenizer, prompts)
+
+    print(outputs)
+    os.exit(1)
 
     for idx, text in enumerate(outputs):
         try:
