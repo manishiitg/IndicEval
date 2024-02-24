@@ -82,7 +82,7 @@ def main(args):
             if example["type"] != "gpt4-multi-turn-hi":
                 continue
 
-            mt_idx[i] = {
+            mt_idx[idx] = {
                 "question": 0,
                 "answer": idx,
             }
