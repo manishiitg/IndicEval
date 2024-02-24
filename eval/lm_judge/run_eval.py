@@ -174,7 +174,7 @@ def main(args):
                     messages = row["messages"]
                     messages.append({"role": "assistant", "content": answer})
                     messages.append(
-                        {"role": "assistant", "content": next_ques})
+                        {"role": "user", "content": next_ques})
                     processed_row[row_idx]["messages"] = messages
 
                     # print(messages)
