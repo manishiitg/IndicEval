@@ -20,7 +20,10 @@ import re
 # https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/data/judge_prompts.jsonl
 
 prompt = """
-As an impartial evaluator, please assess the quality of the AI assistant's response to the user's question below. Your evaluation should take into account several factors, including helpfulness, relevance, accuracy, depth, creativity, and level of detail. Begin your evaluation with a brief explanation that is as objective as possible.
+As an impartial evaluator, please assess the quality of the AI assistant's response to the user's question below. 
+Your evaluation should take into account several factors, including helpfulness, relevance, accuracy, depth, creativity, and level of detail. 
+
+
 [Question]
 {question}
 [AI Assistant's Response]
@@ -33,6 +36,8 @@ Accuracy: The correctness of the information provided in the response.
 Depth: The level of detail and comprehensiveness of the response.
 Creativity: The originality and novelty of the response.
 Level of Detail: The amount of information provided in the response.
+
+Provide a brief explanation for your rating for every factor.
 
 Only respond in json format as follows:
 {
