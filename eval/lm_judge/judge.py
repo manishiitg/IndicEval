@@ -193,18 +193,18 @@ def main(args):
         try:
             ratings = json.loads(text)
             text = json.dumps(ratings, indent=4)
-            print(text)
+            rating = ratings["overall_rating"]["rating"]
 
-            sum = 0
-            total = 0
+            # sum = 0
+            # total = 0
 
-            for key, value in ratings.items():
-                # explanation = value["explanation"]
-                rating = value["rating"]
-                sum += float(rating)
-                total += 1
+            # for key, value in ratings.items():
+            #     # explanation = value["explanation"]
+            #     rating = value["rating"]
+            #     sum += float(rating)
+            #     total += 1
 
-            rating = sum / total
+            # rating = sum / total
             # rating = get_rating(text)
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
