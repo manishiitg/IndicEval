@@ -198,8 +198,7 @@ def main(args):
                         [x["content"] for x in messages]))
                     idx += 1
 
-            outputs = eval_hf_model(args, model, tokenizer, new_prompts)
-            new_outputs = {}
+            new_outputs = eval_hf_model(args, model, tokenizer, new_prompts)
 
             for pix, _ in enumerate(new_prompts):
                 row = {}
