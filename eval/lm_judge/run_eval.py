@@ -92,7 +92,6 @@ def main(args):
 
         else:
             messages = json.loads(example["messages"])
-            continue  # temp
 
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
@@ -100,7 +99,7 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         simple_prompts.append("\n\n".join(
-            [x["content"] for x in messages]))
+            [f"{x["role"]} : {x["content"]}" for x in messages]))
         prompts.append(prompt)
         processed_row.append(example)
         idx += 1
@@ -177,12 +176,6 @@ def main(args):
                     messages.append(
                         {"role": "assistant", "content": next_ques})
                     row["messages"] = messages
-
-                    print("-=====")
-                    print(messages)
-                    print(row["mt_question"])
-                    print("-=====")
-
                     if args.use_chat_format:
                         prompt = chat_formatting_function(
                             messages, tokenizer, args)
