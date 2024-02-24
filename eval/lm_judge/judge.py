@@ -139,14 +139,13 @@ def main(args):
     if count == 0:
         return
 
-    model_name_or_path = "Qwen/Qwen1.5-72B-Chat-AWQ"
-    model_name_or_path = "abacusai/Smaug-72B-v0.1"
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    ludge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
+    tokenizer = AutoTokenizer.from_pretrained(ludge_model)
 
     print("Loading model and tokenizer vllm awq...")
     model = vllm.LLM(
-        model=model_name_or_path,
-        tokenizer=model_name_or_path,
+        model=ludge_model,
+        tokenizer=ludge_model,
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
@@ -192,10 +191,12 @@ def main(args):
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
+            pending_data[idx]["rated_by"] = ludge_model
         except ValueError:
             pending_data[idx]["judgement"] = text
             pending_data[idx]["rating"] = -1
             pending_data[idx]["judgement_pending"] = False
+            pending_data[idx]["rated_by"] = ludge_model
             print("text failed", text, -1)
 
     final_data = pending_data + completed_data
