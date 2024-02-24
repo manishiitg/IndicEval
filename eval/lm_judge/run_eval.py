@@ -75,6 +75,7 @@ def main(args):
         if lang == "hi":
             system = default_system_hi
 
+        print(row["type"])
         if row["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in row["type"]:
             if len(mt_idx) > 2: #temp
                 continue
