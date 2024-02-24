@@ -2,7 +2,7 @@
 
 model_names=(
     "Qwen/Qwen1.5-72B-Chat-AWQ"
-    "mistralai/Mixtral-8x7B-Instruct-v0.1"
+    # "mistralai/Mixtral-8x7B-Instruct-v0.1"
     "ai4bharat/Airavata"
     "google/gemma-7b-it"
     "manishiitg/open-aditi-hi-v4"
