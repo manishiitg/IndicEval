@@ -1,10 +1,10 @@
 #!/bin/bash
 
 model_names=(
+    "google/gemma-7b-it"
     "Qwen/Qwen1.5-72B-Chat-AWQ"
     # "mistralai/Mixtral-8x7B-Instruct-v0.1"
     "ai4bharat/Airavata"
-    "google/gemma-7b-it"
     "manishiitg/open-aditi-hi-v4"
     "manishiitg/open-aditi-hi-v3"
     # "manishiitg/open-aditi-hi-v2-awq"
