@@ -50,6 +50,7 @@ def sort_data(data):
     # Sorting models based on the first metric for each language
     for task, task_dict in scores.items():
         for model, model_dict in task_dict.items():
+            print("model", model, model_dict)
             for lang, lang_dict in model_dict.items():
                 for metric, metric_value in lang_dict.items():
                     if lang not in sorted_data:
