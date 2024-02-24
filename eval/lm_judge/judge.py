@@ -134,7 +134,6 @@ def eval_hf_model(args, model, tokenizer, prompts):
 def main(args):
 
     ds = load_dataset("manishiitg/llm_judge", split="train")
-    ds = ds.select(range(20))
     final_data = []
     for row in ds:
         final_data.append(row)
