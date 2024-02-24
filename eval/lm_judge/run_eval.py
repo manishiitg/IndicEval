@@ -75,17 +75,17 @@ def main(args):
         if lang == "hi":
             system = default_system_hi
 
-        print(row["type"])
-        if row["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in row["type"]:
+        print(example)
+        if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
             if len(mt_idx) > 2: #temp
                 continue
             mt_idx[idx] = 0
-            prompt = row["mt_question"][mt_idx[idx]]
+            prompt = example["mt_question"][mt_idx[idx]]
             messages = [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt}
             ]
-            row["messages"] = messages
+            example["messages"] = messages
 
         else:
             messages = json.loads(example["messages"])
