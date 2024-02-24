@@ -10,7 +10,7 @@ for model_name_or_path in "${model_names[@]}"; do
     model_name=${model_name_or_path##*/}
     
     FOLDER="${FOLDER_BASE}/${TASK_NAME}/${model_name}"
-    FILE=$FOLDER/lm_judge_predictions.json
+    FILE=$FOLDER/lm_judge_predictions.jsonl
     echo "evaluating $model_name base on $TASK_NAME $NUM_SHOTS ..."
 
     if echo "$model_name" | grep -qi "awq"; then
