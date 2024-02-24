@@ -63,8 +63,7 @@ def main(args):
     prompts = []
     simple_prompts = []
     for i, example in enumerate(test_data):
-        messages = json.loads(example["messages"])
-        simple_prompts.append("\n\n".join([x["content"] for x in messages]))
+        messages = json.loads(example["messages"])        
 
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
@@ -72,10 +71,11 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in prompt])
 
         exists = False
-        if prompt in existing_data:
-            exists = True
+        # if prompt in existing_data:
+        #     exists = True
 
         if not exists:
+            simple_prompts.append("\n\n".join([x["content"] for x in messages]))
             prompts.append(prompt)
 
     if len(prompts) > 0:
@@ -110,7 +110,9 @@ def main(args):
                 row = {}
                 row["prompt"] = prompt
                 row["response"] = output
-                row["date"] = date.today().strftime("%m/%d/%Y")
+                row["type"] = example["type"]
+                row["lang"] = example["lang"]
+                # row["date"] = date.today().strftime("%m/%d/%Y")
                 row["model_name"] = args.model_name_or_path
                 row["simple_prompt"] = simple_prompt
                 row["judgement_pending"] = True
