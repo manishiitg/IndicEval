@@ -20,7 +20,7 @@ import torch
 
 
 @torch.no_grad()
-def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
+def eval_hf_model(args, model, tokenizer, prompts):
     sampling_params = vllm.SamplingParams(
         temperature=0,
         max_tokens=512,
