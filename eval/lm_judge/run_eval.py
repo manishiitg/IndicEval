@@ -79,7 +79,7 @@ def main(args):
             system = default_system_hi
 
         if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
-            if len(mt_idx) > 2: #temp
+            if len(mt_idx) > 2:  # temp
                 continue
             mt_idx[idx] = 0
             prompt = example["mt_question"][mt_idx[idx]]
@@ -97,7 +97,6 @@ def main(args):
             prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
-            
 
         exists = False
         # if prompt in existing_data: # temp
@@ -133,12 +132,11 @@ def main(args):
                 # max_num_batched_tokens=4096,
                 max_model_len=4096,
             )
-        outputs = eval_hf_model(args, model, tokenizer,
-                                prompts, test_data, args.eval_batch_size)
+        outputs = eval_hf_model(args, model, tokenizer, prompts)
 
         final_data = []
         with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
-            for example, output, simple_prompt, prompt in zip(test_data, outputs, simple_prompts, prompts):
+            for example, output, simple_prompt, prompt in zip(processed_row, outputs, simple_prompts, prompts):
                 row = {}
                 row["prompt"] = prompt
                 row["response"] = output
@@ -158,7 +156,7 @@ def main(args):
             simple_prompts = []
             org_row = []
             for row_idx, mt_ix in mt_idx.items():
-                row = test_data[row_idx]
+                row = processed_row[row_idx]
                 answer = new_outputs[row_idx]
 
                 lang = row["lang"]
@@ -166,6 +164,7 @@ def main(args):
                 if lang == "hi":
                     system = default_system_hi
 
+                print("row_idx, mt_ix", row_idx, mt_ix)
                 next_ques_idx = mt_ix + 1
                 if next_ques_idx < len(row["mt_question"]):
                     mt_idx[row_idx] = next_ques_idx
@@ -211,7 +210,8 @@ def main(args):
             if len(new_prompts) == 0:
                 break
 
-        json.dump(final_data, fout, indent=4)
+        with open(os.path.join(args.save_dir, f"lm_judge_predictions.jsonl"), "w") as fout:
+            json.dump(final_data, fout, indent=4)
 
         # api = HfApi()
         # if api.repo_exists(repo_id=args.push_output, repo_type="dataset"):
