@@ -81,8 +81,6 @@ def main(args):
             system = default_system_hi
 
         if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
-            if len(mt_idx) > 2:  # temp
-                continue
             mt_idx[idx] = 0
             prompt = example["mt_question"][mt_idx[idx]]
             messages = [
