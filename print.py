@@ -209,6 +209,7 @@ def generateLMJudge():
 
     markdown_output = f"LM Judge \n"
     markdown_output += f"| Model | Language | Score | No# Questions | \n"
+    markdown_output += "| --- | --- | --- | --- | \n"
     for model_name in scores:
         for lang in scores[model_name]:
             ratings = scores[model_name][lang]
