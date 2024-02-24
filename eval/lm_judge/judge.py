@@ -140,7 +140,6 @@ def main(args):
 
     count = 0
     for row in tqdm(final_data):
-        row["judgement_pending"] = True
         if row["judgement_pending"]:
             count = count + 1
 
