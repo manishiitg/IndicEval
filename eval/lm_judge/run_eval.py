@@ -161,7 +161,7 @@ def main(args):
                 if lang == "hi":
                     system = default_system_hi
 
-                print("row_idx, mt_ix", row_idx, mt_ix)
+                # print("row_idx, mt_ix", row_idx, mt_ix)
                 next_ques_idx = mt_ix["question"] + 1
                 if next_ques_idx < len(row["mt_question"]):
                     mt_idx[row_idx] = next_ques_idx
