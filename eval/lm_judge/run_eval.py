@@ -75,7 +75,6 @@ def main(args):
         if lang == "hi":
             system = default_system_hi
 
-        print(example)
         if example["type"] == "gpt4-multi-turn-hi" or "mt_bench-" in example["type"]:
             if len(mt_idx) > 2: #temp
                 continue
@@ -89,12 +88,13 @@ def main(args):
 
         else:
             messages = json.loads(example["messages"])
+            continue  # temp
 
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
         else:
             prompt = "\n\n".join([x["content"] for x in prompt])
-            continue  # temp
+            
 
         exists = False
         # if prompt in existing_data: # temp
