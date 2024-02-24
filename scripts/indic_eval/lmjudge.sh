@@ -38,4 +38,4 @@ for model_name_or_path in "${model_names[@]}"; do
     
 done
 
-python3 -m eval.lm_judge.judge
+# python3 -m eval.lm_judge.judge
