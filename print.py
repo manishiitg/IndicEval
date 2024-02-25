@@ -207,7 +207,7 @@ def generateLMJudge():
 
             scores[model_name][lang].append(float(row["rating"]))
 
-    markdown_output = f"LM Judge \n"
+    markdown_output = f"#### LM Judge \n\n"
     markdown_output += f"| Model | Language | Score | No# Questions | \n\n"
     markdown_output += "| --- | --- | --- | --- | \n\n"
 
