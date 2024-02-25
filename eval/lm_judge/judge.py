@@ -167,7 +167,7 @@ def main(args):
     completed_data = []
     pending_data = []
     for row in tqdm(final_data):
-        if row["judgement_pending"] or row["rating"] == -1:
+        if row["judgement_pending"] or row["rating"] == -1 or True:
             instruction = row["simple_prompt"]
             answer = row["response"]
             prompt = get_lm_judge_rating_prompt(
