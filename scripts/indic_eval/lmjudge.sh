@@ -39,4 +39,6 @@ for model_name_or_path in "${model_names[@]}"; do
     
 done
 
+echo "starting lmjudge ..."
+
 python3 -m eval.lm_judge.judge
