@@ -208,8 +208,8 @@ def generateLMJudge():
             scores[model_name][lang].append(float(row["rating"]))
 
     markdown_output = f"LM Judge \n"
-    markdown_output += f"| Model | Language | Score | No# Questions | \n"
-    markdown_output += "| --- | --- | --- | --- | \n"
+    markdown_output += f"| Model | Language | Score | No# Questions | \n\n"
+    markdown_output += "| --- | --- | --- | --- | \n\n"
 
 
     # Create a list to hold the model scores for sorting
@@ -228,7 +228,7 @@ def generateLMJudge():
     # Generate the markdown output
     markdown_output = ""
     for model_name, lang, avg, count in model_scores:
-        markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} |\n"
+        markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} | \n\n"
 
 
     # for model_name in scores:
