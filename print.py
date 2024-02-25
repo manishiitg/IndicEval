@@ -224,7 +224,7 @@ def generateLMJudge():
     langs = ["hi","en"]
     for l in langs:
         # Generate the markdown output
-        markdown_output += f"####LLM Judge Language: {l} \n"
+        markdown_output += f"#### LLM Judge Language: {l} \n"
         markdown_output += f"| Model | Language | Score | No# Questions |\n"
         markdown_output += "| --- | --- | --- | --- |\n"
 
