@@ -225,14 +225,15 @@ def generateLMJudge():
     for l in langs:
         # Generate the markdown output
         markdown_output += f"LM Judge {l} \n"
-        markdown_output += f"| Model | Language | Score | No# Questions |"
-        markdown_output += "| --- | --- | --- | --- |"
+        markdown_output += f"| Model | Language | Score | No# Questions |\n"
+        markdown_output += "| --- | --- | --- | --- |\n"
 
 
         for model_name, lang, avg, count in model_scores:
             if lang == l:
-                markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} |"
+                markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} |\n"
 
+        markdown_output += f"\n\n"
     return markdown_output
 
 
