@@ -214,8 +214,14 @@ def main(args):
             pending_data[idx]["rating"] = float(rating)
             pending_data[idx]["judgement_pending"] = False
             pending_data[idx]["rated_by"] = judge_model
+        except TypeError as e:
+            pending_data[idx]["judgement"] = text + "Exception " + e
+            pending_data[idx]["rating"] = -1
+            pending_data[idx]["judgement_pending"] = False
+            pending_data[idx]["rated_by"] = judge_model
+            print("text failed type error", text, -1, e)
         except ValueError as e:
-            pending_data[idx]["judgement"] = text
+            pending_data[idx]["judgement"] = text + "Exception " + e
             pending_data[idx]["rating"] = -1
             pending_data[idx]["judgement_pending"] = False
             pending_data[idx]["rated_by"] = judge_model
