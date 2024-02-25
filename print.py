@@ -226,7 +226,7 @@ def generateLMJudge():
     model_scores.sort(key=lambda x: x[2], reverse=True)
 
     # Generate the markdown output
-    markdown_output = ""
+    
     for model_name, lang, avg, count in model_scores:
         markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} | \n\n"
 
