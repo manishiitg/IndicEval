@@ -210,16 +210,37 @@ def generateLMJudge():
     markdown_output = f"LM Judge \n"
     markdown_output += f"| Model | Language | Score | No# Questions | \n"
     markdown_output += "| --- | --- | --- | --- | \n"
+
+
+    # Create a list to hold the model scores for sorting
+    model_scores = []
+
+    # Iterate over the models and calculate the average score
     for model_name in scores:
         for lang in scores[model_name]:
             ratings = scores[model_name][lang]
-            sum = 0
-            for r in ratings:
-                sum += r
-            avg = sum / len(ratings)
-            markdown_output += f"| {model_name} | {lang} | {avg:.4f} |  {len(ratings)} |\n"
-            print("model name score", model_name,
-                  "lang", lang, "avg", avg, len(ratings))
+            avg = sum(ratings) / len(ratings)
+            model_scores.append((model_name, lang, avg, len(ratings)))
+
+    # Sort the model scores by average score in descending order
+    model_scores.sort(key=lambda x: x[2], reverse=True)
+
+    # Generate the markdown output
+    markdown_output = ""
+    for model_name, lang, avg, count in model_scores:
+        markdown_output += f"| {model_name} | {lang} | {avg:.4f} | {count} |\n"
+
+
+    # for model_name in scores:
+    #     for lang in scores[model_name]:
+    #         ratings = scores[model_name][lang]
+    #         sum = 0
+    #         for r in ratings:
+    #             sum += r
+    #         avg = sum / len(ratings)
+    #         markdown_output += f"| {model_name} | {lang} | {avg:.4f} |  {len(ratings)} |\n"
+    #         print("model name score", model_name,
+    #               "lang", lang, "avg", avg, len(ratings))
 
     return markdown_output
 
