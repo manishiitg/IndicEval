@@ -147,7 +147,7 @@ def main(args):
     if count == 0:
         return
 
-    judge_model = "Qwen/Qwen1.5-72B-Chat"
+    judge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
     tokenizer = AutoTokenizer.from_pretrained(judge_model)
 
     print("Loading model and tokenizer vllm awq...")
@@ -157,7 +157,7 @@ def main(args):
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
-        # quantization="AWQ",
+        quantization="AWQ",
         max_model_len=4096,
         dtype="float16",
         gpu_memory_utilization=.8
@@ -168,7 +168,7 @@ def main(args):
     completed_data = []
     pending_data = []
     for row in tqdm(final_data):
-        if row["judgement_pending"] or row["rating"] == -1 or True:
+        if row["judgement_pending"] or row["rating"] == -1:
             instruction = row["simple_prompt"]
             answer = row["response"]
             prompt = get_lm_judge_rating_prompt(
