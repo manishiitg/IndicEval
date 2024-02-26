@@ -186,6 +186,7 @@ def main(args):
             prompts.append(text)
             pending_data.append(row)
         else:
+            row["rated_by"] = judge_model
             completed_data.append(row)
 
     outputs = eval_hf_model(args, model, tokenizer, prompts)
