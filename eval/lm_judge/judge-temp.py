@@ -40,7 +40,7 @@ Only respond in json format as follows:
 {
   "overall_rating": {
     "explanation" : "<explanation>",
-    "rating" : "<rating>",
+    "rating" : "<rating>"
   },
 }
 Response format should be parsable by json.loads
@@ -124,7 +124,8 @@ def main(args):
     for row in ds:
         final_data.append(row)
 
-    judge_model = "Qwen/Qwen1.5-7B-Chat"
+    # judge_model = "Qwen/Qwen1.5-7B-Chat"
+    judge_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
     tokenizer = AutoTokenizer.from_pretrained(judge_model)
 
     print("Loading model and tokenizer vllm awq...")
