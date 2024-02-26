@@ -212,7 +212,7 @@ def main(args):
 
     final_data = pending_data + completed_data
     dataset = process_and_update_dataset(final_data)
-    dataset.push_to_hub("manishiitg/llm_judge-custom-data", private=True)
+    dataset.push_to_hub("manishiitg/custom-data", private=False)
 
 
 def process_and_update_dataset(new_data):
