@@ -36,6 +36,7 @@ Accuracy: The correctness of the information provided in the response.
 Depth: The level of detail and comprehensiveness of the response.
 Creativity: The originality and novelty of the response.
 Level of Detail: The amount of information provided in the response.
+Formatting and Presentation: How well the response was presented to the user. 
 
 Calculate an overall rating based on above factors and also provide an detailed explanation for the overall rating.
 
