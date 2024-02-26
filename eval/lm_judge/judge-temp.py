@@ -21,7 +21,7 @@ import re
 
 prompt = """
 As an impartial evaluator, please assess the quality of the AI assistant's response to the user's question below. 
-Your evaluation should take into account several factors, including helpfulness, relevance, accuracy, depth, creativity, and level of detail. 
+Your evaluation should take into account several factors, including relevance, accuracy. 
 
 [Question]
 {question}
@@ -30,13 +30,8 @@ Your evaluation should take into account several factors, including helpfulness,
 
 Please rate the response on a scale of 1 to 10 for each of the following evaluation factors:
 
-Helpfulness: The degree to which the response addresses the user's question or need.
 Relevance: The extent to which the response is related to the user's question or topic.
 Accuracy: The correctness of the information provided in the response.
-Depth: The level of detail and comprehensiveness of the response.
-Creativity: The originality and novelty of the response.
-Level of Detail: The amount of information provided in the response.
-Formatting and Presentation: How well the response was presented to the user. 
 
 Calculate an overall rating based on above factors and also provide an detailed explanation for the overall rating.
 
@@ -93,19 +88,6 @@ Response format should be parsable by json.loads
 # Overall Rating: <overall_rating>
 # """
 
-rating_pattern = r'Overall Rating: (\d+(?:\.\d+)?)'
-
-
-def get_rating(output):
-    match = re.search(rating_pattern, output)
-
-    # If a match is found, extract the rating
-    if match:
-        rating = match.group(1)
-        return rating
-    else:
-        raise ValueError()
-
 
 def get_lm_judge_rating_prompt(question, answer):
     prompt_1 = prompt.replace("{question}", question)
@@ -152,7 +134,7 @@ def main(args):
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
         # quantization="AWQ",
-        max_model_len=4096,
+        max_model_len=8196,
         dtype="float16",
         gpu_memory_utilization=.8
 
