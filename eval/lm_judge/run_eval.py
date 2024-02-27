@@ -93,6 +93,11 @@ def main(args):
         else:
             messages = json.loads(example["messages"])
 
+        if args.model_name_or_path == "mistralai/Mixtral-8x7B-Instruct-v0.1":
+            if lang != "en":
+                messages[-1]["content"] = messages[-1]["content"] + \
+                    "\n Respond only in hindi"
+
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
         else:
@@ -177,7 +182,10 @@ def main(args):
                         {"role": "user", "content": next_ques})
                     processed_row[row_idx]["messages"] = messages
 
-                    # print(messages)
+                    if args.model_name_or_path == "mistralai/Mixtral-8x7B-Instruct-v0.1":
+                        if lang != "en":
+                            messages[-1]["content"] = messages[-1]["content"] + \
+                                "\n Respond only in hindi"
                     if args.use_chat_format:
                         prompt = chat_formatting_function(
                             messages, tokenizer, args)
