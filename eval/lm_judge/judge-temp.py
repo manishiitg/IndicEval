@@ -171,8 +171,10 @@ def main(args):
             tokenize=False,
             add_generation_prompt=True
         )
-        prompts.append(text)
-        pending_data.append(row)
+        tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+        if tokenized_prompt < 8196:
+            prompts.append(text)
+            pending_data.append(row)
 
     outputs = eval_hf_model(args, model, tokenizer, prompts)
 
