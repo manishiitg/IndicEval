@@ -120,11 +120,12 @@ def main(args):
     ds = load_dataset(
         "manishiitg/teknium-GPTeacher-General-Instruct", split="train")
     ds = ds.filter(lambda x: x["lang"] == "hi")
+    ds = ds.select(range(10000))
     final_data = []
     for row in ds:
         final_data.append(row)
 
-    judge_model = "Qwen/Qwen1.5-7B-Chat"
+    judge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
     # judge_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
     tokenizer = AutoTokenizer.from_pretrained(judge_model)
 
@@ -135,7 +136,7 @@ def main(args):
         tokenizer_mode="auto",
         tensor_parallel_size=torch.cuda.device_count(),
         # max_num_batched_tokens=4096,
-        # quantization="AWQ",
+        quantization="AWQ",
         max_model_len=8196,
         dtype="float16",
         gpu_memory_utilization=.8
