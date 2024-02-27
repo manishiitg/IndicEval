@@ -120,7 +120,6 @@ def main(args):
     ds = load_dataset(
         "manishiitg/teknium-GPTeacher-General-Instruct", split="train")
     ds = ds.filter(lambda x: x["lang"] == "hi")
-    ds = ds.select(range(10000))
     final_data = []
     for row in ds:
         final_data.append(row)
