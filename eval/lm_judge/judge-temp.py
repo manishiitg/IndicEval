@@ -120,14 +120,14 @@ def main(args):
     ds = load_dataset(
         "manishiitg/teknium-GPTeacher-General-Instruct", split="train")
     ds = ds.filter(lambda x: x["lang"] == "hi").shuffle()
-    ds = ds.select(range(5000))
+    # ds = ds.select(range(5000))
     final_data = []
     for row in ds:
         final_data.append(row)
 
     # judge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
-    # judge_model = "Qwen/Qwen1.5-72B-Chat-AWQ"
-    judge_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+    judge_model = "Qwen/Qwen1.5-7B-Chat"
+    # judge_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
     tokenizer = AutoTokenizer.from_pretrained(judge_model)
 
     print("Loading model and tokenizer vllm awq...")
