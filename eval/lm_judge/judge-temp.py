@@ -118,7 +118,7 @@ def eval_hf_model(args, model, tokenizer, prompts):
 def main(args):
 
     ds = load_dataset(
-        "manishiitg/teknium-GPTeacher-General-Instruct", split="train")
+        "manishiitg/data-check", split="train")
     ds = ds.filter(lambda x: x["lang"] == "hi").shuffle()
     # ds = ds.select(range(5000))
     final_data = []
@@ -144,14 +144,23 @@ def main(args):
 
     )
 
+    default_system_en = "You are a helpful assistant."
+    default_system_hi = "आप एक सहायक सहायक हैं."
+
     prompts = []
     completed_data = []
     pending_data = []
     for row in tqdm(final_data):
         messages = []
 
+        system = row["system"]
+        instruction = row["instruction"]
+        question = instruction
+        if system != default_system_en and system != default_system_hi:
+            question = system + "\n\n" + instruction
+
         prompt = get_lm_judge_rating_prompt(
-            question=row["instruction"], answer=row["response"])
+            question=question, answer=row["response"])
 
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -166,6 +175,18 @@ def main(args):
         pending_data.append(row)
 
     outputs = eval_hf_model(args, model, tokenizer, prompts)
+
+    final_data = []
+    ix = 0
+    for output in outputs:
+        prompt = prompts[ix]
+        final_data.append({
+            prompt, output
+        })
+        ix += 1
+
+    with open(os.path.join(args.save_dir, f"lm_judge_datacheck.jsonl"), "w") as fout:
+        json.dump(final_data, fout, indent=4)
 
     for idx, text in enumerate(outputs):
         try:
@@ -199,7 +220,8 @@ def main(args):
                     pending_data[idx]["rated_by"] = judge_model
                 else:
                     print("Rating not found.")
-                    pending_data[idx]["judgement"] = text + "Exception:" + str(e)
+                    pending_data[idx]["judgement"] = text + \
+                        "Exception:" + str(e)
                     pending_data[idx]["rating"] = -1
                     pending_data[idx]["judgement_pending"] = False
                     pending_data[idx]["rated_by"] = judge_model
