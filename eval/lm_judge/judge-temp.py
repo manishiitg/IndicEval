@@ -120,7 +120,7 @@ def main(args):
     ds = load_dataset(
         "manishiitg/data-check", split="train")
     ds = ds.filter(lambda x: x["lang"] == "hi").shuffle()
-    # ds = ds.select(range(5000))
+    ds = ds.select(range(10000))
     final_data = []
     for row in ds:
         final_data.append(row)
@@ -169,7 +169,7 @@ def main(args):
         text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
-            add_generation_prompt=True
+            add_generation_prompt=False
         )
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         if len(tokenized_prompt) < 8196:
