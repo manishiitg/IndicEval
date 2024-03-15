@@ -1,6 +1,35 @@
 # IndicEval
 
 
+=========
+
+LLM Evaluation for indic models mainly for hindi language
+
+easy evalulate your models on hindi language own your own GPU's
+
+Supports 
+- multi gpu support
+- faster inference via vllm
+- awq support
+
+
+Dataset's for evaluation: https://huggingface.co/collections/manishiitg/indiceval-65eed3f98c0e239a9b0a4eae
+
+
+===========
+
+To run this via skypilot https://github.com/skypilot-org/skypilot use
+
+
+`sky spot launch -n en-hi-spot eval.yaml`
+
+=========== 
+
+To run this on machine having GPU look at eval.yaml
+
+add your model name in scripts/indic_eval/commaon_vars.sh to evalulate and run scripts/indic_eval/run_suite.sh
+
+
 | Model | xlsum-hi | truthfulqa-hi | indic-arc-easy | mmlu_hi | indicqa | flores | indicheadline | indicxparaphrase | hellaswag-indic | indicwikibio | boolq-hi | implicit_hate | indic-arc-challenge | indicsentiment |  
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | 
 | open-aditi-hi-v2 |  0.4213 | 0.6934 | 0.4979 | 0.3253 | 0.0795 | 43.6822 | 0.4565 | 0.6838 | 0.2404 | 0.4846 | 0.8541 | 11.5021 | 0.4462 | 0.9729 |
@@ -64,32 +93,4 @@ Task: boolq Metric: accuracy
 Task: xlsum Metric: bleurt 
 
 Task: truthfulqa Metric: accuracy 
-
-
-
-=========
-
-LLM Evaluation for indic models
-
-Supports 
-- multi gpu support
-- faster inference via vllm
-- awq support
-- llm judge
-- eval on spot instance using skypilot with resume support
-
-
-===========
-
-To run this via skypilot https://github.com/skypilot-org/skypilot use
-
-
-`sky spot launch -n en-hi-spot eval.yaml`
-
-=========== 
-To run this on machine having GPU look at eval.yaml
-
-
-
-add your model name in scripts/indic_eval/commaon_vars.sh to evalulate and run scripts/indic_eval/run_suite.sh
 
