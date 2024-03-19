@@ -158,15 +158,15 @@ def main(args):
     chat_formatting_function = dynamic_import_function(
         args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset(args.dataset, f"ARC-{args.subset.capitalize()}")
-    test_data = dataset["test"]
+    dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
+    test_data = dataset["train"]
 
     prompts = []
     k = args.ntrain
     for i, example in enumerate(test_data):
         system = gen_system_prompt()
         prompt = format_example(
-            question=example["question"], answers=example["choices"]["text"], label=None)
+            question=example["question"], answers=example["choices"], label=None)
 
         messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
         if args.use_chat_format:
