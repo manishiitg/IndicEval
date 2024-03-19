@@ -159,6 +159,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
+    dataset = dataset.filter(lambda x: x["language"] == args.lang)
     test_data = dataset["train"]
 
     prompts = []
@@ -225,5 +226,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Load model as awq"
     )
+    parser.add_argument(
+        "--lang",
+        type=str,
+        default="hi",
+        help="language"
+    )
+
     args = parser.parse_args()
     main(args)
