@@ -194,7 +194,7 @@ def main(args):
     for i, example in enumerate(test_data):
         system = gen_system_prompt()
 
-        shots_data = generate_shots(example["question"], test_data)
+        shots_data = generate_shots(example["question"], test_data, shots)
 
         prompt = format_example(
             question=example["question"], answers=example["choices"], choices_text=example["choices_text"])
