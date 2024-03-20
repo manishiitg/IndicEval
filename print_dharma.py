@@ -85,3 +85,94 @@ def sort_data(data):
 
 data = sort_data(scores)
 print(json.dumps(data, indent=4))
+
+def generate_markdown_table(data):
+    markdown_output = ""
+
+    # Iterate over tasks and sub-tasks
+    task_model_score = {}
+    langs = ["hi", "en"]
+    for lang in langs:
+        lang_dict = data[lang]
+        markdown_output += f"#### Language {lang.capitalize()}\n\n"
+
+        tasks = []
+        task_model_score[lang] = {}
+        for task, tasks_dict in lang_dict.items():
+            tasks.append(task)
+            if task not in task_model_score[lang]:
+                task_model_score[lang][task] = {}
+            for model, model_dict in tasks_dict.items():
+                if model not in task_model_score[lang][task]:
+                    task_model_score[lang][task][model] = {}
+                for metric, metric_value in model_dict.items():
+                    task_model_score[lang][task][model] = metric_value
+                    break
+
+        # Create a table header
+
+        model_scores = {}
+        for task, task_dict in task_model_score[lang].items():
+            for model, metric_value in task_dict.items():
+                if model not in model_scores:
+                    model_scores[model] = []
+                model_scores[model].append(metric_value)
+
+        avg_model_score = {}
+        for model, scores in model_scores.items():
+            sum = 0
+            for s in scores:
+                if s > 1:
+                    # bluert/chf
+                    s = s / 100
+                sum += s
+            avg = sum / len(scores)
+            avg_model_score[model] = avg
+
+        sorted_model_dict = {k: v for k, v in sorted(
+            avg_model_score.items(), key=lambda item: item[1], reverse=True)}
+
+        tasks = list(set(tasks))
+
+        taskStr = "| "
+        dashStr = "| "
+        for task in tasks:
+            taskStr += task + " | "
+            dashStr += "--- | "
+
+        markdown_output += f"| Model {taskStr} \n"
+        markdown_output += f"| --- {dashStr}\n"
+
+        for model, avg in sorted_model_dict.items():
+            markdown_output += f"| {model} | "  # {avg:.4f} |
+            for task in tasks:
+                if model not in task_model_score[lang][task]:
+                    markdown_output += f" - |"
+                else:
+                    average_value = task_model_score[lang][task][model]
+                    markdown_output += f" {average_value:.4f} |"
+
+            markdown_output += "\n"
+
+        # Add a newline after the table
+        markdown_output += "\n"
+
+    dups = {}
+    for lang in langs:
+        lang_dict = data[lang]
+        for task, tasks_dict in lang_dict.items():
+            for model, model_dict in tasks_dict.items():
+                for metric, metric_value in model_dict.items():
+                    if task not in dups:
+                        dups[task] = True
+                        if metric == "em_score":
+                            metric = "accuracy"
+                        markdown_output += f"Task: {task} Metric: {metric} \n\n"
+
+    return markdown_output
+
+# Convert JSON to Markdown table grouped by task and sub-task
+markdown_output = generate_markdown_table(sort_data(scores))
+
+# Print the Markdown output
+print(markdown_output)
