@@ -3,7 +3,7 @@ import os
 import json
 from datasets import load_dataset
 
-directory = "/sky-notebook/eval-results/"
+directory = "/sky-notebook/eval-results/dharma"
 
 scores = {}
 
@@ -15,28 +15,29 @@ for root, dirs, files in os.walk(directory):
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
 
-            if file == "metrics.json":
+            if file == "subject_metrics.json":
                 splits = file_path.replace(directory, "").split('/')
-                task = splits[0]
+                # task = splits[0]
                 model = splits[1]
                 lang = splits[2]
                 file = splits[3]
 
-                if model in skip_model or "awq" in model or "AWQ" in model:
-                    continue
+                # if model in skip_model or "awq" in model or "AWQ" in model:
+                #     continue
 
                 with open(file_path, 'r') as json_file:
                     try:
                         metric = json.load(json_file)
+                        for k,v in metric.items():
+                            task = k
+                            if task not in scores:
+                                scores[task] = {}
+                            if model not in scores[task]:
+                                scores[task][model] = {}
+                            if lang not in scores[task][model]:
+                                scores[task][model][lang] = {}
 
-                        if task not in scores:
-                            scores[task] = {}
-                        if model not in scores[task]:
-                            scores[task][model] = {}
-                        if lang not in scores[task][model]:
-                            scores[task][model][lang] = {}
-
-                        scores[task][model][lang] = metric
+                            scores[task][model][lang] = v
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
@@ -84,7 +85,6 @@ def sort_data(data):
 
 data = sort_data(scores)
 print(json.dumps(data, indent=4))
-
 
 def generate_markdown_table(data):
     markdown_output = ""
@@ -176,10 +176,3 @@ markdown_output = generate_markdown_table(sort_data(scores))
 
 # Print the Markdown output
 print(markdown_output)
-
-with open("/sky-notebook/eval-results/output.json", 'w', encoding='utf-8') as file:
-    json.dump(data, file, indent=4)
-
-
-with open("/sky-notebook/eval-results/output.md", 'w', encoding='utf-8') as file:
-    file.write(markdown_output)
