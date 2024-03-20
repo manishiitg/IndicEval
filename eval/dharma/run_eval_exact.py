@@ -209,8 +209,6 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in messages])
 
-        print(prompt)
-        os.exit(1)
         prompts.append(prompt)
 
 
