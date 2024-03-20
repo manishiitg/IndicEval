@@ -17,14 +17,10 @@ import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
 
-choice_to_count_map = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
-count_to_choice_map = {v: k for k, v in choice_to_count_map.items()}
-
-
-def format_example(question, answers, label=None):
+def format_example(question, answers, choices_text):
     prompt = f"Question: {question.strip()}\nnChoices: "
     for idx, answer in enumerate(answers):
-        choice = count_to_choice_map[idx]
+        choice = choices_text[idx]
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
     return prompt
@@ -41,10 +37,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         temperature=0,
         max_tokens=1024,
         stop=["<|im_end|>"],
-    )  
+    )
 
     print("prompts", prompts)
-
 
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
@@ -54,24 +49,16 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
-    
+
     print("outputs", outputs)
 
     def extract_answer(row):
-        choices = row['choices']
         answerKey = row['output']
-        answerStr = ""
-
-        idx = choice_to_count_map[answerKey]
-        print("idx", idx, "answerKey", answerKey)
-        answerStr = answerKey + ". " + choices[idx]
-
-        row["answer_text"] = answerStr
+        row["answer_text"] = answerKey
         return row
 
     # Apply the function to each row of the DataFrame
     test_data = test_data.map(extract_answer)
-
     targets = test_data['answer_text']
 
     predictions = []
@@ -92,10 +79,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     with open(os.path.join(args.save_dir, f"predictions.jsonl"), "w") as fout:
         for prediction in predictions:
             fout.write(json.dumps(prediction) + "\n")
-
-    em_score = exact_match.compute(predictions=outputs, references=targets,
-                                   ignore_case=True, ignore_punctuation=True)["exact_match"]
-    print(f"Exact match : {em_score}")
 
     outputs = [output[0] if len(output) > 0 else "" for output in outputs]
     targets = [target[0] if len(target) > 0 else "" for target in targets]
@@ -122,13 +105,12 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "em_score": em_score_options,
-            "exact_match": em_score,
         }, fout, indent=4)
 
     with open(os.path.join(args.save_dir, f"subject_metrics.json"), "w") as fout:
         json.dump(final_scores, fout, indent=4)
 
-    return em_score
+    return em_score_options
 
 
 def main(args):
@@ -172,7 +154,7 @@ def main(args):
     for i, example in enumerate(test_data):
         system = gen_system_prompt()
         prompt = format_example(
-            question=example["question"], answers=example["choices"], label=None)
+            question=example["question"], answers=example["choices"], choices_text=example["choices_text"])
 
         messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
         if args.use_chat_format:

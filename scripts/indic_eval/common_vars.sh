@@ -9,7 +9,7 @@ model_names=(
     "ai4bharat/Airavata"
     "manishiitg/open-aditi-hi-v4"
     "manishiitg/open-aditi-hi-v3"
-    "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
+    # "TheBloke/OpenHermes-2.5-Mistral-7B-AWQ"
     "teknium/OpenHermes-2.5-Mistral-7B"
     "manishiitg/open-aditi-hi-v2"
     "manishiitg/open-aditi-hi-v1"   
