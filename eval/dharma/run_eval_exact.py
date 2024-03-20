@@ -19,7 +19,7 @@ exact_match = evaluate.load("exact_match")
 
 
 def format_answer(answers, choices_text, label):
-    prmopt = ""
+    prompt = ""
     if label:
         choice_idx = -1
         for idx, val in enumerate(choices_text):
@@ -28,7 +28,7 @@ def format_answer(answers, choices_text, label):
 
         assert (choice_idx != -1)
         prompt += f" {label}. {answers[choice_idx]}"
-    return prmopt
+    return prompt
 
 
 def format_example(question, answers, choices_text):
