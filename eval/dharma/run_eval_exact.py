@@ -27,7 +27,7 @@ def format_example(question, answers, choices_text):
 
 
 def gen_system_prompt():
-    prompt = f"Please read the question carefully and select the most appropriate answer from the given options."
+    prompt = f"Please read the question carefully and select only the most appropriate answer from the given options. Only select the option in your response."
     return prompt
 
 
@@ -39,8 +39,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         stop=["<|im_end|>"],
     )
 
-    print("prompts", prompts)
-
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
 
@@ -49,8 +47,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
-
-    print("outputs", outputs)
 
     def extract_answer(row):
         answerKey = row['output']
@@ -148,7 +144,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
-    test_data = dataset.filter(lambda x: x["language"] == args.lang)
+    test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(100))
 
     prompts = []
     for i, example in enumerate(test_data):
