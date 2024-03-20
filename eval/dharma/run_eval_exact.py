@@ -166,7 +166,7 @@ def main(args):
             tensor_parallel_size=torch.cuda.device_count(),
             # max_num_batched_tokens=4096,
             quantization="AWQ",
-            max_model_len=8196,
+            max_model_len=4096,
         )
     else:
         print("Loading model and tokenizer vllm...")
@@ -176,7 +176,7 @@ def main(args):
             tokenizer_mode="auto",
             tensor_parallel_size=torch.cuda.device_count(),
             # max_num_batched_tokens=4096,
-            max_model_len=8196,
+            max_model_len=4096,
         )
 
     if not os.path.exists(args.save_dir):

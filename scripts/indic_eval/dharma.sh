@@ -31,7 +31,7 @@ for model_name_or_path in "${model_names[@]}"; do
     if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.dharma.run_eval_exact \
-            --ntrain 3 \
+            --ntrain 1 \
             --lang $LANG \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
@@ -75,7 +75,7 @@ for model_name_or_path in "${model_names[@]}"; do
     if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
         # zero-shot
         python3 -m eval.dharma.run_eval_exact \
-            --ntrain 0 \
+            --ntrain 1 \
             --lang $LANG \
             --save_dir $FOLDER \
             --model_name_or_path $model_name_or_path \
