@@ -31,7 +31,7 @@ def format_example(question, answers, choices_text, label=None):
                 choice_idx = idx
 
         assert (choice_idx != -1)
-        prompt += f"{label}. {answers[choice_idx]}"
+        prompt += f" {label}. {answers[choice_idx]}"
     return prompt
 
 
