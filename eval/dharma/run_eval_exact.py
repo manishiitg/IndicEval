@@ -59,7 +59,7 @@ def generate_shots(base_question, data, num_shots):
     if len(existing_short_response) == 0:
         for row in data.shuffle():
             if row["question"] != base_question:
-                existing_questions_in_shorts[row["question"]]
+                existing_questions_in_shorts[row["question"]] = True
                 question_formatted = format_example(row["question"], row["choices"], row["choices_text"])
                 answer_formatted = format_answer(row["choices"], row["choices_text"], row["output"])
                 existing_short_response.append({"role": "user", "content": question_formatted})
