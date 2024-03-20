@@ -27,7 +27,7 @@ def format_example(question, answers, choices_text):
 
 
 def gen_system_prompt():
-    prompt = f"Please read the question carefully and select only the most appropriate answer from the given options. Only select the option in your response."
+    prompt = f"Please read the question carefully and select only the most appropriate answer from the given options. Only select the option in your response. Do not add any placeholds like The Answer is: etc"
     return prompt
 
 
