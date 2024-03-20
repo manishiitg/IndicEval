@@ -50,6 +50,7 @@ existing_short_response = []
 
 
 def generate_shots(base_question, data, num_shots):
+    global existing_questions_in_shorts, existing_short_response
     if len(existing_short_response) > 0:
         if base_question in existing_questions_in_shorts:
             existing_questions_in_shorts = {}
