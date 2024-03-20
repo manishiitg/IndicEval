@@ -18,12 +18,8 @@ import evaluate
 exact_match = evaluate.load("exact_match")
 
 
-def format_example(question, answers, choices_text, label=None):
-    prompt = f"Question: {question.strip()}\nnChoices: "
-    for idx, answer in enumerate(answers):
-        choice = choices_text[idx]
-        prompt += f"{choice}. {answer.strip()}\n"
-    prompt += "\nAnswer:"
+def format_answer(answers, choices_text, label):
+    prmopt = ""
     if label:
         choice_idx = -1
         for idx, val in enumerate(choices_text):
@@ -32,12 +28,46 @@ def format_example(question, answers, choices_text, label=None):
 
         assert (choice_idx != -1)
         prompt += f" {label}. {answers[choice_idx]}"
+    return prmopt
+
+
+def format_example(question, answers, choices_text):
+    prompt = f"Question: {question.strip()}\nnChoices: "
+    for idx, answer in enumerate(answers):
+        choice = choices_text[idx]
+        prompt += f"{choice}. {answer.strip()}\n"
+    prompt += "\nAnswer:"
     return prompt
 
 
 def gen_system_prompt():
-    prompt = f"Please read the question carefully and select only the most appropriate answer from the given options. Only select the option in your response. Do not add any placeholds like The Answer is: etc"
+    prompt = f"Please read the question carefully and select only the most appropriate answer from the given options."
     return prompt
+
+
+existing_questions_in_shorts = {}
+existing_short_response = []
+
+
+def generate_shots(base_question, data, num_shots):
+    if len(existing_short_response) > 0:
+        if base_question in existing_questions_in_shorts:
+            existing_questions_in_shorts = {}
+            existing_short_response = []
+
+    if len(existing_short_response) == 0:
+        for row in data.shuffle():
+            if row["question"] != base_question:
+                existing_questions_in_shorts[row["question"]]
+                question_formatted = format_example(row["question"], row["choices"], row["choices_text"])
+                answer_formatted = format_answer(row["choices"], row["choices_text"], row["output"])
+                existing_short_response.append({"role": "user", "content": question_formatted})
+                existing_short_response.append({"role": "assistant", "content": answer_formatted})
+
+            if len(existing_short_response) > num_shots:
+                break
+
+    return existing_short_response
 
 
 @torch.no_grad()
@@ -158,12 +188,18 @@ def main(args):
     test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(100))
 
     prompts = []
+    shots = args.ntrain
     for i, example in enumerate(test_data):
         system = gen_system_prompt()
+
+        shots_data = generate_shots(example["question"], test_data)
+
         prompt = format_example(
             question=example["question"], answers=example["choices"], choices_text=example["choices_text"])
 
-        messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
+        messages = [{"role": "system", "content": system}]
+        messages.extend(shots_data)
+        messages.append({"role": "user", "content": prompt})
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
         else:
@@ -177,7 +213,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntrain", type=int, default=5)
+    parser.add_argument("--ntrain", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--dataset", type=str, default="easy",
                         choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
