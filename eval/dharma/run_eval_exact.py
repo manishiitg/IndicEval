@@ -185,7 +185,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
-    test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(100))
+    test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(10))
 
     prompts = []
     shots = args.ntrain
@@ -205,7 +205,10 @@ def main(args):
         else:
             prompt = "\n\n".join([x["content"] for x in messages])
 
+        print(prompt)
+        os.exit(1)
         prompts.append(prompt)
+
 
     eval_hf_model(args, model, tokenizer, prompts,
                   test_data, args.eval_batch_size)
