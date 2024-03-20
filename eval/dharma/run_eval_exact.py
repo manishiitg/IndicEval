@@ -112,6 +112,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         final_scores[k]['score'] = exact_match.compute(predictions=v['model_output'], references=v['prediction'],
                                                        ignore_case=True, ignore_punctuation=True)["exact_match"]
 
+    os.exit(1)
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "em_score": em_score_options,
@@ -160,7 +161,7 @@ def main(args):
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
     dataset = dataset.filter(lambda x: x["language"] == args.lang)
-    test_data = dataset["train"]
+    test_data = dataset["train"].select(range(10))
 
     prompts = []
     k = args.ntrain
