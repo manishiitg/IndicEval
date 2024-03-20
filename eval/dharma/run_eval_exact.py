@@ -63,6 +63,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         answerStr = ""
 
         idx = choice_to_count_map[answerKey]
+        print("idx", idx, "answerKey", answerKey)
         answerStr = answerKey + ". " + choices[idx]
 
         row["answer_text"] = answerStr
