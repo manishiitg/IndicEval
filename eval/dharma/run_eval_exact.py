@@ -164,7 +164,6 @@ def main(args):
     test_data = dataset["train"].select(range(10))
 
     prompts = []
-    k = args.ntrain
     for i, example in enumerate(test_data):
         system = gen_system_prompt()
         prompt = format_example(
@@ -177,6 +176,8 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in messages])
 
         prompts.append(prompt)
+
+    print("prompts", prompts)
 
     eval_hf_model(args, model, tokenizer, prompts,
                   test_data, args.eval_batch_size)
