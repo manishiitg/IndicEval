@@ -78,7 +78,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     for row in test_data:
         row = {
             "question": row["question"],
-            "id": row["id"],
             "model_output": outputs[idx],
             "prediction": targets[idx],
             "subject": row["subject"]
