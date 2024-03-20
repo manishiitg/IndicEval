@@ -41,7 +41,11 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         temperature=0,
         max_tokens=1024,
         stop=["<|im_end|>"],
-    )
+    )  
+
+    print("prompts", prompts)
+
+
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
     generations = model.generate(prompts, sampling_params)
 
@@ -50,6 +54,8 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     }
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
+    
+    print("outputs", outputs)
 
     def extract_answer(row):
         choices = row['choices']
@@ -176,8 +182,6 @@ def main(args):
             prompt = "\n\n".join([x["content"] for x in messages])
 
         prompts.append(prompt)
-
-    print("prompts", prompts)
 
     eval_hf_model(args, model, tokenizer, prompts,
                   test_data, args.eval_batch_size)
