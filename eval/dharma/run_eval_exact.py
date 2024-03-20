@@ -75,7 +75,7 @@ def generate_shots(base_question, data, num_shots):
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
         temperature=0,
-        max_tokens=256,
+        max_tokens=128,
         stop=["<|im_end|>","[/INST]"],
     )
 
@@ -88,7 +88,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     outputs = [prompt_to_output[prompt]
                if prompt in prompt_to_output else "" for prompt in prompts]
 
-    print("outputs", outputs)
     def extract_answer(row):
         answerKey = row['output']
         row["answer_text"] = answerKey
@@ -141,7 +140,6 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         final_scores[k]['score'] = exact_match.compute(predictions=v['model_output'], references=v['prediction'],
                                                        ignore_case=True, ignore_punctuation=True)["exact_match"]
 
-    os.exit(1)
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({
             "em_score": em_score_options,
@@ -190,7 +188,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
-    test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(10))
+    test_data = dataset.filter(lambda x: x["language"] == args.lang)
 
     prompts = []
     shots = args.ntrain
