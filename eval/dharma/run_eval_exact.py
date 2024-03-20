@@ -114,6 +114,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
 
     final_scores = {}
     for k, v in group_wise.items():
+        final_scores[k] = {}
         final_scores[k]['score'] = exact_match.compute(predictions=v['model_output'], references=v['prediction'],
                                                        ignore_case=True, ignore_punctuation=True)["exact_match"]
 
