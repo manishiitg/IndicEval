@@ -166,8 +166,7 @@ def main(args):
         args.chat_formatting_function) if args.use_chat_format else None
 
     dataset = load_dataset("manishiitg/pharaouk_dharma-1-hi", split="train")
-    dataset = dataset.filter(lambda x: x["language"] == args.lang)
-    test_data = dataset["train"].select(range(10))
+    test_data = dataset.filter(lambda x: x["language"] == args.lang).select(range(10))
 
     prompts = []
     for i, example in enumerate(test_data):
