@@ -32,7 +32,7 @@ def format_answer(answers, choices_text, label):
 
 
 def format_example(question, answers, choices_text):
-    prompt = f"Question: {question.strip()}\nnChoices: "
+    prompt = f"Question: {question.strip()}\nChoices: "
     for idx, answer in enumerate(answers):
         choice = choices_text[idx]
         prompt += f"{choice}. {answer.strip()}\n"
