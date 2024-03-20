@@ -22,8 +22,8 @@ for root, dirs, files in os.walk(directory):
                 lang = splits[2]
                 file = splits[3]
 
-                if model in skip_model or "awq" in model or "AWQ" in model:
-                    continue
+                # if model in skip_model or "awq" in model or "AWQ" in model:
+                #     continue
 
                 with open(file_path, 'r') as json_file:
                     try:
