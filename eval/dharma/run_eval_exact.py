@@ -201,7 +201,8 @@ def main(args):
             question=example["question"], answers=example["choices"], choices_text=example["choices_text"])
 
         messages = [{"role": "system", "content": system}]
-        messages.extend(shots_data)
+        for shot in shots_data:
+            messages.append(shot)
         messages.append({"role": "user", "content": prompt})
         if args.use_chat_format:
             prompt = chat_formatting_function(messages, tokenizer, args)
