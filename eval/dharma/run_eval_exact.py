@@ -17,12 +17,21 @@ import vllm
 import evaluate
 exact_match = evaluate.load("exact_match")
 
-def format_example(question, answers, choices_text):
+
+def format_example(question, answers, choices_text, label=None):
     prompt = f"Question: {question.strip()}\nnChoices: "
     for idx, answer in enumerate(answers):
         choice = choices_text[idx]
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
+    if label:
+        choice_idx = -1
+        for idx, val in enumerate(choices_text):
+            if val == label:
+                choice_idx = idx
+
+        assert (choice_idx != -1)
+        prompt += f"{label}. {answers[choice_idx]}"
     return prompt
 
 
@@ -61,6 +70,7 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     idx = 0
     for row in test_data:
         row = {
+            "prompt": prompts[idx],
             "question": row["question"],
             "model_output": outputs[idx],
             "prediction": targets[idx],
@@ -89,8 +99,9 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         subject = r["subject"]
         if subject not in group_wise:
             group_wise[subject] = {'model_output': [], "prediction": []}
-        group_wise[subject]['model_output'].append(r['model_output'][0])
-        group_wise[subject]['prediction'].append(r['prediction'][0])
+
+        group_wise[subject]['model_output'].append(r['model_output'])
+        group_wise[subject]['prediction'].append(r['prediction'])
 
     final_scores = {}
     for k, v in group_wise.items():
