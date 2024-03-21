@@ -177,27 +177,27 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
-    if args.awq:
-        print("Loading model and tokenizer vllm awq...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            quantization="AWQ",
-            max_model_len=4096,
-        )
-    else:
-        print("Loading model and tokenizer vllm...")
-        model = vllm.LLM(
-            model=args.model_name_or_path,
-            tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            # max_num_batched_tokens=4096,
-            max_model_len=4096,
-        )
+    # if args.awq:
+    #     print("Loading model and tokenizer vllm awq...")
+    #     model = vllm.LLM(
+    #         model=args.model_name_or_path,
+    #         tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+    #         tokenizer_mode="auto",
+    #         tensor_parallel_size=torch.cuda.device_count(),
+    #         # max_num_batched_tokens=4096,
+    #         quantization="AWQ",
+    #         max_model_len=4096,
+    #     )
+    # else:
+    #     print("Loading model and tokenizer vllm...")
+    #     model = vllm.LLM(
+    #         model=args.model_name_or_path,
+    #         tokenizer=args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path,
+    #         tokenizer_mode="auto",
+    #         tensor_parallel_size=torch.cuda.device_count(),
+    #         # max_num_batched_tokens=4096,
+    #         max_model_len=4096,
+    #     )
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
