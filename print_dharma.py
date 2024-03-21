@@ -7,8 +7,7 @@ directory = "/sky-notebook/eval-results/dharma"
 
 scores = {}
 
-skip_model = ["open-aditi-hi-v2-dpo-awq", "Qwen",
-              "open-aditi-chat-hi-1.8-awq", "OpenHathi-7B-Hi-v0.1-Base"]
+skip_model = ["open-aditi-hi-v2-dpo-awq", "open-aditi-chat-hi-1.8-awq"]
 
 for root, dirs, files in os.walk(directory):
     for file in files:
@@ -28,7 +27,7 @@ for root, dirs, files in os.walk(directory):
                 with open(file_path, 'r') as json_file:
                     try:
                         metric = json.load(json_file)
-                        for k,v in metric.items():
+                        for k, v in metric.items():
                             task = k
                             if task not in scores:
                                 scores[task] = {}
@@ -38,6 +37,7 @@ for root, dirs, files in os.walk(directory):
                                 scores[task][model][lang] = {}
 
                             scores[task][model][lang] = v
+                            print("model lang v ", model, lang, v)
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
@@ -85,6 +85,7 @@ def sort_data(data):
 
 data = sort_data(scores)
 print(json.dumps(data, indent=4))
+
 
 def generate_markdown_table(data):
     markdown_output = ""
@@ -170,6 +171,7 @@ def generate_markdown_table(data):
                         markdown_output += f"Task: {task} Metric: {metric} \n\n"
 
     return markdown_output
+
 
 # Convert JSON to Markdown table grouped by task and sub-task
 markdown_output = generate_markdown_table(sort_data(scores))
