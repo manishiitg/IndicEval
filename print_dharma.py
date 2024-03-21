@@ -15,6 +15,7 @@ for root, dirs, files in os.walk(directory):
             file_path = os.path.join(root, file)
 
             if file == "metrics.json":
+                print(file_path)
                 splits = file_path.replace(directory, "").split('/')
                 print(splits)
                 task = splits[0]
