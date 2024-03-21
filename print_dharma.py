@@ -29,6 +29,7 @@ for root, dirs, files in os.walk(directory):
                 with open(file_path, 'r') as json_file:
                     try:
                         metric = json.load(json_file)
+                        print(metric)
                         for k, v in metric.items():
                             task = k
                             if task not in scores:
