@@ -30,17 +30,16 @@ for root, dirs, files in os.walk(directory):
                     try:
                         metric = json.load(json_file)
                         print(metric)
-                        for k, v in metric.items():
-                            task = k
-                            if task not in scores:
-                                scores[task] = {}
-                            if model not in scores[task]:
-                                scores[task][model] = {}
-                            if lang not in scores[task][model]:
-                                scores[task][model][lang] = {}
+                        # for k, v in metric.items():
+                        #     task = k
+                        if task not in scores:
+                            scores[task] = {}
+                        if model not in scores[task]:
+                            scores[task][model] = {}
+                        if lang not in scores[task][model]:
+                            scores[task][model][lang] = {}
 
-                            scores[task][model][lang] = v
-                            print("model lang v ", model, lang, v)
+                        scores[task][model][lang] = metric
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
