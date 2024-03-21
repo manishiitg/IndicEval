@@ -2,7 +2,7 @@ import unicodedata
 import os
 import json
 
-directory = "/sky-notebook/eval-results/dharma/"
+directory = "/sky-notebook/eval-results/dharma"
 
 scores = {}
 
@@ -13,7 +13,7 @@ for root, dirs, files in os.walk(directory):
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
 
-            if file == "metrics.json":
+            if file == "subject_metrics.json":
                 splits = file_path.replace(directory, "").split('/')
                 task = splits[0]
                 # if task != "dharma":
