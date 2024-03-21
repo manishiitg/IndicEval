@@ -177,6 +177,7 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name_or_path if args.tokenizer_name_or_path else args.model_name_or_path)
 
+    model = None
     # if args.awq:
     #     print("Loading model and tokenizer vllm awq...")
     #     model = vllm.LLM(
