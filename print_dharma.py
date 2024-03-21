@@ -3,7 +3,7 @@ import os
 import json
 from datasets import load_dataset
 
-directory = "/sky-notebook/eval-results/dharma"
+directory = "/sky-notebook/eval-results"
 
 scores = {}
 
