@@ -3,7 +3,7 @@
 model_names=(
     "google/gemma-7b-it"
     # "Qwen/Qwen1.5-72B-Chat-AWQ"
-    # "Qwen/Qwen1.5-7B-Chat"
+    "Qwen/Qwen1.5-7B-Chat"
     # "01-ai/Yi-34B-Chat"
     # "mistralai/Mixtral-8x7B-Instruct-v0.1"
     "ai4bharat/Airavata"
