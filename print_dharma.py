@@ -2,7 +2,7 @@ import unicodedata
 import os
 import json
 
-directory = "/sky-notebook/eval-results/"
+directory = "/sky-notebook/eval-results/dharma/"
 
 scores = {}
 
@@ -16,8 +16,8 @@ for root, dirs, files in os.walk(directory):
             if file == "metrics.json":
                 splits = file_path.replace(directory, "").split('/')
                 task = splits[0]
-                if task != "dharma":
-                    continue
+                # if task != "dharma":
+                #     continue
                 model = splits[1]
                 lang = splits[2]
                 file = splits[3]
@@ -29,16 +29,16 @@ for root, dirs, files in os.walk(directory):
                     try:
                         metric = json.load(json_file)
                         print(metric)
-                        # for k, v in metric.items():
-                        #     task = k
-                        if task not in scores:
-                            scores[task] = {}
-                        if model not in scores[task]:
-                            scores[task][model] = {}
-                        if lang not in scores[task][model]:
-                            scores[task][model][lang] = {}
+                        for k, v in metric.items():
+                            task = k
+                            if task not in scores:
+                                scores[task] = {}
+                            if model not in scores[task]:
+                                scores[task][model] = {}
+                            if lang not in scores[task][model]:
+                                scores[task][model][lang] = {}
 
-                        scores[task][model][lang] = metric
+                            scores[task][model][lang] = v
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON in {file}: {e}")
             else:
