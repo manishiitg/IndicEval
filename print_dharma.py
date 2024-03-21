@@ -14,9 +14,11 @@ for root, dirs, files in os.walk(directory):
         if file.endswith('.json'):
             file_path = os.path.join(root, file)
 
-            if file == "subject_metrics.json":
+            if file == "metrics.json":
                 splits = file_path.replace(directory, "").split('/')
-                # task = splits[0]
+                task = splits[0]
+                if task != "dharma":
+                    continue
                 model = splits[1]
                 lang = splits[2]
                 file = splits[3]
