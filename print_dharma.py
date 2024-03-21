@@ -1,9 +1,8 @@
 import unicodedata
 import os
 import json
-from datasets import load_dataset
 
-directory = "/sky-notebook/eval-results"
+directory = "/sky-notebook/eval-results/"
 
 scores = {}
 
@@ -12,7 +11,9 @@ skip_model = ["open-aditi-hi-v2-dpo-awq", "open-aditi-chat-hi-1.8-awq"]
 for root, dirs, files in os.walk(directory):
     for file in files:
         if file.endswith('.json'):
+            print(file)
             file_path = os.path.join(root, file)
+            print(file_path)
 
             if file == "metrics.json":
                 splits = file_path.replace(directory, "").split('/')
