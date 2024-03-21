@@ -75,18 +75,33 @@ def generate_shots(base_question, data, num_shots):
 def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
     sampling_params = vllm.SamplingParams(
         temperature=0,
-        max_tokens=128,
+        max_tokens=4, ## need only the first token
         stop=["<|im_end|>","[/INST]"],
     )
 
     # We need to remap the outputs to the prompts because vllm might not return outputs for some prompts (e.g., if the prompt is too long)
-    generations = model.generate(prompts, sampling_params)
+    # Define the path to the predictions.jsonl file
+    predictions_file_path = os.path.join(args.save_dir, "predictions.jsonl")
 
-    prompt_to_output = {
-        g.prompt: g.outputs[0].text.strip() for g in generations
-    }
-    outputs = [prompt_to_output[prompt]
-               if prompt in prompt_to_output else "" for prompt in prompts]
+    # Check if the file exists
+    if not os.path.exists(predictions_file_path):
+        generations = model.generate(prompts, sampling_params)
+        prompt_to_output = {
+            g.prompt: g.outputs[0].text.strip() for g in generations
+        }
+        outputs = [prompt_to_output[prompt]
+                if prompt in prompt_to_output else "" for prompt in prompts]
+    else:
+        # Read the data from the file
+        outputs = []
+        with open(predictions_file_path, "r") as file:
+            for line in file:
+                # Parse the JSON data
+                prediction = json.loads(line)
+                # Print the prediction
+                outputs.append(prediction["model_output"])
+                
+    
 
     def extract_answer(row):
         answerKey = row['output']
@@ -131,14 +146,19 @@ def eval_hf_model(args, model, tokenizer, prompts, test_data, batch_size=1):
         if subject not in group_wise:
             group_wise[subject] = {'model_output': [], "prediction": []}
 
-        group_wise[subject]['model_output'].append(r['model_output'])
-        group_wise[subject]['prediction'].append(r['prediction'])
+        if len(r['model_output']) == 0:
+            r['model_output'] = " "
+        group_wise[subject]['model_output'].append(r['model_output'][0])
+        group_wise[subject]['prediction'].append(r['prediction'][0])
 
     final_scores = {}
     for k, v in group_wise.items():
         final_scores[k] = {}
         final_scores[k]['score'] = exact_match.compute(predictions=v['model_output'], references=v['prediction'],
                                                        ignore_case=True, ignore_punctuation=True)["exact_match"]
+        
+    print(final_scores)
+    os.exit(1)
 
     with open(os.path.join(args.save_dir, f"metrics.json"), "w") as fout:
         json.dump({

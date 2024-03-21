@@ -28,21 +28,21 @@ for model_name_or_path in "${model_names[@]}"; do
         template_format="eval.templates.create_prompt_with_chatml_format"
     fi
 
-    if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
+    # if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
         # zero-shot
-        python3 -m eval.dharma.run_eval_exact \
-            --ntrain 1 \
-            --lang $LANG \
-            --save_dir $FOLDER \
-            --model_name_or_path $model_name_or_path \
-            --tokenizer_name_or_path $model_name_or_path \
-            --eval_batch_size 4 \
-            --use_chat_format \
-            --chat_formatting_function $template_format \
-            $awq_param
-    else
-        cat "$FILE"
-    fi
+    python3 -m eval.dharma.run_eval_exact \
+        --ntrain 1 \
+        --lang $LANG \
+        --save_dir $FOLDER \
+        --model_name_or_path $model_name_or_path \
+        --tokenizer_name_or_path $model_name_or_path \
+        --eval_batch_size 4 \
+        --use_chat_format \
+        --chat_formatting_function $template_format \
+        $awq_param
+    # else
+    #     cat "$FILE"
+    # fi
 done
 
 for model_name_or_path in "${model_names[@]}"; do
