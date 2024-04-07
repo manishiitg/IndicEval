@@ -1,6 +1,7 @@
 import unicodedata
 from transformers import AutoTokenizer
 
+
 def is_hindi(char):
     try:
         return unicodedata.name(char).startswith('DEVANAGARI')
@@ -13,11 +14,11 @@ def contains_hindi(s):
 
 
 debug_print = False
+gemma_tokenizer = AutoTokenizer.from_pretrained("philschmid/gemma-tokenizer-chatml")
 
 
 def gemma_with_chatml_format(messages, tokenizer, args):
-    tokenizer = AutoTokenizer.from_pretrained("philschmid/gemma-tokenizer-chatml")
-    prompt = tokenizer.apply_chat_template(
+    prompt = gemma_tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True)
     return prompt
 
