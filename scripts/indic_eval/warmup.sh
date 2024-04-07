@@ -24,6 +24,9 @@ for model_name_or_path in "${model_names[@]}"; do
     if echo "$model_name" | grep -qi "OpenHermes"; then
         template_format="eval.templates.create_prompt_with_chatml_format"
     fi
+    if echo "$model_name" | grep -qi "merged" && echo "$model_name" | grep -qi "gemma"; then
+        template_format="eval.templates.gemma_with_chatml_format"
+    fi
     
     python3 -m eval.warmup \
         --model_name_or_path $model_name_or_path \

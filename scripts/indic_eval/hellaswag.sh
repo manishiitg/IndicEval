@@ -29,6 +29,9 @@ for model_name_or_path in "${model_names[@]}"; do
     if echo "$model_name" | grep -qi "OpenHermes"; then
         template_format="eval.templates.create_prompt_with_chatml_format"
     fi
+    if echo "$model_name" | grep -qi "merged" && echo "$model_name" | grep -qi "gemma"; then
+        template_format="eval.templates.gemma_with_chatml_format"
+    fi
 
     if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
         python3 -m eval.hellaswag.run_eval_exact \
@@ -75,6 +78,9 @@ for model_name_or_path in "${model_names[@]}"; do
     fi
     if echo "$model_name" | grep -qi "OpenHermes"; then
         template_format="eval.templates.create_prompt_with_chatml_format"
+    fi
+    if echo "$model_name" | grep -qi "merged" && echo "$model_name" | grep -qi "gemma"; then
+        template_format="eval.templates.gemma_with_chatml_format"
     fi
 
     if [ "$check_file_existence" = false ] || [ ! -f "$FILE" ]; then
